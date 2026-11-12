@@ -1,0 +1,2306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<body>
+<title>Gem Factory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<style>:root {
+  --bg: #120b1f; --panel: #1e1433; --panel2: #2a1d47; --ink: #f5efff; --muted: #a99cc7;
+  --accent: #ffd23f; --good: #3ddc84; --bad: #ff4d6d;
+  --common: #9ad1ff; --uncommon: #3ddc84; --rare: #ff6bd6;
+  color-scheme: dark; /* single deliberate dark arcade look */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: 'Press Start 2P', ui-monospace, monospace; font-size: 12px; overflow: hidden; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+#app { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.hidden { display: none !important; }
+button { font: inherit; font-size: 10px; color: var(--ink); background: var(--panel2); border: 3px solid var(--ink); padding: 8px 10px; cursor: pointer; box-shadow: 3px 3px 0 #000; }
+button:hover:not(:disabled) { background: #3a2a63; }
+button:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
+button:disabled { opacity: .4; cursor: not-allowed; }
+input { font: inherit; font-size: 10px; background: #000; color: var(--ink); border: 3px solid var(--ink); padding: 6px; width: 150px; }
+
+#screen-title { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding: 16px; }
+.logo { font-size: clamp(28px, 8vw, 56px); line-height: 1.2; margin: 0 0 8px; color: var(--accent); text-shadow: 4px 4px 0 var(--bad), 8px 8px 0 #3a86ff; animation: bob 2s steps(4) infinite; }
+@keyframes bob { 50% { transform: translateY(-4px); } }
+.sub { color: var(--muted); font-size: 10px; margin: 0 0 12px; }
+.seed { font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.toggles { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+#screen-game { display: grid; grid-template-columns: 220px auto auto; grid-template-areas: "hud board shop" "hud perks shop"; gap: 12px 16px; padding: 12px; align-items: start; max-width: 100vw; max-height: 100%; }
+#hud { grid-area: hud; background: var(--panel); border: 3px solid var(--ink); padding: 12px; display: flex; flex-direction: column; gap: 14px; box-shadow: 4px 4px 0 #000; }
+.stat label { display: block; color: var(--muted); font-size: 8px; margin-bottom: 6px; }
+.stat .v { font-size: 15px; }
+.money { color: var(--accent); }
+.money.neg { color: var(--bad); }
+#bar { height: 12px; border: 2px solid var(--ink); background: #000; margin-top: 6px; }
+#bar-fill { height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--good) 0 6px, #2fb36b 6px 12px); transition: width .25s steps(6); }
+.hud-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.hud-btns button { font-size: 8px; padding: 6px; }
+#board-wrap { grid-area: board; position: relative; padding-top: 30px; }
+canvas#board { display: block; image-rendering: pixelated; border: 3px solid var(--ink); box-shadow: 4px 4px 0 #000; background: #24183c; touch-action: none; }
+#move-points { position: absolute; left: 50%; top: 0; transform: translateX(-50%) scale(var(--mp-scale, 1)); font-size: 18px; color: var(--accent); text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; pointer-events: none; white-space: nowrap; transition: transform .12s; z-index: 5; }
+#move-points.fly { animation: fly .32s ease-in forwards; }
+@keyframes fly { to { transform: translate(-50%, -30px) scale(1.6); opacity: 0; } }
+#fx { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
+#perk-row { grid-area: perks; display: flex; gap: 8px; overflow-x: auto; padding: 4px 4px 10px; max-width: 100%; }
+.perk { flex: 0 0 auto; width: 96px; height: 104px; background: var(--panel2); border: 3px solid var(--common); padding: 6px; font-size: 7px; line-height: 1.5; overflow: hidden; box-shadow: 3px 3px 0 #000; cursor: grab; touch-action: pan-x; position: relative; }
+.perk.uncommon { border-color: var(--uncommon); }
+.perk.rare { border-color: var(--rare); }
+.perk .pn { font-size: 8px; color: var(--accent); margin-bottom: 6px; line-height: 1.3; }
+.perk.empty { border-style: dashed; border-color: #4a3b70; color: #4a3b70; display: flex; align-items: center; justify-content: center; cursor: default; box-shadow: none; touch-action: pan-x; }
+.perk.fire { animation: fire .35s steps(4); }
+@keyframes fire { 40% { transform: translateY(-12px) scale(1.1); filter: brightness(1.8); } }
+.perk.dragging { opacity: .5; }
+
+#shop { grid-area: shop; width: 300px; background: var(--panel); border: 3px solid var(--accent); padding: 12px; box-shadow: 4px 4px 0 #000; max-height: calc(100dvh - 24px); overflow-y: auto; }
+#shop h2 { margin: 0 0 10px; font-size: 16px; color: var(--accent); display: flex; justify-content: space-between; align-items: center; }
+#btn-shop-toggle { display: none; font-size: 8px; padding: 4px 6px; }
+#shop h3 { margin: 10px 0 6px; font-size: 8px; color: var(--muted); }
+.cards { display: flex; gap: 6px; flex-wrap: wrap; }
+.card { width: 88px; min-height: 112px; background: var(--panel2); border: 3px solid var(--common); padding: 6px; font-size: 7px; line-height: 1.5; cursor: pointer; box-shadow: 3px 3px 0 #000; display: flex; flex-direction: column; gap: 4px; }
+.card.uncommon { border-color: var(--uncommon); }
+.card.rare { border-color: var(--rare); }
+.card.tile, .card.upgrade { border-color: var(--accent); }
+.card .cn { font-size: 8px; color: var(--accent); line-height: 1.3; }
+.card .cd { flex: 1; }
+.card .cp { font-size: 10px; color: var(--good); }
+.card.off { opacity: .45; }
+.card.sold { opacity: .25; cursor: default; align-items: center; justify-content: center; }
+.card.picked { outline: 3px dashed var(--accent); outline-offset: 2px; }
+.card:hover:not(.sold) { transform: translateY(-3px); }
+.shop-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+#btn-next { background: #1f6b43; }
+#shop-hint { font-size: 7px; line-height: 1.6; color: var(--muted); margin: 10px 0 0; }
+
+.float { position: absolute; transform: translate(-50%, -50%); pointer-events: none; font-size: 10px; color: #fff; text-shadow: 2px 2px 0 #000; animation: floatUp .8s ease-out forwards; white-space: nowrap; z-index: 20; }
+.float.mul { color: var(--bad); font-size: 16px; }
+.float.money { color: var(--accent); }
+@keyframes floatUp { from { opacity: 1; transform: translate(-50%, -50%); } to { opacity: 0; transform: translate(-50%, -250%); } }
+#flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 30; }
+#flash.on { animation: flash .25s; }
+@keyframes flash { from { opacity: .5; } to { opacity: 0; } }
+#big, #toast { position: fixed; left: 50%; pointer-events: none; opacity: 0; z-index: 31; white-space: nowrap; text-shadow: 4px 4px 0 #000; }
+#big { top: 40%; font-size: 48px; color: var(--bad); }
+#toast { top: 18%; font-size: 16px; color: var(--accent); }
+#big.on, #toast.on { animation: pop .7s; }
+@keyframes pop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); } 25% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); } 75% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1); } }
+#modal { position: fixed; inset: 0; background: rgba(8, 4, 16, .75); display: flex; align-items: center; justify-content: center; z-index: 35; }
+#modal .box { background: var(--panel); border: 3px solid var(--accent); box-shadow: 6px 6px 0 #000; padding: 20px; min-width: 260px; max-width: calc(100vw - 32px); text-align: center; }
+#modal h2 { color: var(--accent); margin: 0 0 14px; font-size: 18px; }
+#modal p { font-size: 10px; line-height: 1.8; margin: 6px 0; }
+#modal p.big { font-size: 20px; color: var(--good); }
+#modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+#tip { position: absolute; z-index: 32; width: 220px; background: #0d0818; border: 3px solid var(--ink); padding: 10px; font-size: 8px; line-height: 1.6; box-shadow: 4px 4px 0 #000; }
+#tip b { display: block; color: var(--accent); margin-bottom: 4px; }
+#tip b.uncommon { color: var(--uncommon); }
+#tip b.rare { color: var(--rare); }
+#tip small { color: var(--muted); font-size: 7px; }
+#tip p { margin: 6px 0; }
+#tip button { font-size: 8px; margin-top: 6px; }
+
+#crt { position: fixed; inset: 0; pointer-events: none; z-index: 40; display: none; }
+body.crt #crt { display: block; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px), radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, .6) 100%); box-shadow: inset 0 0 90px rgba(0, 0, 0, .7); border-radius: 24px; animation: flicker 4s infinite steps(1); }
+body.crt #app { text-shadow: 1px 0 rgba(255, 0, 80, .35), -1px 0 rgba(0, 200, 255, .35); }
+body.crt canvas#board { filter: saturate(1.2) contrast(1.08); }
+@keyframes flicker { 0%, 100% { opacity: 1; } 47% { opacity: .92; } 48% { opacity: 1; } }
+
+body.mobile #screen-game { grid-template-columns: 1fr; grid-template-areas: "hud" "board" "perks"; padding: 8px; gap: 8px; justify-items: center; }
+body.mobile #hud { flex-direction: row; flex-wrap: wrap; gap: 8px 14px; padding: 8px; width: 100%; }
+body.mobile .stat .v { font-size: 11px; }
+body.mobile #bar { width: 80px; }
+body.mobile #perk-row { width: 100%; }
+body.mobile #shop { position: fixed; left: 0; right: 0; bottom: 0; width: auto; max-height: 55vh; z-index: 25; border-width: 3px 0 0; }
+body.mobile #shop.collapsed { max-height: 48px; overflow: hidden; }
+body.mobile #btn-shop-toggle { display: inline-block; }
+@media (prefers-reduced-motion: reduce) { .logo, body.crt #crt { animation: none; } }
+</style>
+<div id="app">
+  <section id="screen-title" class="screen">
+    <h1 class="logo">GEM<br>FACTORY</h1>
+    <p class="sub">A MATCH-3 ROGUELIKE</p>
+    <button id="btn-new">NEW RUN</button>
+    <button id="btn-continue" class="hidden">CONTINUE</button>
+    <label class="seed">SEED <input id="seed-input" maxlength="16" placeholder="random"></label>
+    <div class="toggles"><button id="btn-mute-t">SOUND: ON</button><button id="btn-crt-t">CRT: ON</button></div>
+  </section>
+  <section id="screen-game" class="screen hidden">
+    <aside id="hud">
+      <div class="stat"><label>ROUND</label><div class="v" id="hud-round">1/20</div></div>
+      <div class="stat"><label>TARGET</label><div class="v" id="hud-target">800</div></div>
+      <div class="stat"><label>SCORE</label><div class="v" id="hud-score">0</div><div id="bar"><div id="bar-fill"></div></div></div>
+      <div class="stat"><label>MOVES</label><div class="v" id="hud-moves">20</div></div>
+      <div class="stat"><label>MONEY</label><div class="v money" id="hud-money">$20</div></div>
+      <div class="hud-btns"><button id="btn-speed">1x</button><button id="btn-mute">SND ON</button><button id="btn-crt">CRT ON</button></div>
+    </aside>
+    <main id="board-wrap"><div id="move-points"></div><canvas id="board"></canvas><div id="fx"></div></main>
+    <section id="perk-row"></section>
+    <aside id="shop" class="hidden">
+      <h2>SHOP <button id="btn-shop-toggle">HIDE</button></h2>
+      <h3>PERKS</h3><div id="shop-perks" class="cards"></div>
+      <h3>POWER TILES</h3><div id="shop-tiles" class="cards"></div>
+      <h3>UPGRADE</h3><div id="shop-upgrade" class="cards"></div>
+      <div class="shop-actions"><button id="btn-reroll">REROLL $2</button><button id="btn-next">NEXT ROUND &gt;</button></div>
+      <p id="shop-hint"></p>
+    </aside>
+  </section>
+  <div id="modal" class="hidden"><div class="box"><h2 id="modal-title"></h2><div id="modal-body"></div><div id="modal-btns"></div></div></div>
+  <div id="tip" class="hidden"></div>
+  <div id="flash"></div><div id="big"></div><div id="toast"></div>
+</div>
+<div id="crt"></div>
+<script>// ---- balance.js
+(function (GF) {
+  'use strict';
+  let nextId = 1;
+  const C = {
+    SIZE: 8,
+    COLORS: ['red', 'blue', 'green', 'yellow', 'purple', 'white', 'orange'],
+    HOT: [0, 6, 3],
+    COLD: [2, 1, 4],
+    START_MONEY: 20,
+    START_SLOTS: 5,
+    MAX_SLOTS: 10,
+    START_MOVES: 20,
+    MAX_EXTRA_MOVES: 5,
+    BASE_INCOME: 3,
+    DEBT_FLOOR: -20,
+    ROUNDS: 20,
+    TARGET_START: 1000,
+    TARGET_GROWTH: 1.45,
+    ENDLESS_GROWTH: 1.5,
+    PERK_PRICE: { common: 4, uncommon: 6, rare: 10 },
+    RARITY_WEIGHTS: { common: 60, uncommon: 30, rare: 10 },
+    REROLL_BASE: 2,
+    UPGRADE_PRICE: { moves: 8, slot: 15, polish: 3 },
+    POLISH_BONUS: 5,
+    SAVE_KEY: 'gemfactory.save.v1',
+  };
+  C.base = function (round) { return 10 + 5 * (round - 1); };
+  C.roundNice = function (n) {
+    if (n < 100) return Math.round(n);
+    const p = Math.pow(10, Math.floor(Math.log10(n)) - 1);
+    return Math.round(n / p) * p;
+  };
+  C.gem = function (kind, color) {
+    const colorless = kind === 'prism' || kind === 'wild' || kind === 'coal';
+    return { id: nextId++, kind: kind, color: colorless ? null : color };
+  };
+  C.setNextId = function (n) { nextId = Math.max(nextId, n); };
+  C.SUFFIXES = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+  C.fmt = function (n) {
+    if (!isFinite(n)) return n < 0 ? '-∞' : '∞';
+    const sign = n < 0 ? '-' : '';
+    const a = Math.abs(n);
+    if (a < 1000) return sign + Math.floor(a).toLocaleString('en-US');
+    if (a < 1e36) {
+      let tier = Math.floor(Math.log10(a) / 3);
+      while (tier > 1 && a < Math.pow(1000, tier)) tier--;
+      while (a >= Math.pow(1000, tier + 1)) tier++;
+      let v = a / Math.pow(1000, tier);
+      let s = v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2);
+      if (Number(s) >= 1000) { tier++; v = a / Math.pow(1000, tier); s = v.toFixed(2); }
+      if (tier < C.SUFFIXES.length) return sign + s + C.SUFFIXES[tier];
+    }
+    let e = Math.floor(Math.log10(a));
+    let m = a / Math.pow(10, e);
+    if (m >= 10) { m /= 10; e++; }
+    if (m < 1) { m *= 10; e--; }
+    let ms = m.toFixed(2);
+    if (Number(ms) >= 10) { e++; ms = (m / 10).toFixed(2); }
+    return sign + ms + 'e' + e;
+  };
+  GF.C = C;
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- rng.js
+(function (GF) {
+  'use strict';
+  function RNG(seed) { this.s = (seed >>> 0) || 1; }
+  RNG.prototype.next = function () {
+    let t = (this.s = (this.s + 0x6D2B79F5) >>> 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  RNG.prototype.int = function (n) { return Math.floor(this.next() * n); };
+  RNG.prototype.pick = function (arr) { return arr[this.int(arr.length)]; };
+  RNG.prototype.chance = function (p) { return this.next() < p; };
+  RNG.prototype.shuffle = function (arr) {
+    for (let i = arr.length - 1; i > 0; i--) { const j = this.int(i + 1); const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+    return arr;
+  };
+  RNG.prototype.weighted = function (weights) {
+    const keys = Object.keys(weights);
+    let total = 0;
+    for (const k of keys) total += weights[k];
+    let roll = this.next() * total;
+    for (const k of keys) { if (weights[k] <= 0) continue; roll -= weights[k]; if (roll < 0) return k; }
+    return keys.filter((k) => weights[k] > 0).pop();
+  };
+  RNG.hash = function (str) {
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  };
+  GF.RNG = RNG;
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- board.js
+(function (GF) {
+  'use strict';
+  const C = GF.C;
+  const N = C.SIZE;
+  const grid = (v) => Array.from({ length: N }, () => Array(N).fill(v));
+  const inB = (r, c) => r >= 0 && c >= 0 && r < N && c < N;
+  const key = (r, c) => r * N + c;
+  const clone = (g) => (g ? { id: g.id, kind: g.kind, color: g.color } : null);
+
+  function create() { return { cells: grid(null), tiles: grid(null), tileState: grid(0) }; }
+
+  function matchesColor(g, k) { return !!g && (g.kind === 'wild' || g.color === k); }
+
+  function pushIfRun(board, run, k, dir, out) {
+    if (run.length >= 3 && run.some(([r, c]) => board.cells[r][c].kind !== 'wild')) out.push({ color: k, dir: dir, cells: run });
+  }
+
+  function lineRuns(board, k, out) {
+    for (let dir = 0; dir < 2; dir++) {
+      for (let i = 0; i < N; i++) {
+        let run = [];
+        for (let j = 0; j < N; j++) {
+          const r = dir === 0 ? i : j, c = dir === 0 ? j : i;
+          if (matchesColor(board.cells[r][c], k)) { run.push([r, c]); continue; }
+          pushIfRun(board, run, k, dir === 0 ? 'h' : 'v', out);
+          run = [];
+        }
+        pushIfRun(board, run, k, dir === 0 ? 'h' : 'v', out);
+      }
+    }
+  }
+
+  function squareRuns(board, k, out) {
+    for (let r = 0; r < N - 1; r++) for (let c = 0; c < N - 1; c++) {
+      const cells = [[r, c], [r, c + 1], [r + 1, c], [r + 1, c + 1]];
+      if (cells.every(([a, b]) => matchesColor(board.cells[a][b], k)) &&
+          cells.some(([a, b]) => board.cells[a][b].kind !== 'wild')) out.push({ color: k, dir: 'sq', cells: cells });
+    }
+  }
+
+  function findGroups(board, opts, colors) {
+    opts = opts || {};
+    colors = colors || [0, 1, 2, 3, 4, 5, 6];
+    const runs = [];
+    for (const k of colors) { lineRuns(board, k, runs); if (opts.square) squareRuns(board, k, runs); }
+    const parent = runs.map((_, i) => i);
+    const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+    const sets = runs.map((r) => new Set(r.cells.map(([a, b]) => key(a, b))));
+    for (let i = 0; i < runs.length; i++) for (let j = i + 1; j < runs.length; j++) {
+      if (runs[i].color !== runs[j].color) continue;
+      for (const x of sets[i]) if (sets[j].has(x)) { parent[find(i)] = find(j); break; }
+    }
+    const byRoot = new Map();
+    runs.forEach((r, i) => { const root = find(i); if (!byRoot.has(root)) byRoot.set(root, []); byRoot.get(root).push(r); });
+    const groups = [];
+    for (const rs of byRoot.values()) {
+      const cells = new Map();
+      rs.forEach((r) => r.cells.forEach(([a, b]) => cells.set(key(a, b), [a, b])));
+      const lines = rs.filter((r) => r.dir !== 'sq');
+      const maxLen = lines.reduce((m, r) => Math.max(m, r.cells.length), 0);
+      let shape = 'three';
+      if (maxLen >= 6) shape = 'six';
+      else if (maxLen >= 5) shape = 'five';
+      else if (lines.some((r) => r.dir === 'h') && lines.some((r) => r.dir === 'v')) shape = 'shape';
+      else if (maxLen === 4) shape = 'four';
+      else if (rs.some((r) => r.dir === 'sq')) shape = 'square';
+      groups.push({ color: rs[0].color, shape: shape, cells: Array.from(cells.values()), runs: rs });
+    }
+    return groups;
+  }
+
+  function adjacent(a, b) { return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1; }
+  function swap(board, a, b) {
+    const t = board.cells[a.r][a.c];
+    board.cells[a.r][a.c] = board.cells[b.r][b.c];
+    board.cells[b.r][b.c] = t;
+  }
+  function isPrismSwap(board, a, b) {
+    const ga = board.cells[a.r][a.c], gb = board.cells[b.r][b.c];
+    if (!ga || !gb) return false;
+    return (ga.kind === 'prism' && gb.color != null) || (gb.kind === 'prism' && ga.color != null);
+  }
+  function canSwap(board, a, b, opts, colors) {
+    if (!inB(a.r, a.c) || !inB(b.r, b.c) || !adjacent(a, b)) return false;
+    if (!board.cells[a.r][a.c] || !board.cells[b.r][b.c]) return false;
+    if (isPrismSwap(board, a, b)) return true;
+    swap(board, a, b);
+    const ok = findGroups(board, opts, colors).length > 0;
+    swap(board, a, b);
+    return ok;
+  }
+  function hasMoves(board, opts, colors) {
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      if (c + 1 < N && canSwap(board, { r: r, c: c }, { r: r, c: c + 1 }, opts, colors)) return true;
+      if (r + 1 < N && canSwap(board, { r: r, c: c }, { r: r + 1, c: c }, opts, colors)) return true;
+    }
+    return false;
+  }
+  function wouldMatch(board, r, c, k) {
+    const m = (rr, cc) => inB(rr, cc) && matchesColor(board.cells[rr][cc], k);
+    let h = 1; for (let x = c - 1; m(r, x); x--) h++; for (let x = c + 1; m(r, x); x++) h++;
+    let v = 1; for (let y = r - 1; m(y, c); y--) v++; for (let y = r + 1; m(y, c); y++) v++;
+    return h >= 3 || v >= 3;
+  }
+
+  function fillNoMatch(board, rng, colors) {
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      if (board.cells[r][c]) continue;
+      const ok = colors.filter((k) => !wouldMatch(board, r, c, k));
+      board.cells[r][c] = C.gem('normal', ok.length ? rng.pick(ok) : rng.pick(colors));
+    }
+  }
+  function clearNormals(board) {
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const g = board.cells[r][c];
+      if (g && g.kind === 'normal') board.cells[r][c] = null;
+    }
+  }
+  // A group with no normal gems can never be cleared by settle, so recolor one
+  // of its colored special gems to a color that would not form a match there.
+  function recolorSpecial(board, group, rng, colors) {
+    for (const [r, c] of group.cells) {
+      const g = board.cells[r][c];
+      if (g.color == null || g.kind === 'wild' || g.kind === 'prism' || g.kind === 'coal') continue;
+      const ok = colors.filter((k) => !wouldMatch(board, r, c, k));
+      if (!ok.length) continue;
+      g.color = rng.pick(ok);
+      return;
+    }
+  }
+  function settle(board, rng, colors, opts) {
+    for (let t = 0; t < 100; t++) {
+      const groups = findGroups(board, opts, colors);
+      if (!groups.length && hasMoves(board, opts, colors)) return true;
+      if (groups.length) {
+        groups.forEach((g) => {
+          if (g.cells.some(([r, c]) => board.cells[r][c].kind === 'normal')) {
+            g.cells.forEach(([r, c]) => { if (board.cells[r][c].kind === 'normal') board.cells[r][c] = null; });
+            return;
+          }
+          recolorSpecial(board, g, rng, colors);
+        });
+      } else clearNormals(board);
+      fillNoMatch(board, rng, colors);
+    }
+    return false;
+  }
+  function newRound(board, rng, colors, opts) {
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const g = board.cells[r][c];
+      if (g && g.color != null && colors.indexOf(g.color) < 0) g.color = rng.pick(colors);
+    }
+    clearNormals(board);
+    fillNoMatch(board, rng, colors);
+    settle(board, rng, colors, opts);
+  }
+  function shuffle(board, rng, colors, opts) {
+    clearNormals(board);
+    fillNoMatch(board, rng, colors);
+    return settle(board, rng, colors, opts);
+  }
+  function gravity(board) {
+    const moves = [];
+    for (let c = 0; c < N; c++) {
+      let write = N - 1;
+      for (let r = N - 1; r >= 0; r--) {
+        const g = board.cells[r][c];
+        if (!g) continue;
+        if (write !== r) {
+          board.cells[write][c] = g; board.cells[r][c] = null;
+          moves.push({ id: g.id, from: [r, c], to: [write, c] });
+        }
+        write--;
+      }
+    }
+    return moves;
+  }
+  function refill(board, rng, colors) {
+    const spawns = [];
+    for (let c = 0; c < N; c++) {
+      let empties = 0;
+      while (empties < N && !board.cells[empties][c]) empties++;
+      for (let r = 0; r < empties; r++) {
+        const g = C.gem('normal', rng.pick(colors));
+        board.cells[r][c] = g;
+        spawns.push({ r: r, c: c, drop: empties, gem: clone(g) });
+      }
+    }
+    return spawns;
+  }
+  function blastCells(r, c, kind, flags) {
+    const out = [];
+    const seen = new Set();
+    const push = (y, x) => { if (inB(y, x) && !seen.has(key(y, x))) { seen.add(key(y, x)); out.push([y, x]); } };
+    if (kind === 'bomb' || kind === 'supernova') {
+      const d = flags && flags.c4 ? 2 : 1;
+      for (let y = r - d; y <= r + d; y++) for (let x = c - d; x <= c + d; x++) push(y, x);
+    }
+    if (kind === 'star' || kind === 'supernova') {
+      for (let i = 0; i < N; i++) { push(r, i); push(i, c); }
+      if (flags && flags.starStruck) {
+        for (let i = -N; i <= N; i++) { push(r + i, c + i); push(r + i, c - i); }
+      }
+    }
+    return out;
+  }
+  function colorCounts(board, excludeSet) {
+    const counts = [0, 0, 0, 0, 0, 0, 0];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const g = board.cells[r][c];
+      if (g && g.color != null && !(excludeSet && excludeSet.has(key(r, c)))) counts[g.color]++;
+    }
+    return counts;
+  }
+  function mostCommonColor(board, colors, excludeSet) {
+    const counts = colorCounts(board, excludeSet);
+    let best = colors[0];
+    for (const k of colors) if (counts[k] > counts[best]) best = k;
+    return best;
+  }
+  function leastCommonColor(board, colors) {
+    const counts = colorCounts(board, null);
+    const present = colors.filter((k) => counts[k] > 0);
+    const pool = present.length ? present : colors;
+    let best = pool[0];
+    for (const k of pool) if (counts[k] < counts[best]) best = k;
+    return best;
+  }
+  function colorCells(board, k) {
+    const out = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const g = board.cells[r][c];
+      if (g && g.color === k) out.push([r, c]);
+    }
+    return out;
+  }
+  function newClearState() { return { set: new Set(), order: [], activated: [], source: {} }; }
+  const SPECIAL_ACTIVE = { bomb: 1, star: 1, prism: 1, supernova: 1 };
+  function expandClear(board, seeds, flags, st, prismColors, colors, seedSource) {
+    const queue = [];
+    const add = (r, c, src) => {
+      const g = board.cells[r][c];
+      if (!g) return;
+      if (g.kind === 'coal' && src !== 'blast') return;
+      const k = key(r, c);
+      if (st.set.has(k)) return;
+      st.set.add(k);
+      st.order.push([r, c]);
+      st.source[k] = src;
+      if (SPECIAL_ACTIVE[g.kind]) queue.push([r, c]);
+    };
+    seeds.forEach(([r, c]) => add(r, c, seedSource || 'match'));
+    while (queue.length) {
+      const [r, c] = queue.shift();
+      const g = board.cells[r][c];
+      const before = st.order.length;
+      let area;
+      if (g.kind === 'prism') {
+        const pc = prismColors ? prismColors[key(r, c)] : undefined;
+        const color = pc != null ? pc : mostCommonColor(board, colors, st.set);
+        area = colorCells(board, color);
+        area.forEach(([y, x]) => add(y, x, 'color'));
+      } else {
+        area = blastCells(r, c, g.kind, flags);
+        area.forEach(([y, x]) => add(y, x, 'blast'));
+      }
+      st.activated.push({ r: r, c: c, kind: g.kind, cells: area, source: st.source[key(r, c)], cleared: st.order.length - before });
+    }
+    return st;
+  }
+  function pickExtra(board, color, count, st, rng) {
+    const normals = [], others = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const g = board.cells[r][c];
+      if (!g || g.color !== color || g.kind === 'coal' || st.set.has(key(r, c))) continue;
+      (g.kind === 'normal' ? normals : others).push([r, c]);
+    }
+    return rng.shuffle(normals).concat(rng.shuffle(others)).slice(0, count);
+  }
+  function pickNear(board, r, c, st) {
+    let best = null, bestD = Infinity;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const g = board.cells[y][x];
+      if (!g || g.kind === 'coal' || st.set.has(key(y, x))) continue;
+      const d = Math.abs(y - r) + Math.abs(x - c);
+      if (d < bestD) { bestD = d; best = [y, x]; }
+    }
+    return best ? [best] : [];
+  }
+  function transformRandom(board, kind, count, rng) {
+    const cand = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const g = board.cells[r][c];
+      if (g && g.kind === 'normal') cand.push([r, c]);
+    }
+    return rng.shuffle(cand).slice(0, count).map(([r, c]) => {
+      const g = C.gem(kind, board.cells[r][c].color);
+      board.cells[r][c] = g;
+      return { r: r, c: c, gem: clone(g) };
+    });
+  }
+
+  const SPECIAL_ORDER = { supernova: 0, prism: 1, star: 2, bomb: 3 };
+  function planSpecials(groups, prefer) {
+    const reserved = new Set();
+    const out = [];
+    for (const g of groups) {
+      const lines = g.runs.filter((r) => r.dir !== 'sq');
+      const wants = [];
+      for (const run of lines) {
+        const n = run.cells.length;
+        const kind = n >= 6 ? 'supernova' : n === 5 ? 'prism' : n === 4 ? 'bomb' : null;
+        if (!kind) continue;
+        const pref = (prefer || []).find((p) => run.cells.some(([r, c]) => r === p.r && c === p.c));
+        const mid = run.cells[Math.floor(run.cells.length / 2)];
+        wants.push({ kind: kind, at: pref ? [pref.r, pref.c] : mid });
+      }
+      const hs = lines.filter((r) => r.dir === 'h'), vs = lines.filter((r) => r.dir === 'v');
+      for (const h of hs) for (const v of vs) {
+        const hit = h.cells.find(([a, b]) => v.cells.some(([c2, d2]) => a === c2 && b === d2));
+        if (hit) wants.push({ kind: 'star', at: hit });
+      }
+      const big = new Set();
+      lines.filter((r) => r.cells.length >= 4).forEach((r) => r.cells.forEach(([a, b]) => big.add(key(a, b))));
+      const usedSq = new Set();
+      for (const sq of g.runs.filter((r) => r.dir === 'sq')) {
+        if (sq.cells.some(([a, b]) => big.has(key(a, b)) || usedSq.has(key(a, b)))) continue;
+        sq.cells.forEach(([a, b]) => usedSq.add(key(a, b)));
+        const pref = (prefer || []).find((p) => sq.cells.some(([r, c]) => r === p.r && c === p.c));
+        wants.push({ kind: 'bomb', at: pref ? [pref.r, pref.c] : sq.cells[0] });
+      }
+      wants.sort((x, y) => SPECIAL_ORDER[x.kind] - SPECIAL_ORDER[y.kind]);
+      for (const w of wants) {
+        let cell = reserved.has(key(w.at[0], w.at[1])) ? null : w.at;
+        if (!cell) {
+          let best = null, bestD = Infinity;
+          for (const [r, c] of g.cells) {
+            if (reserved.has(key(r, c))) continue;
+            const d = Math.abs(r - w.at[0]) + Math.abs(c - w.at[1]);
+            if (d < bestD) { bestD = d; best = [r, c]; }
+          }
+          cell = best;
+        }
+        if (!cell) continue;
+        reserved.add(key(cell[0], cell[1]));
+        out.push({ kind: w.kind, r: cell[0], c: cell[1], color: w.kind === 'prism' ? null : g.color });
+      }
+    }
+    return out;
+  }
+
+  GF.Board = {
+    create, inB, key, clone, matchesColor, findGroups, adjacent, swap, isPrismSwap, canSwap, hasMoves, wouldMatch,
+    fillNoMatch, clearNormals, settle, newRound, shuffle, gravity, refill, blastCells,
+    colorCounts, mostCommonColor, leastCommonColor, colorCells, newClearState, expandClear,
+    pickExtra, pickNear, transformRandom, planSpecials,
+  };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- perk-engine.js
+(function (GF) {
+  'use strict';
+  const C = GF.C;
+  const DEFS = [];
+  const byId = {};
+  function def(d) {
+    d.rarity = d.rarity || 'common';
+    d.price = C.PERK_PRICE[d.rarity];
+    DEFS.push(d);
+    byId[d.id] = d;
+    return d;
+  }
+  let uid = 1;
+  function create(id) { return { id: id, uid: uid++, state: {}, sellBonus: 0 }; }
+  function setNextUid(n) { uid = Math.max(uid, n); }
+  function flags(row) {
+    const has = (id) => row.some((p) => p.id === id);
+    return {
+      square: has('square'), c4: has('c4'), starStruck: has('star_struck'), equity: has('equity'),
+      creditCard: has('credit_card'), showman: has('showman'),
+      shinyMul: has('polished_shine') ? 3 : 2, overcharge: has('overcharge'), tileSpeed: has('fast_forward') ? 2 : 1,
+      clockCap: has('clockmaker') ? 2 : 1, tileDiscount: has('renovation') ? 2 : 0, mirrorCap: has('echo_chamber') ? 2 : 1,
+      perkDiscount: has('coupon') ? 1 : 0, sellFull: has('pawn_shop'), freeReroll: has('stockpile'),
+      shopPerks: has('golden_ticket') ? 4 : 3, upgradeHalf: has('clearance_sale'), insurance: has('insurance'),
+    };
+  }
+  function family(k, equity) {
+    let f = C.HOT.indexOf(k) >= 0 ? 'hot' : C.COLD.indexOf(k) >= 0 ? 'cold' : null;
+    if (equity && f) f = f === 'hot' ? 'cold' : 'hot';
+    return f;
+  }
+  function sellValue(inst, row) {
+    const price = byId[inst.id].price;
+    const full = row ? flags(row).sellFull : false;
+    return (full ? price : Math.floor(price / 2)) + inst.sellBonus;
+  }
+  function resolveDef(row, i, seen, copied) {
+    const inst = row[i];
+    if (!inst || seen.has(i)) return null;
+    seen.add(i);
+    const d = byId[inst.id];
+    if (d.copy === 'right') return resolveDef(row, i + 1, seen, true);
+    if (d.copy === 'leftmost') return resolveDef(row, 0, seen, true);
+    if (copied && (d.passive || d.noCopy)) return null;
+    return d;
+  }
+  function chainMirror(x, row, i, apply, cap) {
+    let j = i;
+    for (;;) {
+      const m = row[j + 1], t = row[j + 2];
+      if (!m || !byId[m.id].mirror || !t || !x.mirrorUsed) return;
+      const used = x.mirrorUsed.get(j + 1) || 0;
+      if (used >= cap) return;
+      x.mirrorUsed.set(j + 1, used + 1);
+      const td = resolveDef(row, j + 2, new Set(), false);
+      if (!td || td.passive || !td.force) return;
+      const e2 = td.force(x, row[j + 2]);
+      if (!e2) return;
+      apply(e2, j + 2, { mirrored: j + 1 });
+      j += 2;
+    }
+  }
+  function dispatch(event, x, row, apply) {
+    const cap = flags(row).mirrorCap;
+    for (let i = 0; i < row.length; i++) {
+      const d = resolveDef(row, i, new Set(), false);
+      if (!d || d.passive || !d.on || !d.on[event]) continue;
+      const eff = d.on[event](x, row[i]);
+      if (!eff) continue;
+      apply(eff, i, null);
+      chainMirror(x, row, i, apply, cap);
+    }
+  }
+  function roll(rng, exclude) {
+    const rarity = rng.weighted(C.RARITY_WEIGHTS);
+    let pool = DEFS.filter((d) => d.rarity === rarity && !exclude.has(d.id) && !d.id.startsWith('t_'));
+    if (!pool.length) pool = DEFS.filter((d) => !exclude.has(d.id) && !d.id.startsWith('t_'));
+    return pool.length ? rng.pick(pool).id : null;
+  }
+
+  GF.Perks = { DEFS, byId, def, create, setNextUid, flags, family, sellValue, resolveDef, dispatch, roll };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- perks-base.js
+(function (GF) {
+  'use strict';
+  const C = GF.C;
+  const def = GF.Perks.def;
+  const cap = (s) => s[0].toUpperCase() + s.slice(1);
+  const isFour = (g) => g.shape === 'four' || g.shape === 'square';
+  const ctxColor = (x) => (x.group ? x.group.color : x.gem ? x.gem.color : null);
+  const add = (n) => () => ({ add: n });
+
+  // ---------- Common (24) ----------
+  C.COLORS.forEach((name, k) => def({
+    id: name + '_lover', name: cap(name) + ' Lover', desc: '+15 per ' + cap(name) + ' gem cleared',
+    on: { gemClear: (x) => (x.gem.color === k ? { add: 15 } : null) }, force: add(15),
+  }));
+  def({ id: 'destroyer', name: 'Destroyer', desc: 'Each match clears 1 extra gem of its color',
+    on: { match: (x) => ({ clearExtra: { color: x.group.color, count: 1 } }) },
+    force: (x) => (ctxColor(x) != null ? { clearExtra: { color: ctxColor(x), count: 1 } } : null) });
+  def({ id: 'bomb_lover', name: 'Bomb Lover', desc: '+80 for each match-4',
+    on: { match: (x) => (isFour(x.group) ? { add: 80 } : null) }, force: add(80) });
+  def({ id: 'star_lover', name: 'Star Lover', desc: '+100 for each T/L match',
+    on: { match: (x) => (x.group.shape === 'shape' ? { add: 100 } : null) }, force: add(100) });
+  def({ id: 'prism_lover', name: 'Prism Lover', desc: '+150 for each match-5',
+    on: { match: (x) => ((x.group.shape === 'five' || x.group.shape === 'six') ? { add: 150 } : null) }, force: add(150) });
+  def({ id: 'domino_effect', name: 'Domino Effect', desc: '+30 per cascade level',
+    on: { cascade: add(30) }, force: add(30) });
+  def({ id: 'chad', name: 'Chad', desc: 'x2 points on the first move of a round',
+    on: { moveEnd: (x) => (x.summary.isFirstMove ? { mul: 2 } : null) }, force: () => ({ mul: 2 }) });
+  def({ id: 'last_hope', name: 'Last Hope', desc: 'x2 points on the last move of a round',
+    on: { moveEnd: (x) => (x.summary.isLastMove ? { mul: 2 } : null) }, force: () => ({ mul: 2 }) });
+  def({ id: 'piggy_bank', name: 'Piggy Bank', desc: '+$3 sell value at the end of each round',
+    on: { roundEnd: () => ({ sellBonus: 3 }) }, force: () => ({ sellBonus: 3 }) });
+  def({ id: 'bomb_destroyer', name: 'Bomb Destroyer', desc: '+90 for each Bomb that explodes',
+    on: { special: (x) => (x.special.kind === 'bomb' ? { add: 90 } : null) }, force: add(90) });
+  def({ id: 'star_destroyer', name: 'Star Destroyer', desc: '+120 for each Star that fires',
+    on: { special: (x) => (x.special.kind === 'star' ? { add: 120 } : null) }, force: add(120) });
+  def({ id: 'diverging_prism', name: 'Diverging Prism', desc: 'When a Prism fires, clear 1 more gem near it',
+    on: { special: (x) => (x.special.kind === 'prism' ? { clearNear: [x.special.r, x.special.c] } : null) },
+    force: (x) => (x.special ? { clearNear: [x.special.r, x.special.c] } : x.cell ? { clearNear: [x.cell.r, x.cell.c] } : null) });
+  def({ id: 'trash_collector', name: 'Trash Collector', desc: '+15 per gem cleared of the rarest color on the board',
+    on: { gemClear: (x) => (x.gem.color != null && x.gem.color === x.leastColor ? { add: 15 } : null) }, force: add(15) });
+  def({ id: 'square', name: 'Square', desc: '2x2 blocks count as match-4', passive: true });
+  def({ id: 'credit_card', name: 'Credit Card', desc: 'Your money can go down to -$20', passive: true });
+  def({ id: 'coal_miner', name: 'Coal Miner', desc: 'Round start: turn 1 random gem into Coal (Mirror cannot copy this)',
+    on: { roundStart: () => ({ transform: { kind: 'coal', count: 1 } }) } });
+  def({ id: 'dice_100', name: '100D Dice', desc: '+1 to +100 random points per match',
+    on: { match: (x) => ({ add: x.rng.int(100) + 1 }) }, force: (x) => ({ add: x.rng.int(100) + 1 }) });
+  def({ id: 'hot_crushers', name: 'Hot Crushers', desc: '+15 per hot gem (Red, Orange, Yellow) cleared',
+    on: { gemClear: (x) => (x.family(x.gem.color) === 'hot' ? { add: 15 } : null) }, force: add(15) });
+
+  // ---------- Uncommon (19) ----------
+  def({ id: 'jewel_collector', rarity: 'uncommon', name: 'Jewel Collector',
+    desc: 'Stores the points of every match of its color (new color each round). Adds the total every move.',
+    on: {
+      roundStart: (x, inst) => { inst.state.color = x.rng.pick(x.colors); return null; },
+      match: (x, inst) => {
+        if (inst.state.color == null) inst.state.color = x.group.color;
+        if (x.group.color !== inst.state.color) return null;
+        inst.state.acc = (inst.state.acc || 0) + x.groupPoints;
+        return { store: x.groupPoints };
+      },
+      moveEnd: (x, inst) => (inst.state.acc ? { add: inst.state.acc } : null),
+    },
+    force: (x, inst) => (inst.state.acc ? { add: inst.state.acc } : null) });
+  def({ id: 'c4', rarity: 'uncommon', name: 'C4', desc: 'Bombs explode 5x5', passive: true });
+  def({ id: 'star_struck', rarity: 'uncommon', name: 'Star Struck', desc: 'Stars also clear both diagonals', passive: true });
+  def({ id: 'cold_crushers', rarity: 'uncommon', name: 'Cold Crushers', desc: '+15 per cold gem (Green, Blue, Purple) cleared',
+    on: { gemClear: (x) => (x.family(x.gem.color) === 'cold' ? { add: 15 } : null) }, force: add(15) });
+  def({ id: 'equity', rarity: 'uncommon', name: 'Equity', desc: 'Hot colors count as cold and cold as hot', passive: true });
+  def({ id: 'bomb_maker', rarity: 'uncommon', name: 'Bomb Maker', desc: 'Round start: turn 1 random gem into a Bomb (Mirror cannot copy this)',
+    on: { roundStart: () => ({ transform: { kind: 'bomb', count: 1 } }) } });
+  def({ id: 'star_maker', rarity: 'uncommon', name: 'Star Maker', desc: 'Round start: turn 1 random gem into a Star (Mirror cannot copy this)',
+    on: { roundStart: () => ({ transform: { kind: 'star', count: 1 } }) } });
+  C.COLORS.forEach((name, k) => def({
+    id: name + '_grinder', rarity: 'uncommon', name: cap(name) + ' Grinder', desc: 'x2 points for ' + cap(name) + ' matches',
+    on: { match: (x) => (x.group.color === k ? { add: x.groupPoints } : null) },
+    force: (x) => (x.groupPoints ? { add: x.groupPoints } : null),
+  }));
+  def({ id: 'money_tree', rarity: 'uncommon', name: 'Money Tree', desc: '+$1 when you match its color, then it picks a new color',
+    on: { match: (x, inst) => {
+      if (inst.state.color == null || !x.colors.includes(inst.state.color)) inst.state.color = x.rng.pick(x.colors);
+      if (x.group.color !== inst.state.color) return null;
+      const others = x.colors.filter((k) => k !== inst.state.color);
+      inst.state.color = x.rng.pick(others.length ? others : x.colors);
+      return { money: 1 };
+    } },
+    force: () => ({ money: 1 }) });
+  def({ id: 'looter', rarity: 'uncommon', name: 'Looter', desc: '+50 for every $2 you have (each move)',
+    on: { moveEnd: (x) => { const n = Math.floor(Math.max(0, x.run.money) / 2); return n ? { add: 50 * n } : null; } },
+    force: (x) => { const n = Math.floor(Math.max(0, x.run.money) / 2); return n ? { add: 50 * n } : null; } });
+  def({ id: 'cascader', rarity: 'uncommon', name: 'Cascader', desc: 'x1.5 points if a move cascades more than 3 levels',
+    on: { moveEnd: (x) => (x.summary.maxLevel > 3 ? { mul: 1.5 } : null) }, force: () => ({ mul: 1.5 }) });
+  def({ id: 'gem_janitor', rarity: 'uncommon', name: 'Gem Janitor', desc: 'Each match clears 3 extra gems of its color',
+    on: { match: (x) => ({ clearExtra: { color: x.group.color, count: 3 } }) },
+    force: (x) => (ctxColor(x) != null ? { clearExtra: { color: ctxColor(x), count: 3 } } : null) });
+  def({ id: 'showman', rarity: 'uncommon', name: 'Showman', desc: 'The shop can offer perks you already own', passive: true });
+
+  // ---------- Rare (5) ----------
+  def({ id: 'executer', rarity: 'rare', name: 'Executer', desc: 'Copies the perk to its right', copy: 'right' });
+  def({ id: 'imagination', rarity: 'rare', name: 'Imagination', desc: 'Copies your leftmost perk', copy: 'leftmost' });
+  def({ id: 'chain_reaction', rarity: 'rare', name: 'Chain Reaction', desc: 'x2 points if 2+ special gems fire in one move',
+    on: { moveEnd: (x) => (x.summary.specialsActivated >= 2 ? { mul: 2 } : null) }, force: () => ({ mul: 2 }) });
+  def({ id: 'mirror', rarity: 'rare', name: 'Mirror', desc: 'When the perk on its left triggers, the perk on its right triggers too (once per cascade level)', mirror: true });
+  def({ id: 'monochrome', rarity: 'rare', name: 'Monochrome', desc: 'Removes 1 random color from the board. Selling it brings the color back.', passive: true,
+    onBuy: (run, inst, rng) => {
+      const active = GF.Run.colors(run);
+      if (active.length <= 4) return;
+      const k = rng.pick(active);
+      inst.state.color = k;
+      run.removedColors.push(k);
+    },
+    onSell: (run, inst) => {
+      const i = run.removedColors.indexOf(inst.state.color);
+      if (i >= 0) run.removedColors.splice(i, 1);
+    } });
+
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- perks-v2.js
+(function (GF) {
+  'use strict';
+  const def = GF.Perks.def;
+  const add = (n) => () => ({ add: n });
+  const mul = (n) => () => ({ mul: n });
+  const isBlast = (o) => !!o && (o.source === 'blast' || o.source === 'color');
+  const tileCount = (b) => { let n = 0; for (const row of b.tiles) for (const t of row) if (t) n++; return n; };
+  const fengShui = (x) => { const n = tileCount(x.board); return n ? { mul: 1 + 0.05 * n } : null; };
+  const crescendo = (x) => { const k = 1 + 0.05 * x.run.moveIndex; return k > 1 ? { mul: k } : null; };
+  const acc = (x, i) => (i.state.acc ? { add: i.state.acc } : null);
+
+  // ---------- Special gems & Supernova (13) ----------
+  def({ id: 'nova_lover', rarity: 'uncommon', name: 'Nova Lover', desc: '+400 for each Supernova that fires',
+    on: { special: (x) => (x.special.kind === 'supernova' ? { add: 400 } : null) }, force: add(400) });
+  def({ id: 'big_bang', rarity: 'rare', name: 'Big Bang', desc: 'x3 points if a Supernova fired this move',
+    on: { moveEnd: (x) => (x.summary.specials.supernova >= 1 ? { mul: 3 } : null) }, force: mul(3) });
+  def({ id: 'stellar_forge', rarity: 'rare', name: 'Stellar Forge', desc: 'Round start: turn 1 random gem into a Supernova (Mirror cannot copy this)',
+    on: { roundStart: () => ({ transform: { kind: 'supernova', count: 1 } }) } });
+  def({ id: 'demolition', name: 'Demolition', desc: '+25 per gem destroyed by an explosion',
+    on: { gemClear: (x) => (isBlast(x.gem) ? { add: 25 } : null) }, force: add(25) });
+  def({ id: 'coal_furnace', rarity: 'uncommon', name: 'Coal Furnace', desc: '+150 per Coal broken',
+    on: { gemClear: (x) => (x.gem.kind === 'coal' ? { add: 150 } : null) }, force: add(150) });
+  def({ id: 'goldsmith', name: 'Goldsmith', desc: 'Gold gems give +$1 more',
+    on: { gemClear: (x) => (x.gem.kind === 'gold' ? { money: 1 } : null) }, force: () => ({ money: 1 }) });
+  def({ id: 'polished_shine', rarity: 'uncommon', name: 'Polished Shine', desc: 'Shiny gems are worth x3 instead of x2', passive: true });
+  def({ id: 'wild_card', name: 'Wild Card', desc: '+40 per Wild cleared',
+    on: { gemClear: (x) => (x.gem.kind === 'wild' ? { add: 40 } : null) }, force: add(40) });
+  def({ id: 'chain_bomb', rarity: 'uncommon', name: 'Chain Bomb', desc: '+200 when a special gem is set off by another explosion',
+    on: { special: (x) => (isBlast(x.special) ? { add: 200 } : null) }, force: add(200) });
+  def({ id: 'prism_shard', name: 'Prism Shard', desc: '+10 per gem a Prism clears',
+    on: { special: (x) => (x.special.kind === 'prism' && x.special.cleared ? { add: 10 * x.special.cleared } : null) },
+    force: (x) => (x.special && x.special.cleared ? { add: 10 * x.special.cleared } : null) });
+  def({ id: 'star_collector', name: 'Star Collector', desc: '+60 per special gem created', on: { create: add(60) }, force: add(60) });
+  def({ id: 'architect', rarity: 'uncommon', name: 'Architect', desc: '+100 per special gem created', on: { create: add(100) }, force: add(100) });
+  def({ id: 'overcharge', rarity: 'rare', name: 'Overcharge', desc: 'Gems destroyed by explosions are worth x2', passive: true });
+
+  // ---------- Power tiles (11) ----------
+  def({ id: 'tile_tycoon', name: 'Tile Tycoon', desc: '+30 each time a power tile does something', on: { tile: add(30) }, force: add(30) });
+  def({ id: 'fast_forward', rarity: 'uncommon', name: 'Fast Forward', desc: 'Bomb, Star and Prism tiles count down twice as fast', passive: true });
+  def({ id: 'landlord', name: 'Landlord', desc: 'Round end: +$1 per power tile on the board',
+    on: { roundEnd: (x) => { const n = tileCount(x.board); return n ? { money: n } : null; } } });
+  def({ id: 'hot_floor', name: 'Hot Floor', desc: '+50 per gem cleared while standing on a power tile',
+    on: { gemClear: (x) => (x.cell && x.board.tiles[x.cell.r][x.cell.c] ? { add: 50 } : null) }, force: add(50) });
+  def({ id: 'clockmaker', rarity: 'uncommon', name: 'Clockmaker', desc: 'Clock tiles can give up to 2 moves per move', passive: true });
+  def({ id: 'arcane_study', name: 'Arcane Study', desc: '+80 each time a Magic tile recolors a gem',
+    on: { tile: (x) => (x.tile.magic ? { add: 80 } : null) }, force: add(80) });
+  def({ id: 'renovation', rarity: 'uncommon', name: 'Renovation', desc: 'Power tiles in the shop cost $2 less', passive: true });
+  def({ id: 'blueprint', rarity: 'rare', name: 'Blueprint', desc: 'Round start: every power tile fires once (Mirror cannot copy this)',
+    on: { roundStart: () => ({ blueprint: true }) } });
+  def({ id: 'feng_shui', rarity: 'uncommon', name: 'Feng Shui', desc: 'x(1 + 0.05 per power tile on the board) points',
+    on: { moveEnd: fengShui }, force: fengShui });
+  def({ id: 'tile_collector', rarity: 'uncommon', name: 'Tile Collector', desc: 'Stores +25 each time a power tile fires. Adds the total every move.',
+    on: { tile: (x, i) => { i.state.acc = (i.state.acc || 0) + 25; return { store: 25 }; }, moveEnd: acc }, force: acc });
+  def({ id: 'overtime', name: 'Overtime', desc: '+$2 each time a Clock tile gives a move',
+    on: { tile: (x) => (x.tile.moves ? { money: 2 } : null) }, force: () => ({ money: 2 }) });
+
+  // ---------- Scaling & multipliers (14) ----------
+  def({ id: 'momentum', rarity: 'uncommon', name: 'Momentum', desc: 'Each move in a row that cascades adds x0.1 (resets when a move does not cascade)',
+    on: { moveEnd: (x, i) => {
+      if (x.summary.maxLevel >= 2) { i.state.streak = (i.state.streak || 0) + 1; return { mul: 1 + 0.1 * i.state.streak }; }
+      i.state.streak = 0; return null;
+    } },
+    force: (x, i) => (i.state.streak ? { mul: 1 + 0.1 * i.state.streak } : null) });
+  def({ id: 'compound', rarity: 'rare', name: 'Compound', desc: 'x1.1 points, +0.1 for every round you have held it',
+    on: { moveEnd: (x, i) => ({ mul: 1.1 + 0.1 * (i.state.rounds || 0) }),
+      roundEnd: (x, i) => { i.state.rounds = (i.state.rounds || 0) + 1; return null; } },
+    force: (x, i) => ({ mul: 1.1 + 0.1 * (i.state.rounds || 0) }) });
+  def({ id: 'snowball', rarity: 'uncommon', name: 'Snowball', desc: 'Moves that cascade 3+ levels store +10 forever. Adds the total every move.',
+    on: { moveEnd: (x, i) => { if (x.summary.maxLevel >= 3) i.state.acc = (i.state.acc || 0) + 10; return acc(x, i); } }, force: acc });
+  def({ id: 'combo_meter', name: 'Combo Meter', desc: '+20 x the highest cascade level of the move',
+    on: { moveEnd: (x) => ({ add: 20 * x.summary.maxLevel }) }, force: (x) => ({ add: 20 * (x.summary.maxLevel || 1) }) });
+  def({ id: 'glass_cannon', rarity: 'rare', name: 'Glass Cannon', desc: 'x3 points, but 5 fewer moves each round',
+    on: { roundStart: () => ({ moves: -5 }), moveEnd: mul(3) }, force: mul(3) });
+  def({ id: 'exponent', rarity: 'rare', name: 'Exponent', desc: 'x2 points if a move clears 30+ gems',
+    on: { moveEnd: (x) => (x.summary.gemsCleared >= 30 ? { mul: 2 } : null) }, force: mul(2) });
+  def({ id: 'crescendo', rarity: 'uncommon', name: 'Crescendo', desc: 'x(1 + 0.05 per move already made this round)',
+    on: { moveEnd: crescendo }, force: crescendo });
+  def({ id: 'hungry', name: 'Hungry', desc: '+5 per gem cleared in the move',
+    on: { moveEnd: (x) => ({ add: 5 * x.summary.gemsCleared }) }, force: (x) => ({ add: 5 * (x.summary.gemsCleared || 0) }) });
+  def({ id: 'echo_chamber', rarity: 'rare', name: 'Echo Chamber', desc: 'Each Mirror can fire twice per cascade level', passive: true });
+  def({ id: 'prism_power', rarity: 'uncommon', name: 'Prism Power', desc: 'x1.5 points if a Prism fired this move',
+    on: { moveEnd: (x) => (x.summary.specials.prism >= 1 ? { mul: 1.5 } : null) }, force: mul(1.5) });
+  def({ id: 'rainbow_road', rarity: 'uncommon', name: 'Rainbow Road', desc: 'x2 points if a move clears 6+ colors',
+    on: { moveEnd: (x) => (x.summary.colorsCleared.size >= 6 ? { mul: 2 } : null) }, force: mul(2) });
+  def({ id: 'minimalist', rarity: 'uncommon', name: 'Minimalist', desc: 'x3 points if a move has no cascade',
+    on: { moveEnd: (x) => (x.summary.maxLevel === 1 ? { mul: 3 } : null) }, force: mul(3) });
+  def({ id: 'lucky_seven', name: 'Lucky Seven', desc: '+777 if a move clears exactly 7 gems',
+    on: { moveEnd: (x) => (x.summary.gemsCleared === 7 ? { add: 777 } : null) }, force: add(777) });
+  def({ id: 'whetstone', rarity: 'uncommon', name: 'Whetstone', desc: 'Round end: +1 Polish to a random color',
+    on: { roundEnd: (x) => ({ polish: { color: x.rng.pick(x.colors) } }) } });
+
+  // ---------- Economy & risk (13) ----------
+  def({ id: 'coupon', name: 'Coupon', desc: 'Perks in the shop cost $1 less', passive: true });
+  def({ id: 'bank_account', name: 'Bank Account', desc: 'Round end: +$1 per $5 you have (max +$5)',
+    on: { roundEnd: (x) => { const n = Math.min(5, Math.floor(Math.max(0, x.run.money) / 5)); return n ? { money: n } : null; } } });
+  def({ id: 'pawn_shop', name: 'Pawn Shop', desc: 'Sell perks for their full price', passive: true });
+  def({ id: 'stockpile', rarity: 'uncommon', name: 'Stockpile', desc: 'The first reroll in each shop is free', passive: true });
+  def({ id: 'gambler', rarity: 'uncommon', name: 'Gambler', desc: 'Each move: 50% x2, 50% x0.5',
+    on: { moveEnd: (x) => ({ mul: x.rng.chance(0.5) ? 2 : 0.5 }) }, force: (x) => ({ mul: x.rng.chance(0.5) ? 2 : 0.5 }) });
+  def({ id: 'russian_roulette', rarity: 'rare', name: 'Russian Roulette', desc: 'Each move: 1 in 6 scores 0, otherwise x3',
+    on: { moveEnd: (x) => ({ mul: x.rng.int(6) === 0 ? 0 : 3 }) }, force: (x) => ({ mul: x.rng.int(6) === 0 ? 0 : 3 }) });
+  def({ id: 'tip_jar', name: 'Tip Jar', desc: '+$1 if a move clears 20+ gems',
+    on: { moveEnd: (x) => (x.summary.gemsCleared >= 20 ? { money: 1 } : null) }, force: () => ({ money: 1 }) });
+  def({ id: 'loan_shark', rarity: 'uncommon', name: 'Loan Shark', desc: '+$15 when bought (repaid if sold). -$3 at the end of every round (can put you in debt)',
+    noCopy: true, onBuy: (run) => { run.money += 15; }, onSell: (run) => { run.money -= 15; }, on: { roundEnd: () => ({ money: -3 }) } });
+  def({ id: 'golden_ticket', rarity: 'uncommon', name: 'Golden Ticket', desc: 'The shop offers 4 perks', passive: true });
+  def({ id: 'overworked', name: 'Overworked', desc: '+1 move each round, but -$2 income',
+    on: { roundStart: () => ({ moves: 1 }), roundEnd: () => ({ income: -2 }) } });
+  def({ id: 'martyr', rarity: 'rare', name: 'Martyr', desc: 'x5 points. Destroys itself after 3 rounds',
+    on: { moveEnd: mul(5), roundEnd: (x, i) => { i.state.rounds = (i.state.rounds || 0) + 1; return i.state.rounds >= 3 ? { destroySelf: true } : null; } },
+    force: mul(5) });
+  def({ id: 'insurance', rarity: 'uncommon', name: 'Insurance', desc: 'The first time you would lose a round, you win it instead. Then it is gone.', passive: true });
+  def({ id: 'clearance_sale', name: 'Clearance Sale', desc: 'Upgrades in the shop cost half (rounded up)', passive: true });
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- tiles.js
+(function (GF) {
+  'use strict';
+  const C = GF.C;
+  const DEFS = {
+    gold:  { name: 'Gold Tile',  price: 5,  phase: 'moveEnd', kind: 'gold', icon: '$', desc: 'After each move, the gem here becomes Gold (+$1 when cleared)' },
+    shiny: { name: 'Shiny Tile', price: 6,  phase: 'moveEnd', kind: 'shiny', icon: 'S', desc: 'After each move, the gem here becomes Shiny (x2 value)' },
+    bomb:  { name: 'Bomb Tile',  price: 7,  phase: 'every', period: 4, kind: 'bomb', icon: 'B', desc: 'Every 4 moves, the gem here becomes a Bomb' },
+    star:  { name: 'Star Tile',  price: 8,  phase: 'every', period: 4, kind: 'star', icon: '+', desc: 'Every 4 moves, the gem here becomes a Star' },
+    prism: { name: 'Prism Tile', price: 10, phase: 'every', period: 8, kind: 'prism', any: true, icon: 'P', desc: 'Every 8 moves, the gem here becomes a Prism' },
+    wild:  { name: 'Wild Tile',  price: 6,  phase: 'roundStart', kind: 'wild', any: true, icon: 'W', desc: 'At round start, the gem here becomes Wild' },
+    clock: { name: 'Clock Tile', price: 8,  phase: 'onClear', icon: 'C', desc: 'Clearing a gem here gives +1 move (once per move)' },
+    magic: { name: 'Magic Tile', price: 5,  phase: 'moveEnd', magic: true, icon: 'M', desc: 'After each move, the gem here turns into the most common color (if that would not make a match)' },
+  };
+  const IDS = Object.keys(DEFS);
+
+  function convert(board, r, c, d) {
+    const g = board.cells[r][c];
+    if (!g || g.kind === 'coal') return null;
+    if (!d.any && g.kind !== 'normal') return null;
+    if (g.kind === d.kind) return null;
+    const ng = C.gem(d.kind, g.color);
+    board.cells[r][c] = ng;
+    return ng;
+  }
+  function magic(board, r, c, colors) {
+    const g = board.cells[r][c];
+    if (!g || g.color == null) return null;
+    const counts = GF.Board.colorCounts(board, null);
+    const order = colors.slice().sort((a, b) => counts[b] - counts[a]);
+    for (const k of order) {
+      if (k === g.color) return null;
+      if (!GF.Board.wouldMatch(board, r, c, k)) {
+        const ng = { id: g.id, kind: g.kind, color: k };
+        board.cells[r][c] = ng;
+        return ng;
+      }
+    }
+    return null;
+  }
+  function applyPhase(board, phase, colors, opts) {
+    opts = opts || {};
+    const speed = opts.speed || 1;
+    const events = [];
+    for (let r = 0; r < C.SIZE; r++) for (let c = 0; c < C.SIZE; c++) {
+      const id = board.tiles[r][c];
+      if (!id) continue;
+      const d = DEFS[id];
+      let g = null;
+      if (opts.forceAll) {
+        if (d.phase === 'onClear') continue;
+        g = d.magic ? magic(board, r, c, colors) : convert(board, r, c, d);
+      } else if (d.phase === 'every') {
+        if (phase !== 'moveEnd') continue;
+        board.tileState[r][c] += speed;
+        if (board.tileState[r][c] < d.period) continue;
+        board.tileState[r][c] = 0;
+        g = convert(board, r, c, d);
+      } else if (d.phase === phase) {
+        g = d.magic ? magic(board, r, c, colors) : convert(board, r, c, d);
+      }
+      if (g) events.push({ r: r, c: c, tile: id, gem: GF.Board.clone(g), magic: !!d.magic });
+    }
+    return events;
+  }
+
+  GF.Tiles = { DEFS, IDS, applyPhase };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- resolver.js
+(function (GF) {
+  'use strict';
+  const C = GF.C;
+  const ALL = [0, 1, 2, 3, 4, 5, 6];
+
+  function colorsOf(run) { return ALL.filter((k) => run.removedColors.indexOf(k) < 0); }
+
+  function gemValue(run, g, level, opts) {
+    opts = opts || {};
+    const polish = g.color != null ? run.polish[g.color] * C.POLISH_BONUS : 0;
+    const shiny = g.kind === 'shiny' ? (opts.shinyMul || 2) : 1;
+    const blast = opts.overcharge && (opts.source === 'blast' || opts.source === 'color') ? 2 : 1;
+    return (C.base(run.round) + polish) * level * shiny * blast;
+  }
+
+  function move(run, a, b) {
+    const B = GF.Board, P = GF.Perks, board = run.board;
+    const flags = P.flags(run.perks), colors = colorsOf(run);
+    const tl = [];
+    const money0 = run.money;
+    let points = 0, extraMoves = 0, clocks = 0;
+    const destroy = new Set();
+    const summary = { maxLevel: 0, specialsActivated: 0, gemsCleared: 0, colorsCleared: new Set(),
+      specials: { bomb: 0, star: 0, prism: 0, supernova: 0 },
+      isFirstMove: run.moveIndex === 0, isLastMove: run.movesLeft === 1 };
+    const pending = { extra: [], near: [] };
+    const x = { run: run, board: board, rng: run.rng, flags: flags, colors: colors, summary: summary, level: 1,
+      mirrorUsed: new Map(), group: null, groupPoints: 0, gem: null, cell: null, special: null, created: null, tile: null,
+      family: (k) => P.family(k, flags.equity), leastColor: B.leastCommonColor(board, colors) };
+    Object.defineProperty(x, 'points', { get: () => points });
+    const vopts = (src) => ({ shinyMul: flags.shinyMul, overcharge: flags.overcharge, source: src });
+
+    const apply = (eff, slot, meta) => {
+      const step = { t: 'perk', slot: slot, level: x.level };
+      if (meta && meta.mirrored != null) step.mirrored = meta.mirrored;
+      if (eff.add) { points += eff.add; step.add = eff.add; }
+      if (eff.mul != null && eff.mul !== 1) { points *= eff.mul; step.mul = eff.mul; }
+      if (eff.money) { run.money += eff.money; step.money = eff.money; }
+      if (eff.store != null) step.store = eff.store;
+      if (eff.clearExtra) { pending.extra.push(eff.clearExtra); step.clear = true; }
+      if (eff.clearNear) { pending.near.push(eff.clearNear); step.clear = true; }
+      if (eff.sellBonus) { run.perks[slot].sellBonus += eff.sellBonus; step.sellBonus = eff.sellBonus; }
+      if (eff.moves) { run.movesLeft += eff.moves; extraMoves += eff.moves; step.moves = eff.moves; }
+      if (eff.polish) { run.polish[eff.polish.color]++; step.polish = eff.polish.color; }
+      if (eff.destroySelf) { destroy.add(run.perks[slot].uid); step.destroy = true; }
+      points = Math.min(points, Number.MAX_VALUE);
+      step.total = points;
+      tl.push(step);
+    };
+    const emit = (ev) => P.dispatch(ev, x, run.perks, apply);
+    const emitTile = (ev) => {
+      x.tile = { id: ev.tile, r: ev.r, c: ev.c, magic: !!ev.magic, moves: ev.moves || 0 };
+      emit('tile');
+      x.tile = null;
+    };
+
+    emit('moveStart');
+
+    let prismPos = null, prismColor = null;
+    const ga = board.cells[a.r][a.c], gb = board.cells[b.r][b.c];
+    if (ga.kind === 'prism' && gb.color != null) { prismPos = { r: b.r, c: b.c }; prismColor = gb.color; }
+    else if (gb.kind === 'prism' && ga.color != null) { prismPos = { r: a.r, c: a.c }; prismColor = ga.color; }
+    B.swap(board, a, b);
+    tl.push({ t: 'swap', a: a, b: b });
+
+    for (let level = 1; level <= 60; level++) {
+      x.level = level;
+      x.mirrorUsed = new Map();
+      const groups = B.findGroups(board, flags, colors);
+      const seeds = level === 1 && prismPos ? [[prismPos.r, prismPos.c]] : [];
+      if (!groups.length && !seeds.length) break;
+      summary.maxLevel = level;
+      const prismColors = {};
+      if (seeds.length) prismColors[B.key(prismPos.r, prismPos.c)] = prismColor;
+      const creates = B.planSpecials(groups, level === 1 ? [b, a] : []);
+      if (groups.length) tl.push({ t: 'match', level: level, groups: groups.map((g) => ({ color: g.color, shape: g.shape, cells: g.cells })) });
+      if (level >= 2) tl.push({ t: 'cascade', level: level });
+
+      for (const g of groups) {
+        x.group = g;
+        x.groupPoints = g.cells.reduce((s, [r, c]) => s + gemValue(run, board.cells[r][c], level, vopts('match')), 0);
+        emit('match');
+      }
+      x.group = null; x.groupPoints = 0;
+
+      const st = B.newClearState();
+      let batches = [{ cells: seeds.concat(...groups.map((g) => g.cells)), src: 'match' }];
+      let done = 0, actDone = 0;
+      for (let guard = 0; guard < 50; guard++) {
+        for (const e of pending.extra) batches.push({ cells: B.pickExtra(board, e.color, e.count, st, run.rng), src: 'extra' });
+        for (const n of pending.near) batches.push({ cells: B.pickNear(board, n[0], n[1], st), src: 'extra' });
+        pending.extra = []; pending.near = [];
+        if (!batches.some((bt) => bt.cells.length)) break;
+        for (const bt of batches) B.expandClear(board, bt.cells, flags, st, prismColors, colors, bt.src);
+        batches = [];
+        const fresh = st.order.slice(done); done = st.order.length;
+        const actFresh = st.activated.slice(actDone); actDone = st.activated.length;
+        if (!fresh.length) continue;
+
+        for (const s of actFresh) {
+          summary.specialsActivated++;
+          summary.specials[s.kind] = (summary.specials[s.kind] || 0) + 1;
+          tl.push({ t: 'special', kind: s.kind, r: s.r, c: s.c, cells: s.cells, source: s.source, cleared: s.cleared });
+        }
+        const step = { t: 'clear', level: level, cells: [] };
+        for (const [r, c] of fresh) {
+          const g = board.cells[r][c];
+          const src = st.source[B.key(r, c)];
+          const v = gemValue(run, g, level, vopts(src));
+          points = Math.min(points + v, Number.MAX_VALUE);
+          summary.gemsCleared++;
+          if (g.color != null) summary.colorsCleared.add(g.color);
+          step.cells.push({ r: r, c: c, id: g.id, v: v, src: src });
+        }
+        step.total = points;
+        tl.push(step);
+
+        for (const [r, c] of fresh) {
+          const g = board.cells[r][c];
+          x.gem = Object.assign({}, g, { source: st.source[B.key(r, c)] });
+          x.cell = { r: r, c: c };
+          if (g.kind === 'gold') { run.money += 1; tl.push({ t: 'money', r: r, c: c, money: 1 }); }
+          if (board.tiles[r][c] === 'clock' && clocks < flags.clockCap) {
+            clocks++; extraMoves++; run.movesLeft++;
+            const ev = { t: 'tile', r: r, c: c, tile: 'clock', moves: 1 };
+            tl.push(ev);
+            emitTile(ev);
+          }
+          emit('gemClear');
+        }
+        x.gem = null; x.cell = null;
+        for (const s of actFresh) { x.special = s; emit('special'); }
+        x.special = null;
+      }
+
+      for (const [r, c] of st.order) board.cells[r][c] = null;
+      for (const cr of creates) {
+        const g = C.gem(cr.kind, cr.color);
+        board.cells[cr.r][cr.c] = g;
+        tl.push({ t: 'create', r: cr.r, c: cr.c, gem: B.clone(g) });
+        x.created = { kind: cr.kind, r: cr.r, c: cr.c };
+        emit('create');
+        x.created = null;
+      }
+      const moves = B.gravity(board);
+      const spawns = B.refill(board, run.rng, colors);
+      tl.push({ t: 'fall', moves: moves, spawns: spawns });
+      if (level >= 2) emit('cascade');
+    }
+
+    x.level = summary.maxLevel + 1;
+    x.mirrorUsed = new Map();
+    for (const ev of GF.Tiles.applyPhase(board, 'moveEnd', colors, { speed: flags.tileSpeed })) {
+      tl.push(Object.assign({ t: 'tile' }, ev));
+      emitTile(ev);
+    }
+    summary.isLastMove = run.movesLeft === 1;
+    emit('moveEnd');
+    points = Math.floor(Math.min(points, Number.MAX_VALUE));
+    tl.push({ t: 'end', points: points });
+    if (destroy.size) {
+      run.perks = run.perks.filter((p) => !destroy.has(p.uid));
+      tl.push({ t: 'perkGone', uids: Array.from(destroy) });
+    }
+    if (!B.hasMoves(board, flags, colors)) {
+      B.shuffle(board, run.rng, colors, flags);
+      tl.push({ t: 'shuffle', cells: board.cells.map((row) => row.map(B.clone)) });
+    }
+    return { points: points, timeline: tl, summary: summary, moneyDelta: run.money - money0, extraMoves: extraMoves };
+  }
+
+  function baseCtx(run) {
+    const P = GF.Perks, flags = P.flags(run.perks);
+    return { run: run, board: run.board, rng: run.rng, flags: flags, colors: colorsOf(run), level: 0,
+      mirrorUsed: new Map(), summary: {}, family: (k) => P.family(k, flags.equity) };
+  }
+
+  function roundStart(run) {
+    const B = GF.Board, x = baseCtx(run);
+    const events = [];
+    let blueprint = false;
+    GF.Perks.dispatch('roundStart', x, run.perks, (eff, slot) => {
+      if (eff.transform) {
+        for (const t of B.transformRandom(run.board, eff.transform.kind, eff.transform.count, run.rng)) {
+          events.push({ r: t.r, c: t.c, gem: t.gem, slot: slot });
+        }
+      }
+      if (eff.moves) run.movesLeft += eff.moves;
+      if (eff.blueprint) blueprint = true;
+    });
+    for (const ev of GF.Tiles.applyPhase(run.board, 'roundStart', x.colors)) events.push(ev);
+    if (blueprint) for (const ev of GF.Tiles.applyPhase(run.board, 'roundStart', x.colors, { forceAll: true })) events.push(ev);
+    B.settle(run.board, run.rng, x.colors, x.flags);
+    return events;
+  }
+
+  function roundEnd(run) {
+    const x = baseCtx(run);
+    const steps = [];
+    const destroy = new Set();
+    GF.Perks.dispatch('roundEnd', x, run.perks, (eff, slot) => {
+      const step = { t: 'perk', slot: slot };
+      if (eff.money) { run.money += eff.money; step.money = eff.money; }
+      if (eff.sellBonus) { run.perks[slot].sellBonus += eff.sellBonus; step.sellBonus = eff.sellBonus; }
+      if (eff.polish) { run.polish[eff.polish.color]++; step.polish = eff.polish.color; }
+      if (eff.income) step.income = eff.income;
+      if (eff.destroySelf) { destroy.add(run.perks[slot].uid); step.destroy = true; }
+      steps.push(step);
+    });
+    if (destroy.size) run.perks = run.perks.filter((p) => !destroy.has(p.uid));
+    return steps;
+  }
+
+  GF.Resolver = { colorsOf, gemValue, move, roundStart, roundEnd };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- run.js
+(function (GF) {
+  'use strict';
+  const C = GF.C;
+
+  function create(seed) {
+    if (seed == null) seed = (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0;
+    const run = {
+      seed: seed >>> 0, rng: new GF.RNG(seed), round: 1, money: C.START_MONEY, perkSlots: C.START_SLOTS,
+      perks: [], polish: [0, 0, 0, 0, 0, 0, 0], removedColors: [], extraMoves: 0, movesLeft: 0, moveIndex: 0,
+      score: 0, phase: 'shop', endless: false, shop: null, stats: { bestMove: 0, roundsWon: 0 }, board: GF.Board.create(),
+    };
+    GF.Board.newRound(run.board, run.rng, colors(run), {});
+    return run;
+  }
+  function target(n) {
+    if (n <= C.ROUNDS) return C.roundNice(C.TARGET_START * Math.pow(C.TARGET_GROWTH, n - 1));
+    return C.roundNice(target(C.ROUNDS) * Math.pow(C.ENDLESS_GROWTH, n - C.ROUNDS));
+  }
+  function colors(run) { return GF.Resolver.colorsOf(run); }
+  function moneyFloor(run) { return GF.Perks.flags(run.perks).creditCard ? C.DEBT_FLOOR : 0; }
+
+  function startRound(run) {
+    GF.Board.newRound(run.board, run.rng, colors(run), GF.Perks.flags(run.perks));
+    run.movesLeft = C.START_MOVES + run.extraMoves;
+    run.moveIndex = 0;
+    run.score = 0;
+    const events = GF.Resolver.roundStart(run);
+    run.movesLeft = Math.max(1, run.movesLeft);
+    run.phase = 'play';
+    return events;
+  }
+  function doMove(run, a, b) {
+    if (run.phase !== 'play') return null;
+    if (!GF.Board.canSwap(run.board, a, b, GF.Perks.flags(run.perks), colors(run))) return null;
+    const res = GF.Resolver.move(run, a, b);
+    run.movesLeft--;
+    run.moveIndex++;
+    run.score = Math.min(run.score + res.points, Number.MAX_VALUE);
+    run.stats.bestMove = Math.max(run.stats.bestMove, res.points);
+    if (run.score >= target(run.round)) run.phase = 'won';
+    else if (run.movesLeft <= 0) {
+      const ins = run.perks.findIndex((p) => p.id === 'insurance');
+      if (ins >= 0) { run.perks.splice(ins, 1); run.phase = 'won'; res.insured = true; }
+      else run.phase = 'over';
+    }
+    return res;
+  }
+  function finishRound(run) {
+    if (run.phase !== 'won') return null;
+    const leftover = run.movesLeft;
+    const steps = GF.Resolver.roundEnd(run);
+    const perkIncome = steps.reduce((s, x) => s + (x.income || 0), 0);
+    const income = Math.max(0, C.BASE_INCOME + leftover + perkIncome);
+    run.money += income;
+    run.stats.roundsWon++;
+    const wasFinal = run.round === C.ROUNDS && !run.endless;
+    run.round++;
+    run.phase = wasFinal ? 'victory' : 'shop';
+    return { base: C.BASE_INCOME, leftover: leftover, perkIncome: perkIncome, income: income, steps: steps };
+  }
+  function continueEndless(run) { run.endless = true; run.phase = 'shop'; }
+
+  function serialize(run) { return JSON.stringify(Object.assign({}, run, { rng: run.rng.s, v: 1 })); }
+  function deserialize(str) {
+    const o = JSON.parse(str);
+    if (!o || o.v !== 1 || !o.board || !Array.isArray(o.perks)) throw new Error('bad save');
+    const rng = new GF.RNG(1); rng.s = o.rng; o.rng = rng;
+    let maxId = 0;
+    o.board.cells.forEach((row) => row.forEach((g) => { if (g && g.id > maxId) maxId = g.id; }));
+    C.setNextId(maxId + 1);
+    GF.Perks.setNextUid(o.perks.reduce((m, p) => Math.max(m, p.uid), 0) + 1);
+    delete o.v;
+    return o;
+  }
+  function save(run) {
+    try { localStorage.setItem(C.SAVE_KEY, serialize(run)); return true; } catch (e) { return false; }
+  }
+  function load() {
+    try { const s = localStorage.getItem(C.SAVE_KEY); return s ? deserialize(s) : null; }
+    catch (e) { clearSave(); return null; }
+  }
+  function clearSave() { try { localStorage.removeItem(C.SAVE_KEY); } catch (e) { /* storage unavailable */ } }
+  function hasSave() { try { return !!localStorage.getItem(C.SAVE_KEY); } catch (e) { return false; } }
+
+  GF.Run = { create, target, colors, moneyFloor, startRound, doMove, finishRound, continueEndless,
+    serialize, deserialize, save, load, clearSave, hasSave };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- shop.js
+(function (GF) {
+  'use strict';
+  const C = GF.C;
+
+  const fl = (run) => GF.Perks.flags(run.perks);
+  function perkPrice(run, id) { return Math.max(1, GF.Perks.byId[id].price - fl(run).perkDiscount); }
+  function tilePrice(run, id) { return Math.max(1, GF.Tiles.DEFS[id].price - fl(run).tileDiscount); }
+  function upgradePrice(run, up) { return fl(run).upgradeHalf ? Math.ceil(up.price / 2) : up.price; }
+  function rerollPrice(run) { return fl(run).freeReroll && run.shop && !run.shop.freeUsed ? 0 : run.shop.rerollCost; }
+  function canAfford(run, price) { return run.money - price >= GF.Run.moneyFloor(run); }
+  function rollPerks(run, n) {
+    const ex = new Set(GF.Perks.flags(run.perks).showman ? [] : run.perks.map((p) => p.id));
+    const out = [];
+    for (let i = 0; i < n; i++) { const id = GF.Perks.roll(run.rng, ex); out.push(id); if (id) ex.add(id); }
+    return out;
+  }
+  function rollTiles(run, n) { const out = []; for (let i = 0; i < n; i++) out.push(run.rng.pick(GF.Tiles.IDS)); return out; }
+  function rollUpgrade(run) {
+    const opts = ['polish'];
+    if (run.extraMoves < C.MAX_EXTRA_MOVES) opts.push('moves');
+    if (run.perkSlots < C.MAX_SLOTS) opts.push('slot');
+    const type = run.rng.pick(opts);
+    const up = { type: type, price: C.UPGRADE_PRICE[type] };
+    if (type === 'polish') up.color = run.rng.pick(GF.Run.colors(run));
+    return up;
+  }
+  function open(run) {
+    run.shop = { perks: rollPerks(run, fl(run).shopPerks), tiles: rollTiles(run, 2), upgrade: rollUpgrade(run), rerollCost: C.REROLL_BASE, freeUsed: false };
+    return run.shop;
+  }
+  function buyPerk(run, idx) {
+    const s = run.shop, id = s && s.perks[idx];
+    if (!id) return { ok: false, reason: 'none' };
+    if (run.perks.length >= run.perkSlots) return { ok: false, reason: 'slots' };
+    const d = GF.Perks.byId[id];
+    const price = perkPrice(run, id);
+    if (!canAfford(run, price)) return { ok: false, reason: 'money' };
+    run.money -= price;
+    const inst = GF.Perks.create(id);
+    run.perks.push(inst);
+    if (d.onBuy) d.onBuy(run, inst, run.rng);
+    s.perks[idx] = null;
+    return { ok: true, inst: inst };
+  }
+  function sellPerk(run, uid) {
+    if (run.phase !== 'shop') return { ok: false, reason: 'phase' };
+    const i = run.perks.findIndex((p) => p.uid === uid);
+    if (i < 0) return { ok: false, reason: 'none' };
+    const inst = run.perks[i], d = GF.Perks.byId[inst.id], value = GF.Perks.sellValue(inst, run.perks);
+    if (inst.id === 'credit_card' && run.money + value < 0) return { ok: false, reason: 'debt' };
+    run.perks.splice(i, 1);
+    run.money += value;
+    if (d.onSell) d.onSell(run, inst);
+    return { ok: true, value: value };
+  }
+  function movePerk(run, from, to) {
+    const n = run.perks.length;
+    if (from === to || from < 0 || to < 0 || from >= n || to >= n) return false;
+    const p = run.perks.splice(from, 1)[0];
+    run.perks.splice(to, 0, p);
+    return true;
+  }
+  function buyTile(run, idx, r, c) {
+    const s = run.shop, id = s && s.tiles[idx];
+    if (!id) return { ok: false, reason: 'none' };
+    if (!GF.Board.inB(r, c)) return { ok: false, reason: 'cell' };
+    const price = tilePrice(run, id);
+    if (!canAfford(run, price)) return { ok: false, reason: 'money' };
+    run.money -= price;
+    run.board.tiles[r][c] = id;
+    run.board.tileState[r][c] = 0;
+    s.tiles[idx] = null;
+    return { ok: true };
+  }
+  function removeTile(run, r, c) {
+    if (!GF.Board.inB(r, c) || !run.board.tiles[r][c]) return false;
+    run.board.tiles[r][c] = null;
+    run.board.tileState[r][c] = 0;
+    return true;
+  }
+  function buyUpgrade(run) {
+    const up = run.shop && run.shop.upgrade;
+    if (!up) return { ok: false, reason: 'none' };
+    const price = upgradePrice(run, up);
+    if (!canAfford(run, price)) return { ok: false, reason: 'money' };
+    run.money -= price;
+    if (up.type === 'moves') run.extraMoves++;
+    else if (up.type === 'slot') run.perkSlots++;
+    else run.polish[up.color]++;
+    run.shop.upgrade = null;
+    return { ok: true };
+  }
+  function reroll(run) {
+    const s = run.shop;
+    if (!s) return { ok: false, reason: 'none' };
+    const price = rerollPrice(run);
+    if (!canAfford(run, price)) return { ok: false, reason: 'money' };
+    run.money -= price;
+    if (price === 0 && fl(run).freeReroll && !s.freeUsed) s.freeUsed = true; else s.rerollCost++;
+    s.perks = rollPerks(run, fl(run).shopPerks);
+    s.tiles = rollTiles(run, 2);
+    s.upgrade = rollUpgrade(run);
+    return { ok: true };
+  }
+
+  GF.Shop = { open, canAfford, buyPerk, sellPerk, movePerk, buyTile, removeTile, buyUpgrade, reroll, perkPrice, tilePrice, upgradePrice, rerollPrice };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- audio.js
+(function (GF) {
+  'use strict';
+  let ctx = null;
+  let muted = false;
+  try { muted = localStorage.getItem('gemfactory.mute') === '1'; } catch (e) { muted = false; }
+  function ac() {
+    if (typeof window === 'undefined') return null;
+    if (!ctx) { const A = window.AudioContext || window.webkitAudioContext; if (!A) return null; ctx = new A(); }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  function tone(freq, dur, type, vol, slideTo, delay) {
+    if (muted) return;
+    const a = ac(); if (!a) return;
+    const t = a.currentTime + (delay || 0);
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    g.gain.setValueAtTime(vol || 0.06, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(a.destination);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  function noise(dur, vol) {
+    if (muted) return;
+    const a = ac(); if (!a) return;
+    const len = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const s = a.createBufferSource(), g = a.createGain();
+    s.buffer = buf; g.gain.value = vol || 0.2;
+    s.connect(g); g.connect(a.destination); s.start();
+  }
+  const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+  GF.Audio = {
+    pop(level) { const n = SCALE[Math.min(Math.max(level, 1) - 1, SCALE.length - 1)]; tone(440 * Math.pow(2, n / 12), 0.12, 'square', 0.05); },
+    boom() { noise(0.35, 0.25); tone(120, 0.3, 'sawtooth', 0.08, 40); },
+    sweep() { tone(300, 0.25, 'sawtooth', 0.05, 1800); },
+    chord() { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.4, 'triangle', 0.05, null, i * 0.04)); },
+    ching() { tone(1568, 0.08, 'square', 0.04); tone(2093, 0.15, 'square', 0.04, null, 0.06); },
+    tick(i) { tone(660 + (i || 0) * 60, 0.05, 'square', 0.035); },
+    mult() { tone(220, 0.3, 'sawtooth', 0.07, 880); },
+    bad() { tone(160, 0.15, 'square', 0.05, 100); },
+    win() { [523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, 0.18, 'square', 0.045, null, i * 0.09)); },
+    lose() { [392, 330, 262, 196].forEach((f, i) => tone(f, 0.25, 'triangle', 0.05, null, i * 0.15)); },
+    isMuted() { return muted; },
+    setMuted(m) { muted = !!m; try { localStorage.setItem('gemfactory.mute', muted ? '1' : '0'); } catch (e) { /* ignore */ } },
+    unlock() { ac(); },
+  };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- render.js
+(function (GF) {
+  'use strict';
+  const C = GF.C, N = C.SIZE, PX = 12;
+  const PAL = [
+    ['#ff4d6d', '#ffb3c1', '#7a0019'],
+    ['#3a86ff', '#b8d4ff', '#0a2a66'],
+    ['#3ddc84', '#b5f5d0', '#0b5e2f'],
+    ['#ffd23f', '#fff1b8', '#8a6a00'],
+    ['#a259ff', '#dcc2ff', '#3d1475'],
+    ['#eeeeee', '#ffffff', '#6b6b80'],
+    ['#ff8c42', '#ffd2b0', '#7a3300'],
+  ];
+  const TILE_COL = { gold: '#ffd23f', shiny: '#ffffff', bomb: '#ff4d6d', star: '#3a86ff', prism: '#ff6bd6', wild: '#3ddc84', clock: '#9ad1ff', magic: '#a259ff' };
+  let cv = null, g = null, cell = 48, dpr = 1, shakeMag = 0;
+  const sprites = {}, particles = [], flashes = [], pulses = {};
+
+  function mask(shape) {
+    return function (x, y) {
+      if (x < 0 || y < 0 || x >= PX || y >= PX) return false;
+      const dx = x - 5.5, dy = y - 5.5;
+      switch (shape) {
+        case 0: return Math.abs(dx) + Math.abs(dy) <= 6;                                        // red diamond
+        case 1: return dx * dx + dy * dy <= 30;                                                  // blue circle
+        case 2: return Math.abs(dx) <= 4.6 && Math.abs(dy) <= 4.6;                               // green square
+        case 3: return y >= 1 && y <= 10 && Math.abs(dx) <= (y - 0.5) * 0.55;                    // yellow triangle
+        case 4: return Math.abs(dy) <= 4.8 && Math.abs(dx) + Math.abs(dy) * 0.55 <= 5.6;         // purple hexagon
+        case 5: { const ax = Math.abs(dx), ay = Math.abs(dy); return (ax + 0.5) * (ay + 0.5) <= 10 && ax <= 6 && ay <= 6; } // white star (76 px)
+        default: return dx * dx + (dy - 1.5) * (dy - 1.5) <= 18 || (dy < -1 && Math.abs(dx) <= (dy + 6) * 0.6); // orange drop
+      }
+    };
+  }
+  function makeSprite(fill, colorAt, edge) {
+    const c = document.createElement('canvas');
+    c.width = c.height = PX;
+    const x = c.getContext('2d');
+    for (let yy = 0; yy < PX; yy++) for (let xx = 0; xx < PX; xx++) {
+      if (!fill(xx, yy)) continue;
+      const isEdge = !fill(xx - 1, yy) || !fill(xx + 1, yy) || !fill(xx, yy - 1) || !fill(xx, yy + 1);
+      x.fillStyle = isEdge ? edge : colorAt(xx, yy);
+      x.fillRect(xx, yy, 1, 1);
+    }
+    return c;
+  }
+  const shade = (pal) => (xx, yy) => (xx + yy >= 5 && xx + yy <= 8 ? pal[1] : xx + yy >= 16 ? pal[2] : pal[0]);
+  function decorate(s, kind) {
+    const x = s.getContext('2d');
+    const px = (xx, yy, col) => { x.fillStyle = col; x.fillRect(xx, yy, 1, 1); };
+    if (kind === 'bomb') { x.fillStyle = '#15101f'; x.fillRect(4, 4, 4, 4); px(4, 4, '#55506a'); px(8, 3, '#15101f'); px(9, 2, '#ffd23f'); px(10, 1, '#ff8c42'); }
+    else if (kind === 'star') { for (let i = 2; i <= 9; i++) { px(i, 5, '#fff'); px(i, 6, '#fff'); px(5, i, '#fff'); px(6, i, '#fff'); } }
+    else if (kind === 'gold') { x.fillStyle = '#ffd23f'; x.fillRect(5, 4, 2, 4); px(4, 5, '#ffd23f'); px(7, 6, '#ffd23f'); }
+    else if (kind === 'shiny') { px(3, 3, '#fff'); px(4, 3, '#fff'); px(3, 4, '#fff'); }
+    else if (kind === 'supernova') {
+      x.fillStyle = '#fff6c2'; x.fillRect(4, 4, 4, 4);
+      px(5, 5, '#ffffff'); px(6, 6, '#ffffff'); px(5, 6, '#ffffff'); px(6, 5, '#ffffff');
+      [[5, 1], [6, 1], [5, 10], [6, 10], [1, 5], [1, 6], [10, 5], [10, 6], [2, 2], [9, 2], [2, 9], [9, 9]].forEach(([a, b]) => px(a, b, '#ffd23f'));
+    }
+  }
+  const PRISM_FRAMES = 16;
+  const prismFrames = [];
+  function hexRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function prismGrid(f) {
+    const ang = (f / PRISM_FRAMES) * Math.PI * 2, tilt = -0.42, R = 1.0, H = 1.0;
+    const rot = (p) => { const [x0, y0, z0] = p; return [x0, y0 * Math.cos(tilt) - z0 * Math.sin(tilt), y0 * Math.sin(tilt) + z0 * Math.cos(tilt)]; };
+    const eq = [0, 1, 2, 3].map((k) => rot([Math.cos(ang + k * Math.PI / 2) * R, 0, Math.sin(ang + k * Math.PI / 2) * R]));
+    const top = rot([0, -H, 0]), bot = rot([0, H, 0]);
+    const faces = [];
+    for (let k = 0; k < 4; k++) { faces.push([top, eq[k], eq[(k + 1) % 4], k]); faces.push([bot, eq[(k + 1) % 4], eq[k], k + 4]); }
+    const L = (() => { const v = [-0.45, -0.6, 0.66]; const m = Math.hypot(v[0], v[1], v[2]); return v.map((q) => q / m); })();
+    const grid = [];
+    for (let py = 0; py < PX; py++) {
+      grid.push([]);
+      for (let px = 0; px < PX; px++) {
+        const X = (px + 0.5 - 6) / 5.7, Y = (py + 0.5 - 6) / 5.7;
+        let best = null, bestZ = -Infinity;
+        for (const [a, b, c, idx] of faces) {
+          const d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]);
+          if (Math.abs(d) < 1e-9) continue;
+          const w1 = ((b[1] - c[1]) * (X - c[0]) + (c[0] - b[0]) * (Y - c[1])) / d;
+          const w2 = ((c[1] - a[1]) * (X - c[0]) + (a[0] - c[0]) * (Y - c[1])) / d;
+          const w3 = 1 - w1 - w2;
+          if (w1 < -1e-6 || w2 < -1e-6 || w3 < -1e-6) continue;
+          const z = w1 * a[2] + w2 * b[2] + w3 * c[2];
+          if (z <= bestZ) continue;
+          const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+          let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+          const cen = [(a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3];
+          if (n[0] * cen[0] + n[1] * cen[1] + n[2] * cen[2] < 0) n = n.map((q) => -q);
+          const m = Math.hypot(n[0], n[1], n[2]) || 1;
+          const lit = 0.38 + 0.62 * Math.max(0, (n[0] * L[0] + n[1] * L[1] + n[2] * L[2]) / m);
+          const rgb = hexRgb(PAL[idx % 7][0]).map((q) => Math.min(255, Math.round(q * lit)));
+          bestZ = z; best = 'rgb(' + rgb.join(',') + ')';
+        }
+        grid[py].push(best);
+      }
+    }
+    return grid;
+  }
+  function prismSprite(f) {
+    if (!prismFrames[f]) {
+      const grid = prismGrid(f);
+      prismFrames[f] = makeSprite((x, y) => y >= 0 && y < PX && x >= 0 && x < PX && grid[y][x] != null, (x, y) => grid[y][x], '#ffffff');
+    }
+    return prismFrames[f];
+  }
+  function getSprite(gem, time) {
+    if (gem.kind === 'prism') return prismSprite(Math.floor((time || 0) / 70) % PRISM_FRAMES);
+    const k = gem.kind + ':' + gem.color;
+    if (sprites[k]) return sprites[k];
+    let s;
+    if (gem.kind === 'wild') s = makeSprite(mask(1), (xx, yy) => PAL[(xx + yy) % 7][0], '#1a1030');
+    else if (gem.kind === 'coal') {
+      s = makeSprite((xx, yy) => { if (xx < 0 || yy < 0 || xx >= PX || yy >= PX) return false; const dx = xx - 5.5, dy = yy - 6; return dx * dx * 0.8 + dy * dy <= 22; },
+        (xx, yy) => ((xx * 7 + yy * 13) % 5 === 0 ? '#6a6577' : '#2e2a38'), '#0d0b12');
+    } else {
+      const pal = PAL[gem.color];
+      s = makeSprite(mask(gem.color), shade(pal), gem.kind === 'gold' ? '#ffd23f' : pal[2]);
+      decorate(s, gem.kind);
+    }
+    sprites[k] = s;
+    return s;
+  }
+
+  function init(canvas) { cv = canvas; g = cv.getContext('2d'); resize(cell); }
+  function resize(px) {
+    cell = px;
+    dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(N * cell * dpr);
+    cv.height = cv.width;
+    cv.style.width = cv.style.height = N * cell + 'px';
+    g.imageSmoothingEnabled = false;
+  }
+  function cellPx() { return cell; }
+  function cellAt(clientX, clientY) {
+    const rect = cv.getBoundingClientRect();
+    const c = Math.floor((clientX - rect.left - cv.clientLeft) / cell);
+    const r = Math.floor((clientY - rect.top - cv.clientTop) / cell);
+    return r >= 0 && c >= 0 && r < N && c < N ? { r: r, c: c } : null;
+  }
+  function cellCenter(r, c) {
+    return { x: cv.offsetLeft + cv.clientLeft + (c + 0.5) * cell, y: cv.offsetTop + cv.clientTop + (r + 0.5) * cell };
+  }
+  function cellRect(r, c) {
+    const rect = cv.getBoundingClientRect();
+    const left = rect.left + cv.clientLeft + c * cell, top = rect.top + cv.clientTop + r * cell;
+    return { left: left, top: top, width: cell, height: cell, right: left + cell, bottom: top + cell };
+  }
+  function shake(m) { shakeMag = Math.min(14, Math.max(shakeMag, m)); }
+  function burst(r, c, gem) {
+    const col = gem.color != null ? PAL[gem.color][0] : gem.kind === 'coal' ? '#6a6577' : '#ffffff';
+    for (let i = 0; i < 8; i++) {
+      const a = Math.random() * Math.PI * 2, sp = 0.04 + Math.random() * 0.08;
+      particles.push({ x: c + 0.5, y: r + 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 0.05, life: 1, col: col });
+    }
+  }
+  function flashCells(cells, kind) { flashes.push({ cells: cells, t: 1, col: kind === 'supernova' ? '#fff6c2' : kind === 'bomb' ? '#ff8c42' : kind === 'star' ? '#ffffff' : '#ff6bd6' }); }
+  function pulseTile(r, c) { pulses[r * N + c] = 1; }
+  function colorHex(k) { return PAL[k] ? PAL[k][0] : '#ffffff'; }
+
+  function drawGem(sp, time) {
+    const img = getSprite(sp.gem, time), s = cell * 0.84 * sp.s, cx = (sp.x + 0.5) * cell, cy = (sp.y + 0.5) * cell;
+    g.globalAlpha = Math.max(0, Math.min(1, sp.a));
+    g.drawImage(img, Math.round(cx - s / 2), Math.round(cy - s / 2), Math.round(s), Math.round(s));
+    if (sp.gem.kind === 'shiny') {
+      const pts = [[1, 1], [10, 2], [2, 9], [9, 10]], q = pts[Math.floor(time / 180 + sp.gem.id) % 4], p = s / 12;
+      g.fillStyle = '#ffffff';
+      g.fillRect(cx - s / 2 + q[0] * p, cy - s / 2 + q[1] * p, p * 1.5, p * 1.5);
+    }
+    g.globalAlpha = 1;
+  }
+  function frame(st) {
+    if (!g) return;
+    const W = N * cell, b = st.board;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, W);
+    let ox = 0, oy = 0;
+    if (shakeMag > 0.3) { ox = (Math.random() - 0.5) * shakeMag; oy = (Math.random() - 0.5) * shakeMag; shakeMag *= 0.86; } else shakeMag = 0;
+    g.save();
+    g.translate(ox, oy);
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      g.fillStyle = (r + c) % 2 ? '#24183c' : '#2c1f4a';
+      g.fillRect(c * cell, r * cell, cell, cell);
+    }
+    g.font = Math.max(8, Math.floor(cell / 5)) + 'px "Press Start 2P", monospace';
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const id = b.tiles[r][c];
+      if (!id) continue;
+      const d = GF.Tiles.DEFS[id], col = TILE_COL[id], k = r * N + c, p = pulses[k] || 0;
+      g.globalAlpha = 0.22 + p * 0.5; g.fillStyle = col; g.fillRect(c * cell, r * cell, cell, cell);
+      g.globalAlpha = 1;
+      const lw = Math.max(2, Math.floor(cell / 16));
+      g.strokeStyle = col; g.lineWidth = lw;
+      g.strokeRect(c * cell + lw / 2 + 1, r * cell + lw / 2 + 1, cell - lw - 2, cell - lw - 2);
+      g.fillStyle = col;
+      g.fillText(d.icon, c * cell + 4, (r + 1) * cell - 4);
+      if (d.period) {
+        const t = String(d.period - b.tileState[r][c]);
+        g.fillText(t, (c + 1) * cell - 4 - g.measureText(t).width, r * cell + 4 + Math.floor(cell / 5));
+      }
+      if (p) pulses[k] = Math.max(0, p - 0.05);
+    }
+    if (st.selected) {
+      g.strokeStyle = '#ffd23f'; g.lineWidth = 3;
+      g.strokeRect(st.selected.c * cell + 2, st.selected.r * cell + 2, cell - 4, cell - 4);
+    }
+    const D = st.display.cells;
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const sp = D[r][c];
+      if (sp && sp.a > 0 && sp.s > 0) drawGem(sp, st.time || 0);
+    }
+    for (let i = flashes.length - 1; i >= 0; i--) {
+      const f = flashes[i];
+      g.globalAlpha = Math.max(0, f.t * 0.6); g.fillStyle = f.col;
+      for (const [r, c] of f.cells) g.fillRect(c * cell, r * cell, cell, cell);
+      f.t -= 0.08;
+      if (f.t <= 0) flashes.splice(i, 1);
+    }
+    g.globalAlpha = 1;
+    const ps = Math.max(2, Math.floor(cell / 10));
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.006; p.life -= 0.03;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      g.globalAlpha = p.life; g.fillStyle = p.col;
+      g.fillRect(p.x * cell - ps / 2, p.y * cell - ps / 2, ps, ps);
+    }
+    g.globalAlpha = 1;
+    if (st.placing) {
+      g.strokeStyle = 'rgba(255,210,63,0.5)'; g.setLineDash([4, 4]); g.lineWidth = 2;
+      for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) g.strokeRect(c * cell + 3, r * cell + 3, cell - 6, cell - 6);
+      g.setLineDash([]);
+    }
+    g.restore();
+  }
+
+  function maskCount(shape) { const f = mask(shape); let n = 0; for (let y = 0; y < PX; y++) for (let x = 0; x < PX; x++) if (f(x, y)) n++; return n; }
+
+  GF.Render = { init, resize, cellPx, cellAt, cellCenter, cellRect, shake, burst, flashCells, pulseTile, colorHex, frame, PAL, TILE_COL, _debug: { maskCount: maskCount, prismFrameData: (f) => prismSprite(f).toDataURL(), PRISM_FRAMES: PRISM_FRAMES } };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- animator.js
+(function (GF) {
+  'use strict';
+  const N = GF.C.SIZE;
+  const tweens = [];
+  const display = { cells: Array.from({ length: N }, () => Array(N).fill(null)) };
+  const Anim = { speed: 1, display: display };
+
+  function sprite(gem, x, y) { return { gem: { id: gem.id, kind: gem.kind, color: gem.color }, x: x, y: y, s: 1, a: 1 }; }
+  function tween(obj, to, ms, ease) {
+    return new Promise((res) => {
+      const from = {};
+      for (const k in to) from[k] = obj[k];
+      tweens.push({ obj: obj, from: from, to: to, t0: performance.now(), ms: Math.max(1, ms / Anim.speed), ease: ease || 'out', res: res });
+    });
+  }
+  function update(now) {
+    for (let i = tweens.length - 1; i >= 0; i--) {
+      const tw = tweens[i];
+      const p = Math.min(1, (now - tw.t0) / tw.ms);
+      const e = tw.ease === 'in' ? p * p : 1 - (1 - p) * (1 - p);
+      for (const k in tw.to) tw.obj[k] = tw.from[k] + (tw.to[k] - tw.from[k]) * e;
+      if (p >= 1) { tweens.splice(i, 1); tw.res(); }
+    }
+  }
+  function wait(ms) { return new Promise((r) => setTimeout(r, ms / Anim.speed)); }
+  function syncCells(cells) {
+    while (tweens.length) tweens.pop().res();
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) display.cells[r][c] = cells[r][c] ? sprite(cells[r][c], c, r) : null;
+  }
+  function sync(board) { syncCells(board.cells); }
+  async function bump(a, b) {
+    const A = display.cells[a.r] && display.cells[a.r][a.c];
+    if (!A) return;
+    await tween(A, { x: a.c + (b.c - a.c) * 0.3, y: a.r + (b.r - a.r) * 0.3 }, 70);
+    await tween(A, { x: a.c, y: a.r }, 70);
+  }
+
+  async function play(tl, H) {
+    const D = display.cells;
+    for (const s of tl) {
+      switch (s.t) {
+        case 'swap': {
+          const A = D[s.a.r][s.a.c], B = D[s.b.r][s.b.c];
+          D[s.a.r][s.a.c] = B; D[s.b.r][s.b.c] = A;
+          await Promise.all([A && tween(A, { x: s.b.c, y: s.b.r }, 140), B && tween(B, { x: s.a.c, y: s.a.r }, 140)]);
+          break;
+        }
+        case 'match': break;
+        case 'cascade': H.cascade(s.level); break;
+        case 'special':
+          if (s.kind === 'supernova') { GF.Audio.boom(); GF.Audio.sweep(); }
+          else if (s.kind === 'bomb') GF.Audio.boom(); else if (s.kind === 'star') GF.Audio.sweep(); else GF.Audio.chord();
+          GF.Render.flashCells(s.cells, s.kind);
+          GF.Render.shake(s.kind === 'supernova' ? 14 : s.kind === 'bomb' ? 10 : 6);
+          await wait(140);
+          break;
+        case 'clear': {
+          GF.Audio.pop(s.level);
+          const ps = [];
+          for (const c of s.cells) {
+            const sp = D[c.r][c.c];
+            if (sp) { GF.Render.burst(c.r, c.c, sp.gem); ps.push(tween(sp, { s: 0, a: 0 }, 180)); }
+            H.float(c.r, c.c, '+' + GF.C.fmt(c.v), '');
+          }
+          H.setMovePoints(s.total, s.level);
+          GF.Render.shake(Math.min(8, s.cells.length / 2));
+          await Promise.all(ps);
+          for (const c of s.cells) D[c.r][c.c] = null;
+          break;
+        }
+        case 'money': GF.Audio.ching(); H.float(s.r, s.c, '+$' + s.money, 'money'); H.money(); await wait(60); break;
+        case 'perk':
+          H.perkFire(s);
+          if (s.mul) GF.Audio.mult(); else GF.Audio.tick(s.slot);
+          if (s.money) GF.Audio.ching();
+          H.setMovePoints(s.total);
+          await wait(s.mul ? 420 : 170);
+          break;
+        case 'create': {
+          const sp = sprite(s.gem, s.c, s.r); sp.s = 0;
+          D[s.r][s.c] = sp;
+          await tween(sp, { s: 1 }, 150);
+          break;
+        }
+        case 'fall': {
+          const ps = [];
+          const moved = s.moves.map((m) => [m, D[m.from[0]][m.from[1]]]);
+          for (const [m] of moved) D[m.from[0]][m.from[1]] = null;
+          for (const [m, sp] of moved) {
+            if (!sp) continue;
+            D[m.to[0]][m.to[1]] = sp;
+            ps.push(tween(sp, { y: m.to[0] }, 80 + 45 * (m.to[0] - m.from[0]), 'in'));
+          }
+          for (const n of s.spawns) {
+            const sp = sprite(n.gem, n.c, n.r - n.drop);
+            D[n.r][n.c] = sp;
+            ps.push(tween(sp, { y: n.r }, 80 + 45 * n.drop, 'in'));
+          }
+          await Promise.all(ps);
+          break;
+        }
+        case 'tile':
+          GF.Render.pulseTile(s.r, s.c);
+          if (s.gem) { const sp = sprite(s.gem, s.c, s.r); sp.s = 1.5; D[s.r][s.c] = sp; tween(sp, { s: 1 }, 180); }
+          if (s.moves) { H.float(s.r, s.c, '+1 MOVE', 'money'); H.moves(); }
+          await wait(110);
+          break;
+        case 'end': await H.endPoints(s.points); break;
+        case 'shuffle': H.banner('NO MOVES - SHUFFLE'); await wait(250); syncCells(s.cells); await wait(250); break;
+        default: break;
+      }
+    }
+  }
+
+  Object.assign(Anim, { tween, update, wait, sync, syncCells, bump, play });
+  GF.Anim = Anim;
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- ui.js
+(function (GF) {
+  'use strict';
+  if (typeof document === 'undefined') return;
+  const C = GF.C;
+  const $ = (id) => document.getElementById(id);
+  const SPEEDS = [1, 2, 4];
+  const GEM_INFO = {
+    normal: 'A plain gem.',
+    bomb: 'BOMB: clears a 3x3 area when cleared.',
+    star: 'STAR: clears its whole row and column when cleared.',
+    prism: 'PRISM: swap it with any gem to clear every gem of that color.',
+    gold: 'GOLD: +$1 when cleared.',
+    shiny: 'SHINY: worth x2 points.',
+    wild: 'WILD: matches with every color.',
+    supernova: 'SUPERNOVA: clears its row, its column and a 3x3 area around it.',
+    coal: 'COAL: never matches. Only Bombs and Stars can break it.',
+  };
+  const S = { run: null, busy: false, selected: null, placing: null, shownScore: 0, speedIdx: 0, crt: true };
+
+  const fmt = (n) => GF.C.fmt(n);
+  const money = (n) => (n < 0 ? '-$' + -n : '$' + n);
+  function prefGet(k) { try { return localStorage.getItem('gemfactory.' + k); } catch (e) { return null; } }
+  function prefSet(k, v) { try { localStorage.setItem('gemfactory.' + k, v); } catch (e) { /* ignore */ } }
+  function show(id) { ['screen-title', 'screen-game'].forEach((s) => $(s).classList.toggle('hidden', s !== id)); }
+
+  // ---------- feedback ----------
+  function spawnFloat(parent, x, y, text, cls) {
+    const el = document.createElement('div');
+    el.className = 'float ' + (cls || '');
+    el.textContent = text;
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+    parent.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+    setTimeout(() => el.remove(), 2000);
+  }
+  function restart(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+  function flash() { restart($('flash'), 'on'); }
+  function big(t) { $('big').textContent = t; restart($('big'), 'on'); }
+  function toast(t) { $('toast').textContent = t; restart($('toast'), 'on'); }
+
+  const hooks = {
+    float(r, c, text, cls) { const p = GF.Render.cellCenter(r, c); spawnFloat($('fx'), p.x, p.y, text, cls); },
+    setMovePoints(total, level) {
+      const el = $('move-points');
+      el.textContent = fmt(total);
+      if (level) el.style.setProperty('--mp-scale', String(Math.min(2, 1 + (level - 1) * 0.2)));
+    },
+    cascade(level) { toast('CASCADE x' + level); },
+    perkFire(s) {
+      const card = $('perk-row').children[s.slot];
+      if (card) {
+        restart(card, 'fire');
+        const r = card.getBoundingClientRect(), a = $('app').getBoundingClientRect();
+        const txt = s.mul ? 'x' + (Math.round(s.mul * 100) / 100) : s.add ? '+' + fmt(s.add) : s.money ? '+$' + s.money
+          : s.sellBonus ? '+$' + s.sellBonus + ' SELL' : s.store ? 'STORED' : s.clear ? 'ZAP!' : '!';
+        spawnFloat($('app'), r.left - a.left + r.width / 2, r.top - a.top, txt, s.mul ? 'mul' : (s.money || s.sellBonus) ? 'money' : '');
+      }
+      if (s.mul) { flash(); big('x' + (Math.round(s.mul * 100) / 100)); }
+      if (s.money) refreshHud();
+    },
+    money() { refreshHud(); },
+    moves() { refreshHud(); },
+    async endPoints(points) {
+      const el = $('move-points');
+      el.textContent = fmt(points);
+      el.classList.add('fly');
+      await GF.Anim.wait(320);
+      el.classList.remove('fly');
+      el.textContent = '';
+      el.style.setProperty('--mp-scale', '1');
+      S.shownScore += points;
+      refreshHud();
+    },
+    banner(t) { toast(t); },
+  };
+
+  // ---------- rendering of DOM parts ----------
+  function refreshHud() {
+    const run = S.run;
+    if (!run) return;
+    const playing = S.busy || run.phase === 'play' || run.phase === 'won' || run.phase === 'over';
+    const round = run.phase === 'victory' ? C.ROUNDS : run.round;
+    const target = GF.Run.target(round);
+    const score = S.busy ? S.shownScore : playing ? run.score : 0;
+    $('hud-round').textContent = round + (run.endless ? '' : '/' + C.ROUNDS);
+    $('hud-target').textContent = fmt(target);
+    $('hud-score').textContent = fmt(score);
+    $('bar-fill').style.width = Math.min(100, (score / target) * 100) + '%';
+    $('hud-moves').textContent = playing ? run.movesLeft : nextRoundMoves(run);
+    $('hud-money').textContent = money(run.money);
+    $('hud-money').classList.toggle('neg', run.money < 0);
+  }
+  function nextRoundMoves(run) {
+    let m = C.START_MOVES + run.extraMoves;
+    for (const p of run.perks) {
+      if (p.id === 'glass_cannon') m -= 5;
+      else if (p.id === 'overworked') m += 1;
+    }
+    return Math.max(1, m);
+  }
+  function perkDesc(d, inst) {
+    let s = d.desc;
+    if (inst.state.color != null && ['jewel_collector', 'money_tree', 'monochrome'].indexOf(d.id) >= 0) {
+      s += ' <b style="color:' + GF.Render.colorHex(inst.state.color) + '">[' + C.COLORS[inst.state.color].toUpperCase() + ']</b>';
+    }
+    if (inst.state.acc) s += ' <b>(' + fmt(inst.state.acc) + ')</b>';
+    if (inst.sellBonus) s += ' <i>sell +$' + inst.sellBonus + '</i>';
+    return s;
+  }
+  function renderPerks() {
+    const run = S.run, row = $('perk-row');
+    row.innerHTML = '';
+    for (let i = 0; i < run.perkSlots; i++) {
+      const inst = run.perks[i];
+      const el = document.createElement('div');
+      if (!inst) { el.className = 'perk empty'; el.textContent = 'EMPTY'; row.appendChild(el); continue; }
+      const d = GF.Perks.byId[inst.id];
+      el.className = 'perk ' + d.rarity;
+      el.dataset.i = String(i);
+      el.innerHTML = '<div class="pn">' + d.name + '</div><div class="pd">' + perkDesc(d, inst) + '</div>';
+      bindPerkCard(el, i);
+      row.appendChild(el);
+    }
+  }
+  function cardEl(cls, html) { const el = document.createElement('div'); el.className = cls; el.innerHTML = html; return el; }
+  function renderShop() {
+    const run = S.run, s = run && run.shop;
+    if (!s) return;
+    const can = (p) => GF.Shop.canAfford(run, p);
+    const P = $('shop-perks'); P.innerHTML = '';
+    s.perks.forEach((id, i) => {
+      if (!id) { P.appendChild(cardEl('card sold', '<div class="cn">SOLD</div>')); return; }
+      const d = GF.Perks.byId[id], pp = GF.Shop.perkPrice(run, id);
+      const el = cardEl('card ' + d.rarity, '<div class="cn">' + d.name + '</div><div class="cd">' + d.desc + '</div><div class="cp">$' + pp + '</div>');
+      if (!can(pp) || run.perks.length >= run.perkSlots) el.classList.add('off');
+      el.onclick = () => act(GF.Shop.buyPerk(run, i));
+      P.appendChild(el);
+    });
+    const T = $('shop-tiles'); T.innerHTML = '';
+    s.tiles.forEach((id, i) => {
+      if (!id) { T.appendChild(cardEl('card sold', '<div class="cn">SOLD</div>')); return; }
+      const d = GF.Tiles.DEFS[id], tp = GF.Shop.tilePrice(run, id);
+      const el = cardEl('card tile' + (S.placing === i ? ' picked' : ''),
+        '<div class="cn" style="color:' + GF.Render.TILE_COL[id] + '">[' + d.icon + '] ' + d.name + '</div><div class="cd">' + d.desc + '</div><div class="cp">$' + tp + '</div>');
+      if (!can(tp)) el.classList.add('off');
+      el.onclick = () => {
+        if (!can(tp)) { act({ ok: false, reason: 'money' }); return; }
+        S.placing = S.placing === i ? null : i;
+        if (document.body.classList.contains('mobile')) $('shop').classList.toggle('collapsed', S.placing != null);
+        renderShop();
+      };
+      T.appendChild(el);
+    });
+    const U = $('shop-upgrade'); U.innerHTML = '';
+    const up = s.upgrade;
+    if (!up) U.appendChild(cardEl('card sold', '<div class="cn">SOLD</div>'));
+    else {
+      const label = up.type === 'moves' ? '+1 MOVE / ROUND' : up.type === 'slot' ? '+1 PERK SLOT' : 'POLISH ' + C.COLORS[up.color].toUpperCase();
+      const desc = up.type === 'moves' ? 'Start every round with one more move.' : up.type === 'slot' ? 'Hold one more perk.' : '+5 points for every ' + C.COLORS[up.color] + ' gem. Stacks.';
+      const upp = GF.Shop.upgradePrice(run, up);
+      const el = cardEl('card upgrade', '<div class="cn">' + label + '</div><div class="cd">' + desc + '</div><div class="cp">$' + upp + '</div>');
+      if (!can(upp)) el.classList.add('off');
+      el.onclick = () => act(GF.Shop.buyUpgrade(run));
+      U.appendChild(el);
+    }
+    const rp = GF.Shop.rerollPrice(run);
+    $('btn-reroll').textContent = rp === 0 ? 'REROLL FREE' : 'REROLL $' + rp;
+    $('btn-reroll').disabled = !can(rp);
+    $('shop-hint').textContent = S.placing != null && s.tiles[S.placing]
+      ? 'Tap a board cell to place the ' + GF.Tiles.DEFS[s.tiles[S.placing]].name + '. ESC to cancel.'
+      : 'Tap a perk to see or sell it. Drag perks to reorder. Long-press or right-click a cell for info.';
+  }
+  function refresh() {
+    refreshHud();
+    if (!S.run) return;
+    if (!S.busy) renderPerks();
+    if (S.run.phase === 'shop') renderShop();
+  }
+  function act(r) {
+    if (r && r.ok) { GF.Audio.ching(); GF.Run.save(S.run); }
+    else {
+      GF.Audio.bad();
+      toast(r && r.reason === 'slots' ? 'NO FREE PERK SLOT' : r && r.reason === 'money' ? 'NOT ENOUGH MONEY' : r && r.reason === 'debt' ? 'PAY OFF DEBT FIRST' : 'CANNOT DO THAT');
+    }
+    refresh();
+  }
+
+  // ---------- tips & modal ----------
+  function showTip(rect, html, btns) {
+    const tip = $('tip');
+    tip.innerHTML = html;
+    tip.classList.remove('hidden');
+    (btns || []).forEach(([label, fn]) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.onclick = (e) => { e.stopPropagation(); hideTip(); fn(); };
+      tip.appendChild(b);
+    });
+    const a = $('app').getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const x = rect.left - a.left + rect.width / 2 - w / 2;
+    let y = rect.top - a.top - h - 8;
+    if (y < 8) y = rect.bottom - a.top + 8;
+    tip.style.left = Math.max(8, Math.min(a.width - w - 8, x)) + 'px';
+    tip.style.top = Math.max(8, y) + 'px';
+  }
+  function hideTip() { $('tip').classList.add('hidden'); }
+  function showPerkTip(el, i) {
+    const inst = S.run.perks[i];
+    if (!inst) return;
+    const d = GF.Perks.byId[inst.id];
+    const btns = [];
+    if (!S.busy) {
+      const mv = (to) => () => { hideTip(); if (GF.Shop.movePerk(S.run, i, to)) { if (S.run.phase === 'shop') GF.Run.save(S.run); refresh(); } };
+      if (i > 0) btns.push(['< MOVE', mv(i - 1)]);
+      if (i < S.run.perks.length - 1) btns.push(['MOVE >', mv(i + 1)]);
+      if (S.run.phase === 'shop') btns.push(['SELL ' + money(GF.Perks.sellValue(inst, S.run.perks)), () => act(GF.Shop.sellPerk(S.run, inst.uid))]);
+    }
+    showTip(el.getBoundingClientRect(), '<b class="' + d.rarity + '">' + d.name + '</b><small>' + d.rarity.toUpperCase() + '</small><p>' + perkDesc(d, inst) + '</p>', btns);
+  }
+  function showCellTip(cell) {
+    const run = S.run, g = run.board.cells[cell.r][cell.c], tile = run.board.tiles[cell.r][cell.c];
+    let html = '';
+    if (g) html += '<b>' + (g.kind === 'normal' ? C.COLORS[g.color].toUpperCase() + ' GEM' : g.kind.toUpperCase()) + '</b><p>' + GEM_INFO[g.kind] + '</p>';
+    if (tile) {
+      const d = GF.Tiles.DEFS[tile];
+      html += '<b>' + d.name.toUpperCase() + '</b><p>' + d.desc + (d.period ? ' (' + (d.period - run.board.tileState[cell.r][cell.c]) + ' moves left)' : '') + '</p>';
+    }
+    const btns = tile && run.phase === 'shop' ? [['REMOVE TILE', () => { GF.Shop.removeTile(run, cell.r, cell.c); GF.Run.save(run); refresh(); }]] : [];
+    if (html) showTip(GF.Render.cellRect(cell.r, cell.c), html, btns);
+  }
+  function modal(title, html, buttons) {
+    return new Promise((resolve) => {
+      $('modal-title').textContent = title;
+      $('modal-body').innerHTML = html;
+      const B = $('modal-btns');
+      B.innerHTML = '';
+      buttons.forEach(([label, val]) => {
+        const b = document.createElement('button');
+        b.textContent = label;
+        b.onclick = () => { $('modal').classList.add('hidden'); resolve(val); };
+        B.appendChild(b);
+      });
+      $('modal').classList.remove('hidden');
+    });
+  }
+
+  // ---------- input ----------
+  function bindPerkCard(el, i) {
+    el.addEventListener('pointerdown', (e) => {
+      if (S.busy) return;
+      e.preventDefault();
+      const sx = e.clientX, sy = e.clientY;
+      let dragging = false;
+      try { el.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      const move = (ev) => { if (!dragging && Math.hypot(ev.clientX - sx, ev.clientY - sy) > 8) { dragging = true; el.classList.add('dragging'); } };
+      const cleanup = () => {
+        el.removeEventListener('pointermove', move);
+        el.removeEventListener('pointerup', up);
+        el.removeEventListener('pointercancel', cancel);
+        el.classList.remove('dragging');
+      };
+      const cancel = () => cleanup();
+      const up = (ev) => {
+        cleanup();
+        if (!dragging) { showPerkTip(el, i); return; }
+        const target = document.elementFromPoint(ev.clientX, ev.clientY);
+        const card = target && target.closest('.perk[data-i]');
+        if (card && GF.Shop.movePerk(S.run, i, +card.dataset.i)) { if (S.run.phase === 'shop') GF.Run.save(S.run); refresh(); }
+      };
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', up);
+      el.addEventListener('pointercancel', cancel);
+    });
+  }
+  async function placeTile(cell) {
+    const run = S.run, idx = S.placing;
+    const existing = run.board.tiles[cell.r][cell.c];
+    if (existing) {
+      const ok = await modal('REPLACE TILE?', '<p>This cell already has a ' + GF.Tiles.DEFS[existing].name + '.</p>', [['REPLACE', true], ['CANCEL', false]]);
+      if (!ok) return;
+    }
+    S.placing = null;
+    $('shop').classList.remove('collapsed');
+    act(GF.Shop.buyTile(run, idx, cell.r, cell.c));
+    GF.Render.pulseTile(cell.r, cell.c);
+  }
+  function bindBoard() {
+    const cv = $('board');
+    let down = null, lp = null;
+    const clearLp = () => { if (lp) { clearTimeout(lp); lp = null; } };
+    cv.addEventListener('pointerdown', (e) => {
+      const run = S.run;
+      if (!run || S.busy) return;
+      const cell = GF.Render.cellAt(e.clientX, e.clientY);
+      if (!cell) return;
+      e.preventDefault();
+      if (S.placing != null) { placeTile(cell); return; }
+      if (run.phase !== 'play') { showCellTip(cell); return; }
+      down = { cell: cell, x: e.clientX, y: e.clientY };
+      try { cv.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      clearLp();
+      lp = setTimeout(() => { if (down) { showCellTip(down.cell); down = null; } }, 500);
+    });
+    cv.addEventListener('pointermove', (e) => {
+      if (!down || S.busy) return;
+      const dx = e.clientX - down.x, dy = e.clientY - down.y;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < GF.Render.cellPx() * 0.4) return;
+      clearLp();
+      const a = down.cell;
+      const b = Math.abs(dx) > Math.abs(dy) ? { r: a.r, c: a.c + Math.sign(dx) } : { r: a.r + Math.sign(dy), c: a.c };
+      down = null;
+      trySwap(a, b);
+    });
+    cv.addEventListener('pointerup', () => {
+      clearLp();
+      if (!down) return;
+      const cell = down.cell, sel = S.selected;
+      down = null;
+      if (sel && Math.abs(sel.r - cell.r) + Math.abs(sel.c - cell.c) === 1) trySwap(sel, cell);
+      else S.selected = sel && sel.r === cell.r && sel.c === cell.c ? null : cell;
+    });
+    cv.addEventListener('pointercancel', () => { clearLp(); down = null; });
+    cv.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const cell = GF.Render.cellAt(e.clientX, e.clientY);
+      if (cell && S.run) showCellTip(cell);
+    });
+  }
+
+  // ---------- flow ----------
+  function layout() {
+    const w = window.innerWidth, h = window.innerHeight, mobile = w < 760;
+    document.body.classList.toggle('mobile', mobile);
+    const shopOpen = S.run && S.run.phase === 'shop';
+    const availW = mobile ? w - 24 : w - 220 - (shopOpen ? 320 : 0) - 64;
+    const availH = mobile ? h - 330 : h - 190;
+    GF.Render.resize(Math.max(28, Math.min(72, Math.floor(Math.min(availW, availH) / 8))));
+  }
+  function toTitle() {
+    S.run = null; S.busy = false; S.placing = null; S.selected = null;
+    show('screen-title');
+    $('btn-continue').classList.toggle('hidden', !GF.Run.hasSave());
+  }
+  function newRun() {
+    const txt = $('seed-input').value.trim();
+    const seed = txt ? (/^\d+$/.test(txt) ? +txt : GF.RNG.hash(txt)) : undefined;
+    S.run = GF.Run.create(seed);
+    show('screen-game');
+    GF.Anim.sync(S.run.board);
+    enterShop();
+  }
+  function resume(run) {
+    S.run = run;
+    show('screen-game');
+    GF.Anim.sync(run.board);
+    if (run.phase === 'shop') enterShop();
+    else if (run.phase === 'victory') { layout(); refresh(); victory(); }
+    else { run.phase = 'play'; $('shop').classList.add('hidden'); layout(); refresh(); }
+  }
+  function enterShop() {
+    const run = S.run;
+    if (!run.shop) GF.Shop.open(run);
+    run.phase = 'shop';
+    $('shop').classList.remove('hidden', 'collapsed');
+    $('toast').classList.remove('on'); $('big').classList.remove('on');
+    GF.Run.save(run);
+    layout(); refresh();
+  }
+  function startRound() {
+    if (S.busy || !S.run || S.run.phase !== 'shop') return;
+    const run = S.run;
+    S.placing = null; run.shop = null; hideTip();
+    $('shop').classList.add('hidden');
+    const events = GF.Run.startRound(run);
+    GF.Anim.sync(run.board);
+    GF.Run.save(run);
+    layout(); refresh();
+    toast('ROUND ' + run.round);
+    events.forEach((e, i) => setTimeout(() => {
+      hooks.float(e.r, e.c, String(e.gem.kind).toUpperCase(), 'money');
+      GF.Render.pulseTile(e.r, e.c);
+    }, 300 + i * 150));
+  }
+  async function trySwap(a, b) {
+    const run = S.run;
+    if (S.busy || !run || run.phase !== 'play') return;
+    S.selected = null;
+    const before = run.score;
+    const res = GF.Run.doMove(run, a, b);
+    if (!res) { GF.Audio.bad(); GF.Anim.bump(a, b); return; }
+    S.busy = true;
+    S.shownScore = before;
+    refreshHud();
+    try { await GF.Anim.play(res.timeline, hooks); } catch (e) { console.error(e); }
+    if (res.insured) toast('INSURANCE!');
+    GF.Anim.sync(run.board);
+    S.busy = false;
+    refresh();
+    if (run.phase === 'won') await roundWon();
+    else if (run.phase === 'over') await gameOver();
+  }
+  async function roundWon() {
+    const run = S.run;
+    GF.Audio.win();
+    const info = GF.Run.finishRound(run);
+    info.steps.forEach((s) => hooks.perkFire(s));
+    refresh();
+    await modal('ROUND CLEAR!', '<p>Base income <b>$' + info.base + '</b></p><p>Leftover moves <b>' + info.leftover + ' x $1</b></p>' + (info.perkIncome ? '<p>Perks <b>' + (info.perkIncome >= 0 ? '+$' : '-$') + Math.abs(info.perkIncome) + '</b></p>' : '') + '<p class="big">+$' + info.income + '</p>', [['CONTINUE', true]]);
+    if (run.phase === 'victory') { GF.Run.save(run); await victory(); } else enterShop();
+  }
+  async function victory() {
+    const run = S.run;
+    const v = await modal('VICTORY!', '<p>You beat all ' + C.ROUNDS + ' rounds.</p><p>Best move <b>' + fmt(run.stats.bestMove) + '</b></p><p>Seed <b>' + run.seed + '</b></p>', [['ENDLESS', 'endless'], ['MENU', 'menu']]);
+    if (v === 'endless') { GF.Run.continueEndless(run); enterShop(); } else { GF.Run.clearSave(); toTitle(); }
+  }
+  async function gameOver() {
+    const run = S.run;
+    GF.Audio.lose();
+    GF.Run.clearSave();
+    await modal('GAME OVER', '<p>Reached round <b>' + run.round + '</b>' + (run.endless ? ' (endless)' : '') + '</p><p>Score <b>' + fmt(run.score) + ' / ' + fmt(GF.Run.target(run.round)) + '</b></p><p>Best move <b>' + fmt(run.stats.bestMove) + '</b></p><p>Seed <b>' + run.seed + '</b></p>', [['MENU', true]]);
+    toTitle();
+  }
+  function updateToggles() {
+    const m = GF.Audio.isMuted();
+    $('btn-mute').textContent = m ? 'SND OFF' : 'SND ON';
+    $('btn-mute-t').textContent = 'SOUND: ' + (m ? 'OFF' : 'ON');
+    $('btn-crt').textContent = S.crt ? 'CRT ON' : 'CRT OFF';
+    $('btn-crt-t').textContent = 'CRT: ' + (S.crt ? 'ON' : 'OFF');
+    document.body.classList.toggle('crt', S.crt);
+    $('btn-speed').textContent = SPEEDS[S.speedIdx] + 'x';
+  }
+  function loop(now) {
+    GF.Anim.update(now);
+    if (S.run) GF.Render.frame({ display: GF.Anim.display, board: S.run.board, selected: S.selected, placing: S.placing != null, time: now });
+    requestAnimationFrame(loop);
+  }
+  function findMove() {
+    const run = S.run;
+    if (!run) return null;
+    const f = GF.Perks.flags(run.perks), cols = GF.Run.colors(run);
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+      if (c < 7 && GF.Board.canSwap(run.board, { r: r, c: c }, { r: r, c: c + 1 }, f, cols)) return { a: { r: r, c: c }, b: { r: r, c: c + 1 } };
+      if (r < 7 && GF.Board.canSwap(run.board, { r: r, c: c }, { r: r + 1, c: c }, f, cols)) return { a: { r: r, c: c }, b: { r: r + 1, c: c } };
+    }
+    return null;
+  }
+  function state() {
+    const r = S.run;
+    return r ? { phase: r.phase, busy: S.busy, movesLeft: r.movesLeft, score: r.score, round: r.round, money: r.money } : { phase: 'title', busy: S.busy };
+  }
+  function init() {
+    GF.Render.init($('board'));
+    S.crt = prefGet('crt') !== '0';
+    S.speedIdx = (+(prefGet('speed') || 0)) % 3;
+    GF.Anim.speed = SPEEDS[S.speedIdx];
+    updateToggles();
+    $('btn-new').onclick = () => { GF.Audio.unlock(); newRun(); };
+    $('btn-continue').onclick = () => { GF.Audio.unlock(); const r = GF.Run.load(); if (r) resume(r); else toTitle(); };
+    [$('btn-mute'), $('btn-mute-t')].forEach((b) => { b.onclick = () => { GF.Audio.setMuted(!GF.Audio.isMuted()); updateToggles(); }; });
+    [$('btn-crt'), $('btn-crt-t')].forEach((b) => { b.onclick = () => { S.crt = !S.crt; prefSet('crt', S.crt ? '1' : '0'); updateToggles(); }; });
+    $('btn-speed').onclick = () => { S.speedIdx = (S.speedIdx + 1) % 3; GF.Anim.speed = SPEEDS[S.speedIdx]; prefSet('speed', String(S.speedIdx)); updateToggles(); };
+    $('btn-reroll').onclick = () => { S.placing = null; $('shop').classList.remove('collapsed'); act(GF.Shop.reroll(S.run)); };
+    $('btn-next').onclick = () => startRound();
+    $('btn-shop-toggle').onclick = () => $('shop').classList.toggle('collapsed');
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { S.placing = null; hideTip(); $('shop').classList.remove('collapsed'); renderShop(); } });
+    document.addEventListener('pointerdown', (e) => { if (!$('tip').contains(e.target)) hideTip(); }, true);
+    bindBoard();
+    window.addEventListener('resize', layout);
+    layout();
+    toTitle();
+    requestAnimationFrame(loop);
+  }
+
+  GF.UI = { init: init, state: state, findMove: findMove, trySwap: trySwap, debugRun: () => S.run };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+</script>
+
+</body>
+</html>
