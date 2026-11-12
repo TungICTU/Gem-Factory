@@ -31,8 +31,9 @@ input { font: inherit; font-size: 10px; background: #000; color: var(--ink); bor
 .seed { font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
 .toggles { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 
-#screen-game { display: grid; grid-template-columns: 220px auto auto; grid-template-areas: "hud board shop" "hud perks shop"; gap: 12px 16px; padding: 12px; align-items: start; max-width: 100vw; max-height: 100%; }
-#hud { grid-area: hud; background: var(--panel); border: 3px solid var(--ink); padding: 12px; display: flex; flex-direction: column; gap: 14px; box-shadow: 4px 4px 0 #000; }
+#screen-game { display: grid; grid-template-columns: 220px auto auto; grid-template-areas: "hud perks shop" "hud board shop"; gap: 12px 16px; padding: 12px; align-items: start; max-width: 100vw; max-height: 100%; }
+#left-col { grid-area: hud; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+#hud { background: var(--panel); border: 3px solid var(--ink); padding: 12px; display: flex; flex-direction: column; gap: 14px; box-shadow: 4px 4px 0 #000; }
 .stat label { display: block; color: var(--muted); font-size: 8px; margin-bottom: 6px; }
 .stat .v { font-size: 15px; }
 .money { color: var(--accent); }
@@ -41,21 +42,12 @@ input { font: inherit; font-size: 10px; background: #000; color: var(--ink); bor
 #bar-fill { height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--good) 0 6px, #2fb36b 6px 12px); transition: width .25s steps(6); }
 .hud-btns { display: flex; flex-wrap: wrap; gap: 6px; }
 .hud-btns button { font-size: 8px; padding: 6px; }
-#board-wrap { grid-area: board; position: relative; padding-top: 30px; }
+#board-wrap { grid-area: board; position: relative; padding-top: 30px; width: max-content; }
 canvas#board { display: block; image-rendering: pixelated; border: 3px solid var(--ink); box-shadow: 4px 4px 0 #000; background: #24183c; touch-action: none; }
 #move-points { position: absolute; left: 50%; top: 0; transform: translateX(-50%) scale(var(--mp-scale, 1)); font-size: 18px; color: var(--accent); text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; pointer-events: none; white-space: nowrap; transition: transform .12s; z-index: 5; }
 #move-points.fly { animation: fly .32s ease-in forwards; }
 @keyframes fly { to { transform: translate(-50%, -30px) scale(1.6); opacity: 0; } }
 #fx { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
-#perk-row { grid-area: perks; display: flex; gap: 8px; overflow-x: auto; padding: 4px 4px 10px; max-width: 100%; }
-.perk { flex: 0 0 auto; width: 96px; height: 104px; background: var(--panel2); border: 3px solid var(--common); padding: 6px; font-size: 7px; line-height: 1.5; overflow: hidden; box-shadow: 3px 3px 0 #000; cursor: grab; touch-action: pan-x; position: relative; }
-.perk.uncommon { border-color: var(--uncommon); }
-.perk.rare { border-color: var(--rare); }
-.perk .pn { font-size: 8px; color: var(--accent); margin-bottom: 6px; line-height: 1.3; }
-.perk.empty { border-style: dashed; border-color: #4a3b70; color: #4a3b70; display: flex; align-items: center; justify-content: center; cursor: default; box-shadow: none; touch-action: pan-x; }
-.perk.fire { animation: fire .35s steps(4); }
-@keyframes fire { 40% { transform: translateY(-12px) scale(1.1); filter: brightness(1.8); } }
-.perk.dragging { opacity: .5; }
 
 #shop { grid-area: shop; width: 300px; background: var(--panel); border: 3px solid var(--accent); padding: 12px; box-shadow: 4px 4px 0 #000; max-height: calc(100dvh - 24px); overflow-y: auto; }
 #shop h2 { margin: 0 0 10px; font-size: 16px; color: var(--accent); display: flex; justify-content: space-between; align-items: center; }
@@ -73,8 +65,8 @@ canvas#board { display: block; image-rendering: pixelated; border: 3px solid var
 .card.sold { opacity: .25; cursor: default; align-items: center; justify-content: center; }
 .card.picked { outline: 3px dashed var(--accent); outline-offset: 2px; }
 .card:hover:not(.sold) { transform: translateY(-3px); }
-.shop-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 #btn-next { background: #1f6b43; }
+#btn-next:hover:not(:disabled) { filter: brightness(1.25); }
 #shop-hint { font-size: 7px; line-height: 1.6; color: var(--muted); margin: 10px 0 0; }
 
 .float { position: absolute; transform: translate(-50%, -50%); pointer-events: none; font-size: 10px; color: #fff; text-shadow: 2px 2px 0 #000; animation: floatUp .8s ease-out forwards; white-space: nowrap; z-index: 20; }
@@ -87,15 +79,20 @@ canvas#board { display: block; image-rendering: pixelated; border: 3px solid var
 #big, #toast { position: fixed; left: 50%; pointer-events: none; opacity: 0; z-index: 31; white-space: nowrap; text-shadow: 4px 4px 0 #000; }
 #big { top: 40%; font-size: 48px; color: var(--bad); }
 #toast { top: 18%; font-size: 16px; color: var(--accent); }
-#big.on, #toast.on { animation: pop .7s; }
+#board-banner { position: absolute; left: 50%; top: calc(var(--board-h, 400px) / 2); pointer-events: none; opacity: 0; z-index: 31; white-space: nowrap; font-size: 28px; color: var(--accent); text-shadow: 4px 4px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; }
+#big.on, #toast.on, #board-banner.on { animation: pop .7s; }
 @keyframes pop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); } 25% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); } 75% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1); } }
 #modal { position: fixed; inset: 0; background: rgba(8, 4, 16, .75); display: flex; align-items: center; justify-content: center; z-index: 35; }
 #modal .box { background: var(--panel); border: 3px solid var(--accent); box-shadow: 6px 6px 0 #000; padding: 20px; min-width: 260px; max-width: calc(100vw - 32px); text-align: center; }
 #modal h2 { color: var(--accent); margin: 0 0 14px; font-size: 18px; }
 #modal p { font-size: 10px; line-height: 1.8; margin: 6px 0; }
 #modal p.big { font-size: 20px; color: var(--good); }
+#modal .payout { min-width: 300px; text-align: left; font-size: 10px; line-height: 2; }
+.payout .row { display: flex; gap: 6px; align-items: baseline; margin: 6px 0; }
+.payout .row i { flex: 1; border-bottom: 2px dotted #4a3b70; }
+.payout .row b { color: var(--accent); }
 #modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
-#tip { position: absolute; z-index: 32; width: 220px; background: #0d0818; border: 3px solid var(--ink); padding: 10px; font-size: 8px; line-height: 1.6; box-shadow: 4px 4px 0 #000; }
+#tip { position: absolute; z-index: 36; width: 220px; background: #0d0818; border: 3px solid var(--ink); padding: 10px; font-size: 8px; line-height: 1.6; box-shadow: 4px 4px 0 #000; }
 #tip b { display: block; color: var(--accent); margin-bottom: 4px; }
 #tip b.uncommon { color: var(--uncommon); }
 #tip b.rare { color: var(--rare); }
@@ -109,15 +106,110 @@ body.crt #app { text-shadow: 1px 0 rgba(255, 0, 80, .35), -1px 0 rgba(0, 200, 25
 body.crt canvas#board { filter: saturate(1.2) contrast(1.08); }
 @keyframes flicker { 0%, 100% { opacity: 1; } 47% { opacity: .92; } 48% { opacity: 1; } }
 
-body.mobile #screen-game { grid-template-columns: 1fr; grid-template-areas: "hud" "board" "perks"; padding: 8px; gap: 8px; justify-items: center; }
-body.mobile #hud { flex-direction: row; flex-wrap: wrap; gap: 8px 14px; padding: 8px; width: 100%; }
+body.mobile #screen-game { grid-template-columns: 1fr; grid-template-areas: "hud" "perks" "cp" "board"; padding: 8px; gap: 8px; justify-items: center; }
+body.mobile #left-col { display: contents; }
+body.mobile #hud { grid-area: hud; flex-direction: row; flex-wrap: wrap; gap: 8px 14px; padding: 8px; width: 100%; }
 body.mobile .stat .v { font-size: 11px; }
 body.mobile #bar { width: 80px; }
-body.mobile #perk-row { width: 100%; }
+body.mobile #perk-frame { width: 100%; }
 body.mobile #shop { position: fixed; left: 0; right: 0; bottom: 0; width: auto; max-height: 55vh; z-index: 25; border-width: 3px 0 0; }
 body.mobile #shop.collapsed { max-height: 48px; overflow: hidden; }
 body.mobile #btn-shop-toggle { display: inline-block; }
 @media (prefers-reduced-motion: reduce) { .logo, body.crt #crt { animation: none; } }
+
+#moves-bar { position: relative; height: 22px; margin-top: 8px; border: 3px solid var(--ink); background: #000; box-shadow: 4px 4px 0 #000; }
+#moves-cells { position: absolute; inset: 2px; display: flex; gap: 2px; }
+#moves-cells.tight { gap: 0; }
+.mcell { flex: 1; background: #1b1430; }
+.mcell.on { background: var(--good); }
+#moves-bar.warn .mcell.on { background: var(--accent); }
+#moves-bar.danger .mcell.on { background: var(--bad); animation: blink .6s steps(2) infinite; }
+.mcell.new { animation: newcell .6s; }
+@keyframes blink { 50% { filter: brightness(1.6); } }
+@keyframes newcell { from { background: #fff; } }
+#moves-text { display: inline-block; background: rgba(0,0,0,.65); padding: 2px 6px; }
+#moves-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #fff; text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; pointer-events: none; }
+.icon { width: 32px; height: 32px; image-rendering: pixelated; display: block; margin: 0 auto 4px; }
+#card-tray { display: flex; gap: 6px; flex-wrap: wrap; justify-content: space-evenly; min-height: 54px; }
+.card-slot { width: 44px; height: 54px; border: 2px dashed #4a3b70; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.card-slot .icon { margin: 0; }
+.card-slot.full { border: 2px solid var(--uncommon); background: var(--panel2); }
+.card-slot.targeting { outline: 3px dashed var(--accent); }
+.card .tag { font-size: 6px; color: var(--muted); letter-spacing: 1px; }
+.card .badge { font-size: 8px; color: var(--accent); }
+#pending { margin-top: 10px; font-size: 8px; color: var(--accent); }
+#pack-modal { position: fixed; inset: 0; background: rgba(8, 4, 16, .8); display: flex; align-items: center; justify-content: center; z-index: 34; }
+#pack-modal .box { background: var(--panel); border: 3px solid var(--accent); box-shadow: 6px 6px 0 #000; padding: 18px; max-width: calc(100vw - 32px); max-height: calc(100vh - 24px); overflow-y: auto; text-align: center; }
+#pack-modal h2 { color: var(--accent); font-size: 16px; margin: 0 0 8px; }
+#pack-modal p { font-size: 9px; margin: 0 0 12px; }
+#pack-modal .cards { justify-content: center; }
+#pack-tray { margin-top: 12px; font-size: 8px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.pack-btns { margin-top: 14px; }
+
+#perk-frame { grid-area: perks; position: relative; border: 3px solid var(--ink); background: var(--panel); box-shadow: 4px 4px 0 #000; padding: 10px 10px 22px; min-height: 92px; }
+#perk-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-evenly; min-height: 56px; }
+.frame-count { position: absolute; left: 8px; bottom: 5px; font-size: 8px; color: var(--muted); }
+.perk { width: 56px; height: 56px; padding: 4px; display: flex; align-items: center; justify-content: center; background: var(--panel2); border: 3px solid var(--common); animation: float 3s ease-in-out infinite; cursor: grab; touch-action: none; position: relative; box-shadow: 3px 3px 0 #000; }
+.perk .icon { width: 40px; height: 40px; margin: 0; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .perk, .card-slot, .slot, .pack { animation: none !important; } }
+#tray-frame { position: relative; border: 2px solid var(--ink); padding: 6px 6px 18px; }
+.card-slot { animation: float 3.4s ease-in-out infinite; }
+#board-col { position: relative; }
+#cascade-panel { display: flex; flex-direction: column; gap: 4px; align-items: center; padding: 12px 4px 4px; border: 0; background: none; opacity: 0; pointer-events: none; }
+#cascade-panel.show { opacity: 1; }
+#cascade-panel.fade { transition: opacity .6s; opacity: 0; }
+#cp-cascades { color: var(--bad); }
+#cp-gems { color: #3a86ff; }
+#cascade-panel label { font-size: 7px; color: var(--muted); }
+#cascade-panel div { font-size: 24px; margin-bottom: 8px; }
+#cascade-panel .bump { animation: bumpn .3s; }
+@keyframes bumpn { 50% { transform: scale(1.4); } }
+body.mobile #cascade-panel { grid-area: cp; width: 100%; flex-direction: row; justify-content: space-around; align-items: baseline; padding: 4px; border: 0; background: none; box-shadow: none; }
+body.mobile #cascade-panel div { margin: 0; font-size: 12px; }
+.slots { display: flex; gap: 8px; flex-wrap: wrap; }
+.slot { width: 56px; text-align: center; cursor: pointer; animation: float 3.2s ease-in-out infinite; }
+.slot .frame { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; background: var(--panel2); border: 3px solid var(--common); box-shadow: 3px 3px 0 #000; }
+.slot .frame .icon { width: 40px; height: 40px; margin: 0; }
+.slot .price { font-size: 8px; color: var(--good); margin-top: 4px; }
+.slot.off { opacity: .45; }
+.slot.sold { opacity: .25; cursor: default; animation: none; }
+.slot.uncommon .frame { border-color: var(--uncommon); } .slot.rare .frame { border-color: var(--rare); }
+.slot.tile .frame, .slot.upgrade .frame { border-color: var(--accent); }
+.pack { width: 56px; cursor: pointer; text-align: center; animation: float 3.2s ease-in-out infinite; }
+.pack .frame { position: relative; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; background: var(--panel2); border: 3px solid; box-shadow: 3px 3px 0 #000; padding: 4px; }
+.pack .frame .icon { width: 40px; height: 40px; margin: 0; }
+.size { position: absolute; top: -7px; right: -7px; min-width: 18px; padding: 3px 3px 2px; font-size: 7px; line-height: 1; text-align: center; color: #000; border: 2px solid #000; box-shadow: 1px 1px 0 #000; }
+.size.s-S { background: #3ddc84; } .size.s-M { background: #3a86ff; color: #fff; } .size.s-L { background: #d16bff; } .size.s-XL { background: #ff4d6d; }
+.iconwrap { position: relative; display: block; width: fit-content; margin: 0 auto 4px; }
+.iconwrap .icon { margin: 0; }
+.slot .frame .iconwrap, .choice .frame .iconwrap { margin: 0; }
+.iconwrap .plus { position: absolute; right: -6px; bottom: -6px; padding: 2px 3px 1px; font-size: 7px; line-height: 1; color: #000; background: var(--accent); border: 2px solid #000; }
+.pack.t-tile .frame { border-color: #3a86ff; } .pack.t-jewel .frame { border-color: #ff6bd6; }
+.pack.t-enhance .frame { border-color: #ff4d6d; } .pack.t-upgrade .frame { border-color: #ffd23f; }
+.pack .price { font-size: 8px; color: var(--good); margin-top: 4px; }
+.pack.off { opacity: .45; } .pack.sold { opacity: .25; cursor: default; animation: none; }
+.shop-pair { display: flex; gap: 16px; margin: 12px 0; flex-wrap: wrap; justify-content: space-evenly; }
+.shop-box { background: rgba(0,0,0,.25); border: 2px solid #4a3b70; padding: 8px; }
+.shop-box h3 { margin-top: 0; }
+.shop-box .slots { justify-content: center; }
+button.wide { width: 100%; margin-top: 8px; }
+.choice { width: 84px; cursor: pointer; text-align: center; font-size: 7px; }
+.choice .frame { height: 64px; display: flex; align-items: center; justify-content: center; background: var(--panel2); border: 3px solid var(--common); box-shadow: 3px 3px 0 #000; margin-bottom: 4px; }
+.choice .frame .icon { width: 44px; height: 44px; margin: 0; }
+.choice.sold { opacity: .25; cursor: default; }
+.choice.off { opacity: .45; }
+.choice.uncommon .frame { border-color: var(--uncommon); } .choice.rare .frame { border-color: var(--rare); }
+.choice.tile .frame, .choice.upgrade .frame { border-color: var(--accent); }
+#hover-label { position: absolute; z-index: 37; pointer-events: none; background: #0d0818; border: 2px solid var(--ink); padding: 4px 6px; font-size: 8px; color: var(--accent); white-space: nowrap; }
+.perk.uncommon { border-color: var(--uncommon); }
+.perk.rare { border-color: var(--rare); }
+.perk .inner { display: flex; align-items: center; justify-content: center; }
+.perk .inner.shake { animation: shake .3s linear; }
+@keyframes shake { 25% { transform: rotate(-6deg); } 75% { transform: rotate(6deg); } }
+#btn-hint { display: block; margin: 8px 0 0 auto; font-size: 8px; padding: 5px 10px; color: var(--accent); border-color: var(--accent); }
+.perk.dragging { cursor: grabbing; box-shadow: 0 12px 16px rgba(0,0,0,.65); pointer-events: none; }
+#shop-items { justify-content: space-evenly; }
 </style>
 <div id="app">
   <section id="screen-title" class="screen">
@@ -129,27 +221,47 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     <div class="toggles"><button id="btn-mute-t">SOUND: ON</button><button id="btn-crt-t">CRT: ON</button></div>
   </section>
   <section id="screen-game" class="screen hidden">
+    <div id="left-col">
     <aside id="hud">
       <div class="stat"><label>ROUND</label><div class="v" id="hud-round">1/20</div></div>
-      <div class="stat"><label>TARGET</label><div class="v" id="hud-target">800</div></div>
+      <div class="stat"><label>TARGET</label><div class="v" id="hud-target">1,000</div></div>
       <div class="stat"><label>SCORE</label><div class="v" id="hud-score">0</div><div id="bar"><div id="bar-fill"></div></div></div>
-      <div class="stat"><label>MOVES</label><div class="v" id="hud-moves">20</div></div>
-      <div class="stat"><label>MONEY</label><div class="v money" id="hud-money">$20</div></div>
+      <div class="stat"><label>MONEY</label><div class="v money" id="hud-money">$10</div></div>
+      <div class="stat"><label>CARDS</label><div id="tray-frame"><div id="card-tray"></div><span id="tray-count" class="frame-count">0/2</span></div></div>
       <div class="hud-btns"><button id="btn-speed">1x</button><button id="btn-mute">SND ON</button><button id="btn-crt">CRT ON</button></div>
     </aside>
-    <main id="board-wrap"><div id="move-points"></div><canvas id="board"></canvas><div id="fx"></div></main>
-    <section id="perk-row"></section>
+    <aside id="cascade-panel"><label>CASCADES</label><div id="cp-cascades">0</div><label>GEMS</label><div id="cp-gems">0</div></aside>
+    </div>
+    <section id="perk-frame"><div id="perk-row"></div><span id="perk-count" class="frame-count">0/5</span></section>
+    <main id="board-wrap">
+      <div id="move-points"></div>
+      <div id="board-col"><canvas id="board"></canvas><div id="fx"></div><div id="board-banner"></div>
+        <div id="moves-bar"><div id="moves-cells"></div><span id="moves-label"><span id="moves-text">MOVES LEFT: 20</span></span></div>
+        <button id="btn-hint" disabled>HINT</button>
+      </div>
+    </main>
     <aside id="shop" class="hidden">
       <h2>SHOP <button id="btn-shop-toggle">HIDE</button></h2>
-      <h3>PERKS</h3><div id="shop-perks" class="cards"></div>
-      <h3>POWER TILES</h3><div id="shop-tiles" class="cards"></div>
-      <h3>UPGRADE</h3><div id="shop-upgrade" class="cards"></div>
-      <div class="shop-actions"><button id="btn-reroll">REROLL $2</button><button id="btn-next">NEXT ROUND &gt;</button></div>
+      <h3>PERKS</h3><div id="shop-items" class="slots"></div>
+      <button id="btn-reroll" class="wide">REROLL $2</button>
+      <div class="shop-pair">
+        <div class="shop-box"><h3>UPGRADE</h3><div id="shop-voucher" class="slots"></div></div>
+        <div class="shop-box"><h3>PACKS</h3><div id="shop-packs" class="slots"></div></div>
+      </div>
+      <div id="pending" class="hidden"><span id="pending-label"></span> <button id="btn-discard">DISCARD</button></div>
+      <button id="btn-next" class="wide">NEXT ROUND &gt;</button>
       <p id="shop-hint"></p>
     </aside>
   </section>
+  <div id="pack-modal" class="hidden"><div class="box">
+    <h2 id="pack-title"></h2><p id="pack-sub"></p>
+    <div id="pack-choices" class="cards"></div>
+    <div id="pack-tray"></div>
+    <div class="pack-btns"><button id="btn-pack-skip">SKIP</button></div>
+  </div></div>
   <div id="modal" class="hidden"><div class="box"><h2 id="modal-title"></h2><div id="modal-body"></div><div id="modal-btns"></div></div></div>
   <div id="tip" class="hidden"></div>
+  <div id="hover-label" class="hidden"></div>
   <div id="flash"></div><div id="big"></div><div id="toast"></div>
 </div>
 <div id="crt"></div>
@@ -162,12 +274,14 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     COLORS: ['red', 'blue', 'green', 'yellow', 'purple', 'white', 'orange'],
     HOT: [0, 6, 3],
     COLD: [2, 1, 4],
-    START_MONEY: 20,
+    START_MONEY: 10,
     START_SLOTS: 5,
     MAX_SLOTS: 10,
     START_MOVES: 20,
     MAX_EXTRA_MOVES: 5,
     BASE_INCOME: 3,
+    INTEREST_PER: 5,
+    INTEREST_MAX: 10,
     DEBT_FLOOR: -20,
     ROUNDS: 20,
     TARGET_START: 1000,
@@ -213,6 +327,23 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     let ms = m.toFixed(2);
     if (Number(ms) >= 10) { e++; ms = (m / 10).toFixed(2); }
     return sign + ms + 'e' + e;
+  };
+  C.CARD_SLOTS = 2;
+  C.PACK_SIZES = {
+    S: { show: 2, picks: 1, price: 4, weight: 40 },
+    M: { show: 3, picks: 1, price: 6, weight: 30 },
+    L: { show: 4, picks: 1, price: 8, weight: 20 },
+    XL: { show: 4, picks: 2, price: 10, weight: 10 },
+  };
+  C.PACK_TYPES = ['upgrade', 'tile', 'jewel', 'enhance'];
+  C.ITEM_WEIGHTS = { perk: 70, card: 12, tile: 9, upgrade: 9 };
+  C.UPGRADE_CARD = { polish1: { price: 3, weight: 70 }, polish2: { price: 5, weight: 22 }, brilliance: { price: 8, weight: 8 } };
+  C.JEWEL_WEIGHTS = { bomb: 20, star: 20, gold: 15, shiny: 15, wild: 15, prism: 8, supernova: 7 };
+  C.VOUCHER_EVERY = 5;
+  C.spinTransform = function (ms) {
+    const theta = (ms / 900) * Math.PI * 2;
+    const c = Math.cos(theta), s = Math.sin(theta);
+    return { scaleX: Math.max(0.08, Math.abs(c)), back: c < -1e-9, edge: Math.round(Math.abs(s) * 2), theta: theta };
   };
   GF.C = C;
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
@@ -336,9 +467,10 @@ body.mobile #btn-shop-toggle { display: inline-block; }
   function canSwap(board, a, b, opts, colors) {
     if (!inB(a.r, a.c) || !inB(b.r, b.c) || !adjacent(a, b)) return false;
     if (!board.cells[a.r][a.c] || !board.cells[b.r][b.c]) return false;
+    if (opts && opts.illegalSwap) return true;
     if (isPrismSwap(board, a, b)) return true;
     swap(board, a, b);
-    const ok = findGroups(board, opts, colors).length > 0;
+    const ok = findGroups(board, opts, colors).some((g) => g.cells.some(([r, c]) => (r === a.r && c === a.c) || (r === b.r && c === b.c)));
     swap(board, a, b);
     return ok;
   }
@@ -406,6 +538,38 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     clearNormals(board);
     fillNoMatch(board, rng, colors);
     settle(board, rng, colors, opts);
+  }
+  // Keep the board between rounds: only recolor gems of removed colors, fill holes, settle.
+  function carryOver(board, rng, colors, opts) {
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const g = board.cells[r][c];
+      if (g && g.color != null && colors.indexOf(g.color) < 0) g.color = rng.pick(colors);
+    }
+    fillNoMatch(board, rng, colors);
+    return settle(board, rng, colors, opts);
+  }
+  // Best swap by cells cleared on the first step (+2 per special created); prism swaps score 10.
+  function findHint(board, opts, colors) {
+    // Baseball Bat makes every swap legal; a hint should still point at a real match
+    if (opts && opts.illegalSwap) opts = Object.assign({}, opts, { illegalSwap: false });
+    let best = null, bestScore = -1;
+    const consider = (a, b) => {
+      if (!canSwap(board, a, b, opts, colors)) return;
+      let score;
+      if (isPrismSwap(board, a, b)) score = 10;
+      else {
+        swap(board, a, b);
+        const groups = findGroups(board, opts, colors);
+        score = groups.reduce((s, g) => s + g.cells.length, 0) + 2 * planSpecials(groups, [b, a]).length;
+        swap(board, a, b);
+      }
+      if (score > bestScore) { bestScore = score; best = { a: a, b: b }; }
+    };
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      if (c + 1 < N) consider({ r: r, c: c }, { r: r, c: c + 1 });
+      if (r + 1 < N) consider({ r: r, c: c }, { r: r + 1, c: c });
+    }
+    return best;
   }
   function shuffle(board, rng, colors, opts) {
     clearNormals(board);
@@ -604,7 +768,7 @@ body.mobile #btn-shop-toggle { display: inline-block; }
 
   GF.Board = {
     create, inB, key, clone, matchesColor, findGroups, adjacent, swap, isPrismSwap, canSwap, hasMoves, wouldMatch,
-    fillNoMatch, clearNormals, settle, newRound, shuffle, gravity, refill, blastCells,
+    fillNoMatch, clearNormals, settle, newRound, carryOver, findHint, shuffle, gravity, refill, blastCells,
     colorCounts, mostCommonColor, leastCommonColor, colorCells, newClearState, expandClear,
     pickExtra, pickNear, transformRandom, planSpecials,
   };
@@ -634,7 +798,7 @@ body.mobile #btn-shop-toggle { display: inline-block; }
       shinyMul: has('polished_shine') ? 3 : 2, overcharge: has('overcharge'), tileSpeed: has('fast_forward') ? 2 : 1,
       clockCap: has('clockmaker') ? 2 : 1, tileDiscount: has('renovation') ? 2 : 0, mirrorCap: has('echo_chamber') ? 2 : 1,
       perkDiscount: has('coupon') ? 1 : 0, sellFull: has('pawn_shop'), freeReroll: has('stockpile'),
-      shopPerks: has('golden_ticket') ? 4 : 3, upgradeHalf: has('clearance_sale'), insurance: has('insurance'),
+      shopPerks: has('golden_ticket') ? 4 : 3, upgradeHalf: has('clearance_sale'), insurance: has('insurance'), illegalSwap: has('baseball_bat'),
     };
   }
   function family(k, equity) {
@@ -859,7 +1023,7 @@ body.mobile #btn-shop-toggle { display: inline-block; }
   def({ id: 'clockmaker', rarity: 'uncommon', name: 'Clockmaker', desc: 'Clock tiles can give up to 2 moves per move', passive: true });
   def({ id: 'arcane_study', name: 'Arcane Study', desc: '+80 each time a Magic tile recolors a gem',
     on: { tile: (x) => (x.tile.magic ? { add: 80 } : null) }, force: add(80) });
-  def({ id: 'renovation', rarity: 'uncommon', name: 'Renovation', desc: 'Power tiles in the shop cost $2 less', passive: true });
+  def({ id: 'renovation', rarity: 'uncommon', name: 'Renovation', desc: 'Tiles and Tile Packs in the shop cost $2 less', passive: true });
   def({ id: 'blueprint', rarity: 'rare', name: 'Blueprint', desc: 'Round start: every power tile fires once (Mirror cannot copy this)',
     on: { roundStart: () => ({ blueprint: true }) } });
   def({ id: 'feng_shui', rarity: 'uncommon', name: 'Feng Shui', desc: 'x(1 + 0.05 per power tile on the board) points',
@@ -925,7 +1089,14 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     on: { moveEnd: mul(5), roundEnd: (x, i) => { i.state.rounds = (i.state.rounds || 0) + 1; return i.state.rounds >= 3 ? { destroySelf: true } : null; } },
     force: mul(5) });
   def({ id: 'insurance', rarity: 'uncommon', name: 'Insurance', desc: 'The first time you would lose a round, you win it instead. Then it is gone.', passive: true });
-  def({ id: 'clearance_sale', name: 'Clearance Sale', desc: 'Upgrades in the shop cost half (rounded up)', passive: true });
+  def({ id: 'clearance_sale', name: 'Clearance Sale', desc: 'Upgrades in the shop cost $3 less', passive: true });
+  def({ id: 'baseball_bat', rarity: 'rare', name: 'Baseball Bat', desc: 'You may swap gems even if it makes no match (still costs a move)', passive: true });
+  def({ id: 'pyromaniac', rarity: 'uncommon', name: 'Pyromaniac', desc: 'When a Bomb explodes: 25% chance one gem it destroys becomes a Bomb',
+    on: { special: (x) => (x.special.kind === 'bomb' && x.rng.chance(0.25) ? { spawnSpecial: { kind: 'bomb' } } : null) },
+    force: (x) => (x.special ? { spawnSpecial: { kind: 'bomb' } } : null) });
+  def({ id: 'star_catcher', rarity: 'uncommon', name: 'Star Catcher', desc: 'When a Star fires: 25% chance one gem it destroys becomes a Star',
+    on: { special: (x) => (x.special.kind === 'star' && x.rng.chance(0.25) ? { spawnSpecial: { kind: 'star' } } : null) },
+    force: (x) => (x.special ? { spawnSpecial: { kind: 'star' } } : null) });
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- tiles.js
@@ -1010,7 +1181,7 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     const polish = g.color != null ? run.polish[g.color] * C.POLISH_BONUS : 0;
     const shiny = g.kind === 'shiny' ? (opts.shinyMul || 2) : 1;
     const blast = opts.overcharge && (opts.source === 'blast' || opts.source === 'color') ? 2 : 1;
-    return (C.base(run.round) + polish) * level * shiny * blast;
+    return (C.base(run.round) + polish) * level * shiny * blast * (opts.chainBoost && level >= 3 ? 1.5 : 1);
   }
 
   function move(run, a, b) {
@@ -1020,7 +1191,8 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     const money0 = run.money;
     let points = 0, extraMoves = 0, clocks = 0;
     const destroy = new Set();
-    const summary = { maxLevel: 0, specialsActivated: 0, gemsCleared: 0, colorsCleared: new Set(),
+    const spawns = [];
+    const summary = { illegal: false, maxLevel: 0, specialsActivated: 0, gemsCleared: 0, colorsCleared: new Set(),
       specials: { bomb: 0, star: 0, prism: 0, supernova: 0 },
       isFirstMove: run.moveIndex === 0, isLastMove: run.movesLeft === 1 };
     const pending = { extra: [], near: [] };
@@ -1028,7 +1200,8 @@ body.mobile #btn-shop-toggle { display: inline-block; }
       mirrorUsed: new Map(), group: null, groupPoints: 0, gem: null, cell: null, special: null, created: null, tile: null,
       family: (k) => P.family(k, flags.equity), leastColor: B.leastCommonColor(board, colors) };
     Object.defineProperty(x, 'points', { get: () => points });
-    const vopts = (src) => ({ shinyMul: flags.shinyMul, overcharge: flags.overcharge, source: src });
+    const chainBoost = !!(GF.Vouchers && GF.Vouchers.has(run, 'chain_reaction_v'));
+    const vopts = (src) => ({ shinyMul: flags.shinyMul, overcharge: flags.overcharge, source: src, chainBoost: chainBoost });
 
     const apply = (eff, slot, meta) => {
       const step = { t: 'perk', slot: slot, level: x.level };
@@ -1042,6 +1215,7 @@ body.mobile #btn-shop-toggle { display: inline-block; }
       if (eff.sellBonus) { run.perks[slot].sellBonus += eff.sellBonus; step.sellBonus = eff.sellBonus; }
       if (eff.moves) { run.movesLeft += eff.moves; extraMoves += eff.moves; step.moves = eff.moves; }
       if (eff.polish) { run.polish[eff.polish.color]++; step.polish = eff.polish.color; }
+      if (eff.spawnSpecial && x.special) { spawns.push({ kind: eff.spawnSpecial.kind, cells: x.special.cells, self: [x.special.r, x.special.c] }); step.spawn = eff.spawnSpecial.kind; }
       if (eff.destroySelf) { destroy.add(run.perks[slot].uid); step.destroy = true; }
       points = Math.min(points, Number.MAX_VALUE);
       step.total = points;
@@ -1063,22 +1237,32 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     B.swap(board, a, b);
     tl.push({ t: 'swap', a: a, b: b });
 
+    let cascade = 0, levels = 0;
     for (let level = 1; level <= 60; level++) {
       x.level = level;
       x.mirrorUsed = new Map();
       const groups = B.findGroups(board, flags, colors);
       const seeds = level === 1 && prismPos ? [[prismPos.r, prismPos.c]] : [];
       if (!groups.length && !seeds.length) break;
-      summary.maxLevel = level;
+      levels = level;
+      for (const g of groups) g.casc = ++cascade;
+      if (seeds.length && !groups.length) ++cascade;
+      const levelCasc = cascade;
+      summary.maxLevel = cascade;
+      const cellCasc = new Map();
+      for (const g of groups) for (const [r, c] of g.cells) {
+        const k = B.key(r, c);
+        cellCasc.set(k, Math.max(cellCasc.get(k) || 0, g.casc));
+      }
+      for (const [r, c] of seeds) cellCasc.set(B.key(r, c), levelCasc);
       const prismColors = {};
       if (seeds.length) prismColors[B.key(prismPos.r, prismPos.c)] = prismColor;
       const creates = B.planSpecials(groups, level === 1 ? [b, a] : []);
       if (groups.length) tl.push({ t: 'match', level: level, groups: groups.map((g) => ({ color: g.color, shape: g.shape, cells: g.cells })) });
-      if (level >= 2) tl.push({ t: 'cascade', level: level });
 
       for (const g of groups) {
         x.group = g;
-        x.groupPoints = g.cells.reduce((s, [r, c]) => s + gemValue(run, board.cells[r][c], level, vopts('match')), 0);
+        x.groupPoints = g.cells.reduce((s, [r, c]) => s + gemValue(run, board.cells[r][c], g.casc, vopts('match')), 0);
         emit('match');
       }
       x.group = null; x.groupPoints = 0;
@@ -1102,15 +1286,17 @@ body.mobile #btn-shop-toggle { display: inline-block; }
           summary.specials[s.kind] = (summary.specials[s.kind] || 0) + 1;
           tl.push({ t: 'special', kind: s.kind, r: s.r, c: s.c, cells: s.cells, source: s.source, cleared: s.cleared });
         }
-        const step = { t: 'clear', level: level, cells: [] };
+        const step = { t: 'clear', level: levelCasc, cells: [] };
         for (const [r, c] of fresh) {
           const g = board.cells[r][c];
           const src = st.source[B.key(r, c)];
-          const v = gemValue(run, g, level, vopts(src));
+          const k = B.key(r, c);
+          const lvl = cellCasc.has(k) ? cellCasc.get(k) : levelCasc;
+          const v = gemValue(run, g, lvl, vopts(src));
           points = Math.min(points + v, Number.MAX_VALUE);
           summary.gemsCleared++;
           if (g.color != null) summary.colorsCleared.add(g.color);
-          step.cells.push({ r: r, c: c, id: g.id, v: v, src: src });
+          step.cells.push({ r: r, c: c, id: g.id, v: v, src: src, lvl: lvl });
         }
         step.total = points;
         tl.push(step);
@@ -1133,6 +1319,25 @@ body.mobile #btn-shop-toggle { display: inline-block; }
         x.special = null;
       }
 
+      for (const g of groups) {
+        if (g.casc < 2) continue;
+        tl.push({ t: 'cascade', level: g.casc });
+        x.cascade = g.casc;
+        emit('cascade');
+      }
+
+      const used = new Set(creates.map((cr) => B.key(cr.r, cr.c)));
+      while (spawns.length) {
+        const sp = spawns.shift();
+        const cand = sp.cells.filter(([r, c]) => {
+          const k = B.key(r, c);
+          return st.set.has(k) && !(r === sp.self[0] && c === sp.self[1]) && !used.has(k) && board.cells[r][c] && board.cells[r][c].color != null;
+        });
+        if (!cand.length) continue;
+        const [r, c] = run.rng.pick(cand);
+        used.add(B.key(r, c));
+        creates.push({ kind: sp.kind, r: r, c: c, color: board.cells[r][c].color });
+      }
       for (const [r, c] of st.order) board.cells[r][c] = null;
       for (const cr of creates) {
         const g = C.gem(cr.kind, cr.color);
@@ -1143,12 +1348,13 @@ body.mobile #btn-shop-toggle { display: inline-block; }
         x.created = null;
       }
       const moves = B.gravity(board);
-      const spawns = B.refill(board, run.rng, colors);
-      tl.push({ t: 'fall', moves: moves, spawns: spawns });
-      if (level >= 2) emit('cascade');
+      const fresh = B.refill(board, run.rng, colors);
+      tl.push({ t: 'fall', moves: moves, spawns: fresh });
     }
 
-    x.level = summary.maxLevel + 1;
+    summary.levels = levels;
+    summary.illegal = summary.maxLevel === 0;
+    x.level = levels + 1;
     x.mirrorUsed = new Map();
     for (const ev of GF.Tiles.applyPhase(board, 'moveEnd', colors, { speed: flags.tileSpeed })) {
       tl.push(Object.assign({ t: 'tile' }, ev));
@@ -1224,23 +1430,32 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     const run = {
       seed: seed >>> 0, rng: new GF.RNG(seed), round: 1, money: C.START_MONEY, perkSlots: C.START_SLOTS,
       perks: [], polish: [0, 0, 0, 0, 0, 0, 0], removedColors: [], extraMoves: 0, movesLeft: 0, moveIndex: 0,
-      score: 0, phase: 'shop', endless: false, shop: null, stats: { bestMove: 0, roundsWon: 0 }, board: GF.Board.create(),
+      score: 0, phase: 'shop', endless: false,
+      cardSlots: C.CARD_SLOTS, consumables: [], openPack: null, pendingPlace: [], vouchers: [], voucherBlock: null, voucherOffer: null, shop: null, stats: { bestMove: 0, bestMoveRound: 0, roundsWon: 0 }, board: GF.Board.create(),
     };
-    GF.Board.newRound(run.board, run.rng, colors(run), {});
+    GF.Board.newRound(run.board, run.rng, colors(run), GF.Perks.flags(run.perks));
+    startRound(run);
     return run;
   }
   function target(n) {
     if (n <= C.ROUNDS) return C.roundNice(C.TARGET_START * Math.pow(C.TARGET_GROWTH, n - 1));
     return C.roundNice(target(C.ROUNDS) * Math.pow(C.ENDLESS_GROWTH, n - C.ROUNDS));
   }
+  function targetFor(run, n) {
+    const t = target(n);
+    return GF.Vouchers && GF.Vouchers.has(run, 'mercy') ? C.roundNice(t * 0.9) : t;
+  }
   function colors(run) { return GF.Resolver.colorsOf(run); }
   function moneyFloor(run) { return GF.Perks.flags(run.perks).creditCard ? C.DEBT_FLOOR : 0; }
 
   function startRound(run) {
-    GF.Board.newRound(run.board, run.rng, colors(run), GF.Perks.flags(run.perks));
+    if (run.openPack || (run.pendingPlace && run.pendingPlace.length)) return null;
+    run.shop = null;
+    GF.Board.carryOver(run.board, run.rng, colors(run), GF.Perks.flags(run.perks));
     run.movesLeft = C.START_MOVES + run.extraMoves;
     run.moveIndex = 0;
     run.score = 0;
+    run.stats.bestMoveRound = 0;
     const events = GF.Resolver.roundStart(run);
     run.movesLeft = Math.max(1, run.movesLeft);
     run.phase = 'play';
@@ -1254,7 +1469,8 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     run.moveIndex++;
     run.score = Math.min(run.score + res.points, Number.MAX_VALUE);
     run.stats.bestMove = Math.max(run.stats.bestMove, res.points);
-    if (run.score >= target(run.round)) run.phase = 'won';
+    run.stats.bestMoveRound = Math.max(run.stats.bestMoveRound || 0, res.points);
+    if (run.score >= targetFor(run, run.round)) run.phase = 'won';
     else if (run.movesLeft <= 0) {
       const ins = run.perks.findIndex((p) => p.id === 'insurance');
       if (ins >= 0) { run.perks.splice(ins, 1); run.phase = 'won'; res.insured = true; }
@@ -1265,15 +1481,18 @@ body.mobile #btn-shop-toggle { display: inline-block; }
   function finishRound(run) {
     if (run.phase !== 'won') return null;
     const leftover = run.movesLeft;
+    const interest = Math.min(C.INTEREST_MAX, Math.floor(Math.max(0, run.money) / C.INTEREST_PER));
     const steps = GF.Resolver.roundEnd(run);
     const perkIncome = steps.reduce((s, x) => s + (x.income || 0), 0);
-    const income = Math.max(0, C.BASE_INCOME + leftover + perkIncome);
+    const perkMoney = steps.reduce((s, x) => s + (x.money || 0), 0); // already paid by roundEnd (Landlord, Bank Account, Loan Shark)
+    const leftoverIncome = Math.floor(leftover / 2);
+    const income = Math.max(0, C.BASE_INCOME + leftoverIncome + perkIncome + interest);
     run.money += income;
     run.stats.roundsWon++;
     const wasFinal = run.round === C.ROUNDS && !run.endless;
     run.round++;
     run.phase = wasFinal ? 'victory' : 'shop';
-    return { base: C.BASE_INCOME, leftover: leftover, perkIncome: perkIncome, income: income, steps: steps };
+    return { base: C.BASE_INCOME, leftover: leftover, leftoverIncome: leftoverIncome, perkIncome: perkIncome, perkMoney: perkMoney, interest: interest, income: income, total: income + perkMoney, steps: steps };
   }
   function continueEndless(run) { run.endless = true; run.phase = 'shop'; }
 
@@ -1286,6 +1505,11 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     o.board.cells.forEach((row) => row.forEach((g) => { if (g && g.id > maxId) maxId = g.id; }));
     C.setNextId(maxId + 1);
     GF.Perks.setNextUid(o.perks.reduce((m, p) => Math.max(m, p.uid), 0) + 1);
+    o.cardSlots = o.cardSlots || C.CARD_SLOTS; o.consumables = o.consumables || []; o.openPack = o.openPack || null;
+    o.stats = o.stats || { bestMove: 0, roundsWon: 0 }; o.stats.bestMoveRound = o.stats.bestMoveRound || 0;
+    o.pendingPlace = o.pendingPlace || []; o.vouchers = o.vouchers || [];
+    if (o.voucherBlock === undefined) o.voucherBlock = null;
+    if (o.voucherOffer === undefined) o.voucherOffer = null;
     delete o.v;
     return o;
   }
@@ -1299,54 +1523,334 @@ body.mobile #btn-shop-toggle { display: inline-block; }
   function clearSave() { try { localStorage.removeItem(C.SAVE_KEY); } catch (e) { /* storage unavailable */ } }
   function hasSave() { try { return !!localStorage.getItem(C.SAVE_KEY); } catch (e) { return false; } }
 
-  GF.Run = { create, target, colors, moneyFloor, startRound, doMove, finishRound, continueEndless,
+  GF.Run = { create, target, targetFor, colors, moneyFloor, startRound, doMove, finishRound, continueEndless,
     serialize, deserialize, save, load, clearSave, hasSave };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- cards.js
+(function (GF) {
+  'use strict';
+  const C = GF.C;
+  const DEFS = {};
+  function def(d) { d.rarity = d.rarity || 'common'; d.price = d.rarity === 'rare' ? 5 : 3; d.playOnly = !!d.playOnly; d.target = d.target || null; DEFS[d.id] = d; }
+  const conv = (kind) => (run, t) => {
+    const g = run.board.cells[t.r][t.c];
+    const ng = { id: g.id, kind: kind, color: kind === 'prism' || kind === 'wild' ? null : g.color };
+    run.board.cells[t.r][t.c] = ng;
+    return [{ r: t.r, c: t.c, gem: GF.Board.clone(ng) }];
+  };
+  def({ id: 'forge', name: 'The Forge', target: 'normal', desc: 'Turn a normal gem into a Bomb', apply: conv('bomb') });
+  def({ id: 'star_card', name: 'The Star', target: 'normal', desc: 'Turn a normal gem into a Star', apply: conv('star') });
+  def({ id: 'midas', name: 'Midas', target: 'normal', desc: 'Turn a normal gem into Gold', apply: conv('gold') });
+  def({ id: 'gleam', name: 'Gleam', target: 'normal', desc: 'Turn a normal gem into Shiny', apply: conv('shiny') });
+  def({ id: 'chaos', name: 'Chaos', target: 'normal', desc: 'Turn a normal gem into Wild', apply: conv('wild') });
+  def({ id: 'prism_card', name: 'The Prism', rarity: 'rare', target: 'notCoal', desc: 'Turn any gem except Coal into a Prism', apply: conv('prism') });
+  def({ id: 'nova', name: 'Nova', rarity: 'rare', target: 'normal', desc: 'Turn a normal gem into a Supernova', apply: conv('supernova') });
+  def({ id: 'purify', name: 'Purify', target: 'coalOrTile', desc: 'Turn Coal into a normal gem, or remove a power tile for half its price',
+    apply: (run, t) => {
+      const g = run.board.cells[t.r][t.c];
+      if (g && g.kind === 'coal') {
+        const ng = { id: g.id, kind: 'normal', color: run.rng.pick(GF.Resolver.colorsOf(run)) };
+        run.board.cells[t.r][t.c] = ng;
+        return [{ r: t.r, c: t.c, gem: GF.Board.clone(ng) }];
+      }
+      const id = run.board.tiles[t.r][t.c];
+      run.money += Math.floor(GF.Tiles.DEFS[id].price / 2);
+      run.board.tiles[t.r][t.c] = null;
+      run.board.tileState[t.r][t.c] = 0;
+      return [];
+    } });
+  def({ id: 'hourglass', name: 'Hourglass', playOnly: true, desc: '+3 moves (only during a round)', apply: (run) => { run.movesLeft += 3; return []; } });
+  def({ id: 'tempest', name: 'Tempest', playOnly: true, desc: 'Shuffle the board without spending a move (only during a round)',
+    apply: (run) => { GF.Board.shuffle(run.board, run.rng, GF.Resolver.colorsOf(run), GF.Perks.flags(run.perks)); return [{ shuffle: true }]; } });
+  def({ id: 'fortune', name: 'Fortune', desc: 'Double your money (max +$15)', apply: (run) => { run.money += Math.min(Math.max(run.money, 0), 15); return []; } });
+  def({ id: 'temperance', name: 'Temperance', desc: 'Gain the total sell value of your perks (max $20)',
+    apply: (run) => { const v = run.perks.reduce((s, p) => s + GF.Perks.sellValue(p, run.perks), 0); run.money += Math.min(v, 20); return []; } });
+  def({ id: 'alchemy', name: 'Alchemy', desc: '+1 Polish to 3 random colors',
+    apply: (run) => { run.rng.shuffle(GF.Resolver.colorsOf(run).slice()).slice(0, 3).forEach((k) => { run.polish[k]++; }); return []; } });
+  def({ id: 'judgement', name: 'Judgement', rarity: 'rare', desc: 'Gain a random perk (needs a free slot)',
+    apply: (run) => {
+      const ex = new Set(GF.Perks.flags(run.perks).showman ? [] : run.perks.map((p) => p.id));
+      const id = GF.Perks.roll(run.rng, ex);
+      if (!id) return [];
+      const inst = GF.Perks.create(id);
+      run.perks.push(inst);
+      const d = GF.Perks.byId[id];
+      if (d.onBuy) d.onBuy(run, inst, run.rng);
+      return [];
+    } });
+  def({ id: 'overclock', name: 'Overclock', desc: 'Every Bomb, Star and Prism tile fires after your next move',
+    apply: (run) => {
+      for (let r = 0; r < C.SIZE; r++) for (let c = 0; c < C.SIZE; c++) {
+        const id = run.board.tiles[r][c];
+        if (id && GF.Tiles.DEFS[id].phase === 'every') run.board.tileState[r][c] = GF.Tiles.DEFS[id].period - 1;
+      }
+      return [];
+    } });
+  const IDS = Object.keys(DEFS);
+
+  function roll(rng, exclude) {
+    const rarity = rng.weighted({ common: 85, rare: 15 });
+    const ex = exclude || new Set();
+    let pool = IDS.filter((id) => DEFS[id].rarity === rarity && !ex.has(id));
+    if (!pool.length) pool = IDS.filter((id) => !ex.has(id));
+    return pool.length ? rng.pick(pool) : null;
+  }
+  function canUse(run, id) {
+    const d = DEFS[id];
+    if (!d) return { ok: false, reason: 'slot' };
+    if (run.phase !== 'play' && run.phase !== 'shop') return { ok: false, reason: 'phase' };
+    if (d.playOnly && run.phase !== 'play') return { ok: false, reason: 'phase' };
+    if (id === 'judgement' && run.perks.length >= run.perkSlots) return { ok: false, reason: 'slots' };
+    return { ok: true };
+  }
+  function targetOk(run, kind, t) {
+    if (!kind) return true;
+    if (!t || !GF.Board.inB(t.r, t.c)) return false;
+    const g = run.board.cells[t.r][t.c];
+    if (kind === 'normal') return !!g && g.kind === 'normal';
+    if (kind === 'notCoal') return !!g && g.kind !== 'coal';
+    if (kind === 'coalOrTile') return (!!g && g.kind === 'coal') || !!run.board.tiles[t.r][t.c];
+    return false;
+  }
+  function use(run, slot, target) {
+    const id = run.consumables[slot];
+    if (!id) return { ok: false, reason: 'slot' };
+    const can = canUse(run, id);
+    if (!can.ok) return can;
+    const d = DEFS[id];
+    if (!targetOk(run, d.target, target)) return { ok: false, reason: 'target' };
+    const events = d.apply(run, target) || [];
+    run.consumables.splice(slot, 1);
+    if (run.phase === 'shop') GF.Board.settle(run.board, run.rng, GF.Resolver.colorsOf(run), GF.Perks.flags(run.perks));
+    return { ok: true, events: events };
+  }
+
+  GF.Cards = { DEFS, IDS, roll, canUse, use };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- vouchers.js
+(function (GF) {
+  'use strict';
+  const C = GF.C;
+  const DEFS = {};
+  function def(d) { d.tier = d.tier || 1; d.price = d.tier === 2 ? 15 : 10; DEFS[d.id] = d; }
+  def({ id: 'overstock_1', name: 'Overstock I', desc: '+1 perk slot', effect: (run) => { run.perkSlots = Math.min(C.MAX_SLOTS, run.perkSlots + 1); } });
+  def({ id: 'overstock_2', name: 'Overstock II', tier: 2, requires: 'overstock_1', desc: '+1 more perk slot', effect: (run) => { run.perkSlots = Math.min(C.MAX_SLOTS, run.perkSlots + 1); } });
+  def({ id: 'stamina_1', name: 'Stamina I', desc: '+2 moves every round', effect: (run) => { run.extraMoves += 2; } });
+  def({ id: 'stamina_2', name: 'Stamina II', tier: 2, requires: 'stamina_1', desc: '+3 more moves every round', effect: (run) => { run.extraMoves += 3; } });
+  def({ id: 'card_holder_1', name: 'Card Holder I', desc: '+1 card slot', effect: (run) => { run.cardSlots++; } });
+  def({ id: 'card_holder_2', name: 'Card Holder II', tier: 2, requires: 'card_holder_1', desc: '+1 more card slot', effect: (run) => { run.cardSlots++; } });
+  def({ id: 'pack_rat', name: 'Pack Rat', desc: 'The shop offers 3 packs' });
+  def({ id: 'reroll_1', name: 'Reroll Surplus I', desc: 'Rerolls cost $1 less' });
+  def({ id: 'reroll_2', name: 'Reroll Surplus II', tier: 2, requires: 'reroll_1', desc: 'Rerolls cost $2 less again' });
+  def({ id: 'black_friday_1', name: 'Black Friday I', desc: 'Shop items and packs cost 25% less' });
+  def({ id: 'black_friday_2', name: 'Black Friday II', tier: 2, requires: 'black_friday_1', desc: 'Shop items and packs cost 50% less' });
+  def({ id: 'chain_reaction_v', name: 'Chain Reaction', desc: 'Gems cleared at cascade level 3+ are worth x1.5' });
+  def({ id: 'palette_knife', name: 'Palette Knife', desc: 'Permanently remove 1 random color (the board keeps at least 3)',
+    canOffer: (run) => GF.Resolver.colorsOf(run).length > 3,
+    effect: (run) => { const cols = GF.Resolver.colorsOf(run); if (cols.length > 3) run.removedColors.push(run.rng.pick(cols)); } });
+  def({ id: 'mercy', name: 'Mercy', desc: 'Every round target is 10% lower' });
+  const IDS = Object.keys(DEFS);
+
+  function has(run, id) { return !!run.vouchers && run.vouchers.indexOf(id) >= 0; }
+  function available(run) {
+    return IDS.filter((id) => {
+      const d = DEFS[id];
+      if (has(run, id)) return false;
+      if (d.requires && !has(run, d.requires)) return false;
+      if (d.canOffer && !d.canOffer(run)) return false;
+      return true;
+    });
+  }
+  function roll(run) { const pool = available(run); return pool.length ? run.rng.pick(pool) : null; }
+  function apply(run, id) { if (has(run, id)) return; run.vouchers.push(id); if (DEFS[id].effect) DEFS[id].effect(run); }
+
+  GF.Vouchers = { DEFS, IDS, has, available, roll, apply };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- packs.js
+(function (GF) {
+  'use strict';
+  const C = GF.C;
+  const KIND = { upgrade: 'upgrade', tile: 'tile', jewel: 'gem', enhance: 'card' };
+  function rollSize(rng) {
+    const w = {}; for (const k of Object.keys(C.PACK_SIZES)) w[k] = C.PACK_SIZES[k].weight;
+    return rng.weighted(w);
+  }
+  function roll(run) { return { type: run.rng.pick(C.PACK_TYPES), size: rollSize(run.rng) }; }
+  const keyOf = (c) => c.id + ':' + (c.color == null ? '' : c.color);
+  function rollChoice(run, type, exclude) {
+    for (let tries = 0; tries < 30; tries++) {
+      let c;
+      if (type === 'upgrade') {
+        const w = {}; for (const k of Object.keys(C.UPGRADE_CARD)) w[k] = C.UPGRADE_CARD[k].weight;
+        const id = run.rng.weighted(w);
+        c = id === 'brilliance' ? { kind: 'upgrade', id: id } : { kind: 'upgrade', id: id, color: run.rng.pick(GF.Resolver.colorsOf(run)) };
+      } else if (type === 'tile') c = { kind: 'tile', id: run.rng.pick(GF.Tiles.IDS) };
+      else if (type === 'jewel') c = { kind: 'gem', id: run.rng.weighted(C.JEWEL_WEIGHTS) };
+      else c = { kind: 'card', id: GF.Cards.roll(run.rng) };
+      if (!exclude.has(keyOf(c))) { exclude.add(keyOf(c)); return c; }
+    }
+    return null;
+  }
+  function open(run, pack) {
+    const sz = C.PACK_SIZES[pack.size], ex = new Set(), choices = [];
+    for (let i = 0; i < sz.show; i++) { const c = rollChoice(run, pack.type, ex); if (c) choices.push(c); }
+    return { type: pack.type, size: pack.size, choices: choices, taken: choices.map(() => false), picks: sz.picks, picked: 0 };
+  }
+  function grant(run, c) {
+    if (c.kind === 'upgrade') {
+      if (c.id === 'brilliance') for (let k = 0; k < 7; k++) run.polish[k]++;
+      else run.polish[c.color] += c.id === 'polish2' ? 2 : 1;
+      return { ok: true };
+    }
+    if (c.kind === 'card') {
+      if (run.consumables.length >= run.cardSlots) return { ok: false, reason: 'cards' };
+      run.consumables.push(c.id);
+      return { ok: true };
+    }
+    run.pendingPlace.push({ kind: c.kind, id: c.id });
+    return { ok: true };
+  }
+  function pick(run, i) {
+    const op = run.openPack;
+    if (!op || !op.choices[i]) return { ok: false, reason: 'none' };
+    if (op.taken[i]) return { ok: false, reason: 'taken' };
+    const r = grant(run, op.choices[i]);
+    if (!r.ok) return r;
+    op.taken[i] = true;
+    op.picked++;
+    if (op.picked >= op.picks) run.openPack = null;
+    return { ok: true };
+  }
+  function skip(run) { run.openPack = null; }
+  function canPlace(run, r, c) {
+    const p = run.pendingPlace[0];
+    if (!p || !GF.Board.inB(r, c)) return false;
+    if (p.kind === 'tile') return true;
+    const g = run.board.cells[r][c];
+    return !!g && g.kind === 'normal';
+  }
+  function place(run, r, c) {
+    const p = run.pendingPlace[0];
+    if (!p) return { ok: false, reason: 'none' };
+    if (!canPlace(run, r, c)) return { ok: false, reason: 'cell' };
+    if (p.kind === 'tile') { run.board.tiles[r][c] = p.id; run.board.tileState[r][c] = 0; }
+    else {
+      const g = run.board.cells[r][c];
+      run.board.cells[r][c] = { id: g.id, kind: p.id, color: p.id === 'prism' || p.id === 'wild' ? null : g.color };
+    }
+    run.pendingPlace.shift();
+    return { ok: true, placed: p };
+  }
+  function discardPending(run) { run.pendingPlace.shift(); }
+
+  GF.Packs = { KIND, rollSize, roll, rollChoice, open, grant, pick, skip, canPlace, place, discardPending };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- shop.js
 (function (GF) {
   'use strict';
   const C = GF.C;
-
   const fl = (run) => GF.Perks.flags(run.perks);
+  const hasV = (run, id) => GF.Vouchers.has(run, id);
+  function bf(run, p) {
+    const m = hasV(run, 'black_friday_2') ? 0.5 : hasV(run, 'black_friday_1') ? 0.75 : 1;
+    return Math.max(1, Math.ceil(p * m));
+  }
   function perkPrice(run, id) { return Math.max(1, GF.Perks.byId[id].price - fl(run).perkDiscount); }
   function tilePrice(run, id) { return Math.max(1, GF.Tiles.DEFS[id].price - fl(run).tileDiscount); }
-  function upgradePrice(run, up) { return fl(run).upgradeHalf ? Math.ceil(up.price / 2) : up.price; }
-  function rerollPrice(run) { return fl(run).freeReroll && run.shop && !run.shop.freeUsed ? 0 : run.shop.rerollCost; }
-  function canAfford(run, price) { return run.money - price >= GF.Run.moneyFloor(run); }
-  function rollPerks(run, n) {
-    const ex = new Set(GF.Perks.flags(run.perks).showman ? [] : run.perks.map((p) => p.id));
-    const out = [];
-    for (let i = 0; i < n; i++) { const id = GF.Perks.roll(run.rng, ex); out.push(id); if (id) ex.add(id); }
-    return out;
+  function itemBase(run, it) {
+    if (it.kind === 'perk') return GF.Perks.byId[it.id].price;
+    if (it.kind === 'card') return GF.Cards.DEFS[it.id].price;
+    if (it.kind === 'tile') return GF.Tiles.DEFS[it.id].price - fl(run).tileDiscount;
+    return C.UPGRADE_CARD[it.id].price;
   }
-  function rollTiles(run, n) { const out = []; for (let i = 0; i < n; i++) out.push(run.rng.pick(GF.Tiles.IDS)); return out; }
-  function rollUpgrade(run) {
-    const opts = ['polish'];
-    if (run.extraMoves < C.MAX_EXTRA_MOVES) opts.push('moves');
-    if (run.perkSlots < C.MAX_SLOTS) opts.push('slot');
-    const type = run.rng.pick(opts);
-    const up = { type: type, price: C.UPGRADE_PRICE[type] };
-    if (type === 'polish') up.color = run.rng.pick(GF.Run.colors(run));
-    return up;
+  function itemPrice(run, it) { return bf(run, Math.max(1, itemBase(run, it) - fl(run).perkDiscount)); }
+  function packPrice(run, pk) { return bf(run, Math.max(1, C.PACK_SIZES[pk.size].price - (pk.type === 'tile' ? fl(run).tileDiscount : 0))); }
+  function voucherPrice(run) { return run.voucherOffer ? Math.max(1, GF.Vouchers.DEFS[run.voucherOffer].price - (fl(run).upgradeHalf ? 3 : 0)) : 0; }
+  function rerollPrice(run) {
+    if (fl(run).freeReroll && run.shop && !run.shop.freeUsed) return 0;
+    return Math.max(0, run.shop.rerollCost - (hasV(run, 'reroll_1') ? 1 : 0) - (hasV(run, 'reroll_2') ? 2 : 0));
+  }
+  function canAfford(run, price) { return run.money - price >= GF.Run.moneyFloor(run); }
+  const keyOf = (it) => it.kind + ':' + it.id + ':' + (it.color == null ? '' : it.color);
+
+  function rollItem(run, exclude) {
+    const owned = new Set(fl(run).showman ? [] : run.perks.map((p) => p.id));
+    for (let tries = 0; tries < 30; tries++) {
+      const kind = run.rng.weighted(C.ITEM_WEIGHTS);
+      let it = null;
+      if (kind === 'perk') {
+        const ex = new Set(owned);
+        exclude.forEach((k) => { if (k.startsWith('perk:')) ex.add(k.split(':')[1]); });
+        const id = GF.Perks.roll(run.rng, ex);
+        it = id ? { kind: 'perk', id: id } : { kind: 'card', id: GF.Cards.roll(run.rng) };
+      } else if (kind === 'card') it = { kind: 'card', id: GF.Cards.roll(run.rng) };
+      else if (kind === 'tile') it = { kind: 'tile', id: run.rng.pick(GF.Tiles.IDS) };
+      else {
+        const w = {}; for (const k of Object.keys(C.UPGRADE_CARD)) w[k] = C.UPGRADE_CARD[k].weight;
+        const id = run.rng.weighted(w);
+        it = id === 'brilliance' ? { kind: 'upgrade', id: id } : { kind: 'upgrade', id: id, color: run.rng.pick(GF.Resolver.colorsOf(run)) };
+      }
+      if (!exclude.has(keyOf(it))) { exclude.add(keyOf(it)); return it; }
+    }
+    return null;
+  }
+  function stock(run) {
+    const ex = new Set(), items = [], packs = [];
+    for (let i = 0; i < fl(run).shopPerks; i++) items.push(rollItem(run, ex));
+    const np = hasV(run, 'pack_rat') ? 3 : 2;
+    for (let i = 0; i < np; i++) packs.push(GF.Packs.roll(run));
+    return { items: items, packs: packs };
   }
   function open(run) {
-    run.shop = { perks: rollPerks(run, fl(run).shopPerks), tiles: rollTiles(run, 2), upgrade: rollUpgrade(run), rerollCost: C.REROLL_BASE, freeUsed: false };
+    const block = Math.floor((run.round - 1) / C.VOUCHER_EVERY);
+    if (run.voucherBlock !== block) { run.voucherBlock = block; run.voucherOffer = GF.Vouchers.roll(run); }
+    const st = stock(run);
+    run.shop = { items: st.items, packs: st.packs, rerollCost: C.REROLL_BASE, freeUsed: false };
     return run.shop;
   }
-  function buyPerk(run, idx) {
-    const s = run.shop, id = s && s.perks[idx];
-    if (!id) return { ok: false, reason: 'none' };
-    if (run.perks.length >= run.perkSlots) return { ok: false, reason: 'slots' };
-    const d = GF.Perks.byId[id];
-    const price = perkPrice(run, id);
+  function buyItem(run, idx) {
+    const s = run.shop, it = s && s.items[idx];
+    if (!it) return { ok: false, reason: 'none' };
+    const price = itemPrice(run, it);
+    if (!canAfford(run, price)) return { ok: false, reason: 'money' };
+    if (it.kind === 'perk') {
+      if (run.perks.length >= run.perkSlots) return { ok: false, reason: 'slots' };
+      run.money -= price;
+      const inst = GF.Perks.create(it.id);
+      run.perks.push(inst);
+      const d = GF.Perks.byId[it.id];
+      if (d.onBuy) d.onBuy(run, inst, run.rng);
+    } else {
+      const r = GF.Packs.grant(run, it);
+      if (!r.ok) return r;
+      run.money -= price;
+    }
+    s.items[idx] = null;
+    return { ok: true };
+  }
+  function buyPack(run, idx) {
+    const s = run.shop, pk = s && s.packs[idx];
+    if (!pk) return { ok: false, reason: 'none' };
+    if (run.openPack || run.pendingPlace.length) return { ok: false, reason: 'busy' };
+    const price = packPrice(run, pk);
     if (!canAfford(run, price)) return { ok: false, reason: 'money' };
     run.money -= price;
-    const inst = GF.Perks.create(id);
-    run.perks.push(inst);
-    if (d.onBuy) d.onBuy(run, inst, run.rng);
-    s.perks[idx] = null;
-    return { ok: true, inst: inst };
+    run.openPack = GF.Packs.open(run, pk);
+    s.packs[idx] = null;
+    return { ok: true };
+  }
+  function buyVoucher(run) {
+    if (!run.voucherOffer) return { ok: false, reason: 'none' };
+    const price = voucherPrice(run);
+    if (!canAfford(run, price)) return { ok: false, reason: 'money' };
+    run.money -= price;
+    GF.Vouchers.apply(run, run.voucherOffer);
+    run.voucherOffer = null;
+    return { ok: true };
   }
   function sellPerk(run, uid) {
     if (run.phase !== 'shop') return { ok: false, reason: 'phase' };
@@ -1366,35 +1870,11 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     run.perks.splice(to, 0, p);
     return true;
   }
-  function buyTile(run, idx, r, c) {
-    const s = run.shop, id = s && s.tiles[idx];
-    if (!id) return { ok: false, reason: 'none' };
-    if (!GF.Board.inB(r, c)) return { ok: false, reason: 'cell' };
-    const price = tilePrice(run, id);
-    if (!canAfford(run, price)) return { ok: false, reason: 'money' };
-    run.money -= price;
-    run.board.tiles[r][c] = id;
-    run.board.tileState[r][c] = 0;
-    s.tiles[idx] = null;
-    return { ok: true };
-  }
   function removeTile(run, r, c) {
     if (!GF.Board.inB(r, c) || !run.board.tiles[r][c]) return false;
     run.board.tiles[r][c] = null;
     run.board.tileState[r][c] = 0;
     return true;
-  }
-  function buyUpgrade(run) {
-    const up = run.shop && run.shop.upgrade;
-    if (!up) return { ok: false, reason: 'none' };
-    const price = upgradePrice(run, up);
-    if (!canAfford(run, price)) return { ok: false, reason: 'money' };
-    run.money -= price;
-    if (up.type === 'moves') run.extraMoves++;
-    else if (up.type === 'slot') run.perkSlots++;
-    else run.polish[up.color]++;
-    run.shop.upgrade = null;
-    return { ok: true };
   }
   function reroll(run) {
     const s = run.shop;
@@ -1402,14 +1882,2138 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     const price = rerollPrice(run);
     if (!canAfford(run, price)) return { ok: false, reason: 'money' };
     run.money -= price;
-    if (price === 0 && fl(run).freeReroll && !s.freeUsed) s.freeUsed = true; else s.rerollCost++;
-    s.perks = rollPerks(run, fl(run).shopPerks);
-    s.tiles = rollTiles(run, 2);
-    s.upgrade = rollUpgrade(run);
+    if (fl(run).freeReroll && !s.freeUsed) s.freeUsed = true; else s.rerollCost++;
+    const ex = new Set(), items = [];
+    for (let i = 0; i < fl(run).shopPerks; i++) items.push(rollItem(run, ex));
+    s.items = items;
     return { ok: true };
   }
 
-  GF.Shop = { open, canAfford, buyPerk, sellPerk, movePerk, buyTile, removeTile, buyUpgrade, reroll, perkPrice, tilePrice, upgradePrice, rerollPrice };
+  GF.Shop = { open, canAfford, itemPrice, packPrice, voucherPrice, rerollPrice, perkPrice, tilePrice,
+    buyItem, buyPack, buyVoucher, sellPerk, movePerk, removeTile, reroll };
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- icons.js
+(function (GF) {
+  'use strict';
+  // Pixel-art icons. Every glyph is 16x16; '.' is transparent, 'k' the dark outline, 'm'/'l' the tint's
+  // main/light colours, and every other letter a fixed palette colour.
+  const PAL = { k: '#1a1030', w: '#ffffff', y: '#ffd23f', r: '#ff4d6d', b: '#3a86ff', g: '#3ddc84', p: '#a259ff',
+    o: '#ff8c42', c: '#7fe7ff', s: '#8a86a0', d: '#3b3650' };
+  const GEMTINT = [['#ff4d6d', '#ffb3c1'], ['#3a86ff', '#b8d4ff'], ['#3ddc84', '#b5f5d0'], ['#ffd23f', '#fff1b8'],
+    ['#a259ff', '#dcc2ff'], ['#eeeeee', '#ffffff'], ['#ff8c42', '#ffd2b0']];
+  const NAMED = { gold: ['#ffd23f', '#fff1b8'], pink: ['#ff6bd6', '#ffc2f0'], cyan: ['#7fe7ff', '#d6f8ff'], green: ['#3ddc84', '#b5f5d0'], grey: ['#8a86a0', '#d0cde0'] };
+  const GLYPHS = {
+    unknown: [
+      '................',
+      '.....kkkkkk.....',
+      '....kmmmmmmk....',
+      '...kmmkkkkmmk...',
+      '...kmk....kmk...',
+      '....k....kmmk...',
+      '........kmmk....',
+      '.......kmmk.....',
+      '.......kmk......',
+      '.......kmk......',
+      '........k.......',
+      '.......kkk......',
+      '.......kmk......',
+      '.......kkk......',
+      '................',
+      '................',
+    ],
+    heart: [
+      '................',
+      '..kkk.....kkk...',
+      '.kmmmk...kmmmk..',
+      'kmllmmk.kmmmmmk.',
+      'kmlmmmmkmmmmmmk.',
+      'kmmmmmmmmmmmmmk.',
+      'kmmmmmmmmmmmmmk.',
+      '.kmmmmmmmmmmmk..',
+      '..kmmmmmmmmmk...',
+      '...kmmmmmmmk....',
+      '....kmmmmmk.....',
+      '.....kmmmk......',
+      '......kmk.......',
+      '.......k........',
+      '................',
+      '................',
+    ],
+    gear: [
+      '......kkkk......',
+      '..kk.kmmmmk.kk..',
+      '.kmmkkmllmkkmmk.',
+      '.kmmmmmmmmmmmmk.',
+      '..kmlmmmmmmmmk..',
+      '.kmlmmkkkkmmmmk.',
+      'kmmlmk....kmmmmk',
+      'kmmmmk....kmmmmk',
+      'kmmmmk....kmmmmk',
+      'kmmmmk....kmmmmk',
+      '.kmmmmkkkkmmmmk.',
+      '..kmmmmmmmmmmk..',
+      '.kmmmmmmmmmmmmk.',
+      '.kmmkkmmmmkkmmk.',
+      '..kk.kmmmmk.kk..',
+      '......kkkk......',
+    ],
+    bomb: [
+      '............k...',
+      '...........kyk..',
+      '..........kywyk.',
+      '.........kskyk..',
+      '.......kksk.k...',
+      '.....kkddkkk....',
+      '....kmmmmmmmk...',
+      '...kmllmmmmmmk..',
+      '..kmlmmmmmmmmmk.',
+      '..kmlmmmmmmmmmk.',
+      '..kmmmmmmmmmmmk.',
+      '..kmmmmmmmmmmmk.',
+      '..kmmmmmmmmmmmk.',
+      '...kmmmmmmmmmk..',
+      '....kmmmmmmmk...',
+      '.....kkkkkkk....',
+    ],
+    star: [
+      '.......kk.......',
+      '......kmmk......',
+      '......kmmk......',
+      '.....kmllmk.....',
+      '.kkkkkmlmmkkkkk.',
+      'kmmmmmmlmmmmmmmk',
+      '.kmllllmmmmmmmk.',
+      '..kmlmmmmmmmmk..',
+      '...kmmmmmmmmk...',
+      '....kmmmmmmk....',
+      '...kmmmmmmmmk...',
+      '...kmmmmmmmmk...',
+      '..kmmmmkkmmmmk..',
+      '..kmmmk..kmmmk..',
+      '.kmmkk....kkmmk.',
+      '..kk........kk..',
+    ],
+    supernova: [
+      '.......kk.......',
+      '..k...kmmk...k..',
+      '.kmk..kmmk..kmk.',
+      '.kmmkkmllmkkmmk.',
+      '..kmmmllllmmmk..',
+      '...kmlwwwwlmk...',
+      '.kkmlwwwwwwlmkk.',
+      'kmmmlwwwwwwlmmmk',
+      'kmmmlwwwwwwlmmmk',
+      '.kkmlwwwwwwlmkk.',
+      '...kmlwwwwlmk...',
+      '..kmmmllllmmmk..',
+      '.kmmkkmllmkkmmk.',
+      '.kmk..kmmk..kmk.',
+      '..k...kmmk...k..',
+      '.......kk.......',
+    ],
+    coin: [
+      '.....kkkkkk.....',
+      '...kkmmmmmmkk...',
+      '..kmmllllllmmk..',
+      '.kmllmmoommmmmk.',
+      'kmlmmmoooommmmmk',
+      'kmlmmoommmmmmmmk',
+      'kmlmmoommmmmmmmk',
+      'kmlmmmooommmmmmk',
+      'kmmmmmmmooommmmk',
+      'kmmmmmmmmmoommmk',
+      'kmmmmmmmmmoommmk',
+      '.kmmmmoooommmmk.',
+      '..kmmmmoommmmk..',
+      '...kkmmmmmmkk...',
+      '.....kkkkkk.....',
+      '................',
+    ],
+    gem: [
+      '................',
+      '....kkkkkkkk....',
+      '...kllllllllk...',
+      '..klwwllllllmk..',
+      '.klwllllllllmmk.',
+      'klllllllllllmmmk',
+      'kmmmmmmmmmmmmmmk',
+      '.klmmmmmmmmmmmk.',
+      '..klmmmmmmmmmk..',
+      '...klmmmmmmmk...',
+      '....klmmmmmk....',
+      '.....klmmmk.....',
+      '......kmmk......',
+      '.......kk.......',
+      '................',
+      '................',
+    ],
+    shiny: [
+      '............k...',
+      '...........kwk..',
+      '..........kkwkk.',
+      '.........kwwwwwk',
+      '..........kkwkk.',
+      '...kkkkkkk.kwk..',
+      '..klllllllk.k...',
+      '.klwllllllmk....',
+      'klllllllllmmk...',
+      'kmmmmmmmmmmmk...',
+      '.klmmmmmmmmk....',
+      '..klmmmmmmk.....',
+      '...klmmmmk......',
+      '....klmmk.......',
+      '.....kmk........',
+      '......k.........',
+    ],
+    wild: [
+      '.......kk.......',
+      '......kryk......',
+      '.....krryyk.....',
+      '....krrryyyk....',
+      '...krrrryyyyk...',
+      '..krrrrryyyyyk..',
+      '.krrrrrmmyyyyyk.',
+      'krrrrrmllmyyyyyk',
+      'kbbbbbmmmmgggggk',
+      '.kbbbbbmmgggggk.',
+      '..kbbbbbgggggk..',
+      '...kbbbbggggk...',
+      '....kbbbgggk....',
+      '.....kbbggk.....',
+      '......kbgk......',
+      '.......kk.......',
+    ],
+    clock: [
+      '.....kkkkkk.....',
+      '...kkmmmmmmkk...',
+      '..kmmllllllmmk..',
+      '.kmlwwwwkwwwwmk.',
+      'kmlwwwwwkwwwwwmk',
+      'kmlwwwwwkwwwwwmk',
+      'kmlwwwwwkwwwwwmk',
+      'kmlswwwwkkkkwsmk',
+      'kmlwwwwwwwwwwwmk',
+      'kmlwwwwwwwwwwwmk',
+      'kmmwwwwwwwwwwwmk',
+      '.kmmwwwwswwwwmk.',
+      '..kmmmwwwwwmmk..',
+      '...kkmmmmmmkk...',
+      '.....kkkkkk.....',
+      '................',
+    ],
+    wand: [
+      '...........k....',
+      '..k.......kmk...',
+      '.kwk....kkmmmkk.',
+      '..k....kmmmlmmmk',
+      '........kmlmmkk.',
+      '........kmmkmmk.',
+      '.......kssk.kk..',
+      '......kssk...k..',
+      '.....kssk...kwk.',
+      '....kssk.....k..',
+      '...kssk.........',
+      '..kssk..........',
+      '.kssk...........',
+      '..kk............',
+      '................',
+      '................',
+    ],
+    coal: [
+      '................',
+      '.....kkkk.......',
+      '...kkddddkkk....',
+      '..kddsddddddk...',
+      '.kdsdddddddddk..',
+      '.kdsdddkddddddk.',
+      'kddddddkdddddddk',
+      'kddddddkkddddddk',
+      'kdddddkddkdddddk',
+      '.kddddddddddddk.',
+      '.kdddddddddddk..',
+      '..kddddddddddk..',
+      '...kkdddddkkk...',
+      '.....kkkkk......',
+      '................',
+      '................',
+    ],
+    hammer: [
+      '..kkkkkkkkkkk...',
+      '.kmmmmmmmmmmmk..',
+      'kmlllllllllmmmk.',
+      'kmlmmmmmmmmmmmk.',
+      'kmmmmmmmmmmmmmk.',
+      '.kmmmmmmmmmmmk..',
+      '..kkkkookkkkk...',
+      '.....kook.......',
+      '.....kook.......',
+      '.....kook.......',
+      '.....kook.......',
+      '.....kook.......',
+      '.....kook.......',
+      '.....kddk.......',
+      '......kk........',
+      '................',
+    ],
+    domino: [
+      '....kkkkkkkk....',
+      '...kwwwwwwwmk...',
+      '...kwkwwwkwmmk..',
+      '...kwwwwwwwmmk..',
+      '...kwwwkwwwmmk..',
+      '...kwwwwwwwmmk..',
+      '...kwkwwwkwmmk..',
+      '...kwwwwwwwmmk..',
+      '...ksssssssmmk..',
+      '...kwwwwwwwmmk..',
+      '...kwkwwwwwmmk..',
+      '...kwwwwwwwmmk..',
+      '...kwwwwwwwmmk..',
+      '...kwwwwwkwmmk..',
+      '...kwwwwwwwmk...',
+      '....kkkkkkkk....',
+    ],
+    arm: [
+      '.........kkk....',
+      '........kmmmk...',
+      '.......kmmmmmk..',
+      '.......kmmlmmk..',
+      '........kmmmmk..',
+      '....kkk.kmmmmk..',
+      '...kmmmkkmmmmk..',
+      '..kmmlmmkmmmmk..',
+      '.kmmllmmmmmmmk..',
+      'kmmlmmmmmmmmmk..',
+      'kmmmmmmmmmmmmk..',
+      'kmmmmmmmmmmmmk..',
+      'kmmmmmmmmmmmk...',
+      '.kmmmmmmmmmk....',
+      '..kkkkkkkkk.....',
+      '................',
+    ],
+    candle: [
+      '.......k........',
+      '......kyk.......',
+      '.....kyyok......',
+      '.....kywyk......',
+      '......kyk.......',
+      '.....kkkkk......',
+      '....klmmmmk.....',
+      '....klmmmmk.....',
+      '....klmmmmk.....',
+      '....klmmmmk.....',
+      '....klmmmmk.....',
+      '....klmmmmk.....',
+      '...kklmmmmkk....',
+      '..ksssssssssk...',
+      '...ksssssssk....',
+      '....kkkkkkk.....',
+    ],
+    piggy: [
+      '.......kkk......',
+      '......kyyyk.....',
+      '......kyoykkk...',
+      '...kkkkkkkkmmk..',
+      '..kmmmmmmmmmmk..',
+      '.kmllmmmmmmmmmk.',
+      'kmlmmmmmmmmkmmk.',
+      'kmlmmmmmmmmmmllk',
+      'kmmmmmmmmmmmmlk.',
+      'kmmmmmmmmmmmmllk',
+      'kmmmmmmmmmmmmmk.',
+      '.kmmmmmmmmmmmk..',
+      '.kmmkmmkkmmkmmk.',
+      '.kmmkmmkkmmkmmk.',
+      '..kk.kk..kk.kk..',
+      '................',
+    ],
+    explosion: [
+      '...k....k.......',
+      '..kmk..kmk..kk..',
+      '..kmmkkmmk.kmmk.',
+      '.kkkmmmmmmkmmmk.',
+      'kmmkmmyymmmmmk..',
+      '.kmmmyyyyyymmkk.',
+      '.kkmyyywwyyymmmk',
+      'kmmmyywwwwyymkk.',
+      '.kmmyywwwwwyymmk',
+      '.kkmyyywwwyymkk.',
+      'kmmmmyyyyyymmk..',
+      '.kmmmmmyymmmmmk.',
+      '..kmmkmmmmkkmmk.',
+      '.kmmk.kmmk..kmk.',
+      '..kk..kmk....k..',
+      '.......k........',
+    ],
+    shooting_star: [
+      '..........k.....',
+      '.........kmk....',
+      '......kkkmmmkkk.',
+      '.....kmmmmlmmmmk',
+      '......kmmlmmmmk.',
+      '.....k.kmmmmmk..',
+      '....klkmmmkmmmk.',
+      '...kllkmmk.kmmk.',
+      '..kllkklk...kk..',
+      '.kllkkllk.......',
+      'kllkkllk........',
+      'klkkllk.........',
+      '.kkllk..........',
+      '.kllk...........',
+      '..kk............',
+      '................',
+    ],
+    trash: [
+      '......kkkk......',
+      '.....kmmmmk.....',
+      '..kkkmkkkkmkkk..',
+      '.kmmmmmmmmmmmmk.',
+      '.kmllllllllllmk.',
+      '..kmmmmmmmmmmk..',
+      '..kmlmmlmmlmmk..',
+      '..kmlmmlmmlmmk..',
+      '..kmlmmlmmlmmk..',
+      '..kmlmmlmmlmmk..',
+      '..kmlmmlmmlmmk..',
+      '..kmlmmlmmlmmk..',
+      '..kmmmmmmmmmmk..',
+      '...kmmmmmmmmk...',
+      '....kkkkkkkk....',
+      '................',
+    ],
+    square: [
+      '.kkkkkk.kkkkkk..',
+      'kllllllkllllllk.',
+      'klwmmmmklwmmmmk.',
+      'klmmmmmklmmmmmk.',
+      'klmmmmmklmmmmmk.',
+      'klmmmmmklmmmmmk.',
+      'kmmmmmmkmmmmmmk.',
+      '.kkkkkk.kkkkkk..',
+      'kllllllkllllllk.',
+      'klwmmmmklwmmmmk.',
+      'klmmmmmklmmmmmk.',
+      'klmmmmmklmmmmmk.',
+      'klmmmmmklmmmmmk.',
+      'kmmmmmmkmmmmmmk.',
+      '.kkkkkk.kkkkkk..',
+      '................',
+    ],
+    credit_card: [
+      '................',
+      '................',
+      '.kkkkkkkkkkkkkk.',
+      'kmmmmmmmmmmmmmmk',
+      'kmllllllllllllmk',
+      'kddddddddddddddk',
+      'kddddddddddddddk',
+      'kmmmmmmmmmmmmmmk',
+      'kmyyommmmmmmmmmk',
+      'kmyyommmmmmmmmmk',
+      'kmmmmmmmmmmmmmmk',
+      'kmwwmwwmwwmmmmmk',
+      'kmmmmmmmmmmmmmmk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+      '................',
+    ],
+    pickaxe: [
+      '....kkkkkkk.....',
+      '..kkmmmmmmmkk...',
+      '.kmmmlllllmmmk..',
+      'kmmmkkoookkmmmk.',
+      'kmmk.koook.kmmk.',
+      'kmk..koook..kmk.',
+      '.k...koook...k..',
+      '.....koook......',
+      '.....koook......',
+      '.....koook......',
+      '.....koook......',
+      '.....koook......',
+      '.....koook......',
+      '.....kdddk......',
+      '......kkk.......',
+      '................',
+    ],
+    dice: [
+      '................',
+      '..kkkkkkkkkkkk..',
+      '.kllllllllllllk.',
+      '.klmmmmmmmmmmmk.',
+      '.klmkkmmmmkkmmk.',
+      '.klmkkmmmmkkmmk.',
+      '.klmmmmmmmmmmmk.',
+      '.klmmmmkkmmmmmk.',
+      '.klmmmmkkmmmmmk.',
+      '.klmmmmmmmmmmmk.',
+      '.klmkkmmmmkkmmk.',
+      '.klmkkmmmmkkmmk.',
+      '.klmmmmmmmmmmmk.',
+      '.kssssssssssssk.',
+      '..kkkkkkkkkkkk..',
+      '................',
+    ],
+    flame: [
+      '.......k........',
+      '......kmk.......',
+      '......kmmk......',
+      '.....kmmmk..k...',
+      '.....kmmmmkkmk..',
+      '..k.kmmmmmkmmk..',
+      '.kmkkmmmmmmmmk..',
+      '.kmmmmmymmmmmk..',
+      '.kmmmmyymmmmmmk.',
+      'kmmmmyyyymmmmmk.',
+      'kmmmmyywyymmmmk.',
+      'kmmmyywwwyymmmk.',
+      '.kmmyywwwyymmk..',
+      '..kmmyyyyymmk...',
+      '...kkmmmmmkk....',
+      '.....kkkkk......',
+    ],
+    chest: [
+      '................',
+      '...kkkkkkkkkk...',
+      '..kooooooooook..',
+      '.koommmooommmok.',
+      '.koooooooooooook',
+      '.kooooooooooook.',
+      '.kmmmmmmmmmmmmk.',
+      '.koooooyyoooook.',
+      '.kooooyyyyoooook',
+      '.koooooyyoooook.',
+      '.kooooooooooook.',
+      '.kmmmmmmmmmmmmk.',
+      '.kooooooooooook.',
+      '..kkkkkkkkkkkk..',
+      '................',
+      '................',
+    ],
+    c4: [
+      '.......k........',
+      '......kyk.......',
+      '..kkkkykk.kkk...',
+      '.kmmmkmmmkmmmk..',
+      '.kmlmkmlmkmlmk..',
+      '.kdddddddddddk..',
+      '.kmlmkmlmkmlmk..',
+      '..kkkkkkkkkkk...',
+      '..kgggkgkgggk...',
+      '..kkkkkkkkkkk...',
+      '.kmlmkmlmkmlmk..',
+      '.kdddddddddddk..',
+      '.kmlmkmlmkmlmk..',
+      '.kmmmkmmmkmmmk..',
+      '..kkk.kkk.kkk...',
+      '................',
+    ],
+    snowflake: [
+      '.......kk.......',
+      '..k...kmmk...k..',
+      '.kmk.kmmmmk.kmk.',
+      '..kmk.kmmk.kmk..',
+      '..kkmkkmmkkmkk..',
+      '.kmkkmmmmmmkkmk.',
+      '.kkkkmllllmkkkk.',
+      'kmmmmmlwwlmmmmmk',
+      'kmmmmmlwwlmmmmmk',
+      '.kkkkmllllmkkkk.',
+      '.kmkkmmmmmmkkmk.',
+      '..kkmkkmmkkmkk..',
+      '..kmk.kmmk.kmk..',
+      '.kmk.kmmmmk.kmk.',
+      '..k...kmmk...k..',
+      '.......kk.......',
+    ],
+    tree: [
+      '.....kkkkk......',
+      '...kkmmmmmkk....',
+      '..kmmmmmmmmmk...',
+      '.kmmlmmyymmmmk..',
+      'kmmlmmmyommmmmk.',
+      'kmmmmmmmmmmmmmk.',
+      'kmmyymmmmmyymmk.',
+      'kmmyommmmmyommk.',
+      '.kmmmmmmmmmmmk..',
+      '..kmmmmmmmmmk...',
+      '...kkkoookkk....',
+      '.....koook......',
+      '....kkoookk.....',
+      '...koooooook....',
+      '....kkkkkkk.....',
+      '................',
+    ],
+    moneybag: [
+      '.....kk..kk.....',
+      '....kmmkkmmk....',
+      '.....kmmmmk.....',
+      '......kddk......',
+      '....kkmmmmkk....',
+      '...kmmmmmmmmk...',
+      '..kmllmmmmmmmk..',
+      '.kmlmmmoooommmk.',
+      '.kmlmmoommmmmmk.',
+      'kmlmmmmoooommmmk',
+      'kmmmmmmmmmoommmk',
+      'kmmmmmoooommmmmk',
+      '.kmmmmmmmmmmmmk.',
+      '..kkmmmmmmmmkk..',
+      '....kkkkkkkk....',
+      '................',
+    ],
+    cascade: [
+      '.kkk........kkk.',
+      'klllkk....kklllk',
+      '.kllllkkkkllllk.',
+      '..kkllllllllkk..',
+      '....kkllllkk....',
+      '.kkk..kkkk..kkk.',
+      'klllkk....kklllk',
+      '.klmmmkkkkmmmlk.',
+      '..kkmmmmmmmmkk..',
+      '....kkmmmmkk....',
+      '.kkk..kkkk..kkk.',
+      'kmmmkk....kkmmmk',
+      '.kmmmmkkkkmmmmk.',
+      '..kkmmmmmmmmkk..',
+      '....kkmmmmkk....',
+      '......kkkk......',
+    ],
+    broom: [
+      '............kk..',
+      '...........kook.',
+      '..........kook..',
+      '.........kook...',
+      '........kook....',
+      '.......kook.....',
+      '.....kkook......',
+      '....kmmmmk......',
+      '...kmmmmmk......',
+      '..kyyyyyyyk.....',
+      '.kyyyyyyyyk.....',
+      'kyyyyyyyyk......',
+      'kyyyyyyyk.......',
+      'kykyykyk........',
+      '.k.kk.k.........',
+      '................',
+    ],
+    tophat: [
+      '................',
+      '....kkkkkkkk....',
+      '...kddddddddk...',
+      '...kdsddddddk...',
+      '...kdsddddddk...',
+      '...kdsddddddk...',
+      '...kdsddddddk...',
+      '...kddddddddk...',
+      '...kmmmmmmmmk...',
+      '.kkkmmmmmmmmkkk.',
+      'kddddddddddddddk',
+      '.kddddddddddddk.',
+      '..kkkkkkkkkkkk..',
+      '................',
+      '................',
+      '................',
+    ],
+    copy_r: [
+      '................',
+      '.kkkkk....kkkkk.',
+      'klllllk..kmmmmmk',
+      'klwwwlk..kmlllmk',
+      'klwwwlkk.kmlllmk',
+      'klwwwlkmkkmlllmk',
+      'klwwwlmmkkmlllmk',
+      'klwwwmmmmmmlllmk',
+      'klwwwlmmkkmlllmk',
+      'klwwwlkmkkmlllmk',
+      'klwwwlkk.kmlllmk',
+      'klllllk..kmmmmmk',
+      '.kkkkk....kkkkk.',
+      '................',
+      '................',
+      '................',
+    ],
+    cloud: [
+      '................',
+      '.....kkkk.......',
+      '...kkmmmmkkkk...',
+      '..kmmllllmmmmk..',
+      '.kmllllllllllmk.',
+      'kmllllllllllllmk',
+      'kmlllllllllllllk',
+      'kmllllllllllllmk',
+      '.kmmllllllllmmk.',
+      '..kkmmmmmmmmkk..',
+      '...kkkkkkkkk....',
+      '..kmmk..........',
+      '.kkmmk..........',
+      'kmkkk...........',
+      '.k..............',
+      '................',
+    ],
+    mirror: [
+      '.....kkkkkk.....',
+      '...kkmmmmmmkk...',
+      '..kmmccccccmmk..',
+      '.kmcwwcccccccmk.',
+      '.kmcwccccccccmk.',
+      'kmcwcccccccccmk.',
+      'kmccccccccccccmk',
+      'kmcccccccccccmk.',
+      '.kmcccccccccmk..',
+      '..kmmccccccmmk..',
+      '...kkmmmmmmkk...',
+      '.....kkmmkk.....',
+      '......kmmk......',
+      '......kllk......',
+      '.....kmmmmk.....',
+      '......kkkk......',
+    ],
+    eraser: [
+      '................',
+      '.........kkkk...',
+      '........kmmmmk..',
+      '.......kmllllmk.',
+      '......kmllllmmmk',
+      '.....kmllllmmmmk',
+      '....kmllllmmmmk.',
+      '...kcccccmmmmk..',
+      '..kccccccmmmk...',
+      '.kccccccmmmk....',
+      '.kcccccmmmk.....',
+      '.kccccmmmk......',
+      '..kccmmkk.k.k...',
+      '...kkkk..ksksk..',
+      '..........ksk...',
+      '...........k....',
+    ],
+    anvil: [
+      '................',
+      '................',
+      '.kkkkkkkkkkkkk..',
+      'klllllllllllllk.',
+      '.kmmmmmmmmmmmmk.',
+      '..kkmmmmmmmmmmk.',
+      '....kkkmmmmmkk..',
+      '......kmmmmmk...',
+      '......kmmmmmk...',
+      '.....kmmmmmmmk..',
+      '....kmmmmmmmmmk.',
+      '...kmmmmmmmmmmmk',
+      '...kmmmmmmmmmmmk',
+      '....kkkkkkkkkkk.',
+      '................',
+      '................',
+    ],
+    wrecking: [
+      '............kk..',
+      '...........kddk.',
+      '..........kddk..',
+      '.........kddk...',
+      '........kddk....',
+      '.......kddk.....',
+      '.....kkddk......',
+      '...kkmmmmmkk....',
+      '..kmmllmmmmmk...',
+      '.kmmlmmmmmmmmk..',
+      '.kmlmmmmmmmmmk..',
+      '.kmmmmmmmmmmmk..',
+      '.kmmmmmmmmmmmk..',
+      '..kmmmmmmmmmk...',
+      '...kkmmmmmkk....',
+      '.....kkkkk......',
+    ],
+    furnace: [
+      '..........kk....',
+      '.........kssk...',
+      '...kkkkkkksskk..',
+      '..ksssssssssssk.',
+      '.kssssssssssssk.',
+      '.kssmmmmmmmmssk.',
+      '.kssmkkkkkkmssk.',
+      '.kssmkykkykmssk.',
+      '.kssmkyyoykmssk.',
+      '.kssmyyoooymssk.',
+      '.kssmyowwoymssk.',
+      '.kssmmmmmmmmssk.',
+      '.kssssssssssssk.',
+      '.kddkkkkkkkkddk.',
+      '..kk........kk..',
+      '................',
+    ],
+    ring: [
+      '......k..k......',
+      '.....kwkkwkk....',
+      '....kccccccck...',
+      '....kcwcccck....',
+      '.....kccccck....',
+      '....kkkccckk....',
+      '...kmmmmmmmmk...',
+      '..kmllmmmmmmmk..',
+      '.kmlmkkkkkkmmmk.',
+      '.kmmk......kmmk.',
+      '.kmmk......kmmk.',
+      '.kmmmkkkkkkmmmk.',
+      '..kmmmmmmmmmmk..',
+      '...kmmmmmmmmk...',
+      '....kkkkkkkk....',
+      '................',
+    ],
+    shard: [
+      '........kk......',
+      '.......kmmk.....',
+      '......kmllmk....',
+      '......kmllmk....',
+      '.....kmlllmmk...',
+      '.....kmllmmmk...',
+      '....kmlllmmmk...',
+      '....kmllmmmmkkk.',
+      '...kmlllmmmmkmmk',
+      '...kmllmmmmmklmk',
+      '...kmllmmmmmlmmk',
+      '..kmlllmmmmmlmmk',
+      '..kmllmmmmmmmmk.',
+      '...kmmmmmmmmmk..',
+      '....kkkkkkkkk...',
+      '................',
+    ],
+    jar: [
+      '....kkkkkkkk....',
+      '...kssssssssk...',
+      '...kssssssssk...',
+      '....kddddddkk...',
+      '...kwcccccccck..',
+      '..kwcccccccccck.',
+      '..kwcccccccccck.',
+      '..kwcmmcccmmcck.',
+      '..kwmmmmmmmmmck.',
+      '..kwmlmmlmmmmck.',
+      '..kcmmmmmmmlmck.',
+      '..kcmmlmmmmmmck.',
+      '...kcmmmmmmmck..',
+      '....kcccccccck..',
+      '.....kkkkkkkk...',
+      '................',
+    ],
+    compass: [
+      '.......kk.......',
+      '......kmmk......',
+      '.....kmllmk.....',
+      '.....kmmmmk.....',
+      '......kssk......',
+      '.....kssssk.....',
+      '.....kskksk.....',
+      '....ksskkssk....',
+      '....ksk..ksk....',
+      '...kssk..kssk...',
+      '...ksk....ksk...',
+      '..kssk....kssk..',
+      '..ksk......kyk..',
+      '..ksk......kyk..',
+      '...k........k...',
+      '................',
+    ],
+    lightning: [
+      '........kkkkk...',
+      '.......kmmmmmk..',
+      '......kmllmmk...',
+      '.....kmllmmk....',
+      '....kmllmmk.....',
+      '...kmllmmkkkk...',
+      '..kmllmmmmmmmk..',
+      '.kmmmmmmmmmmk...',
+      '..kkkkkmmmmk....',
+      '.....kmmmmk.....',
+      '....kmmmmk......',
+      '....kmmmk.......',
+      '...kmmmk........',
+      '...kmmk.........',
+      '...kmk..........',
+      '....k...........',
+    ],
+    tile: [
+      '................',
+      '.kkkkkkkkkkkkkk.',
+      'kllllllllllllllk',
+      'klmmmmmmmmmmmmmk',
+      'klmmmmmllmmmmmmk',
+      'klmmmmllllmmmmmk',
+      'klmmmllmmllmmmmk',
+      'klmmllmmmmllmmmk',
+      'klmmllmmmmllmmmk',
+      'klmmmllmmllmmmmk',
+      'klmmmmllllmmmmmk',
+      'klmmmmmllmmmmmmk',
+      'klmmmmmmmmmmmmmk',
+      'kmmmmmmmmmmmmmmk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+    ],
+    ffwd: [
+      '................',
+      '................',
+      '.kk.....kk......',
+      'kllk...kllk.....',
+      'klmmk..klmmk....',
+      'klmmmk.klmmmk...',
+      'klmmmmkklmmmmk..',
+      'klmmmmmklmmmmmk.',
+      'klmmmmmmlmmmmmmk',
+      'klmmmmmklmmmmmk.',
+      'klmmmmkklmmmmk..',
+      'klmmmk.klmmmk...',
+      'klmmk..klmmk....',
+      'kllk...kllk.....',
+      '.kk.....kk......',
+      '................',
+    ],
+    hot_floor: [
+      '.....k....k.....',
+      '....kmk..kmk....',
+      '...kmmk.kmmk..k.',
+      '...kmmmkkmmmkkmk',
+      '.kkmmymkmmymmmmk',
+      'kmkmyymkmyymmmk.',
+      'kmmmyymmmyyyymk.',
+      '.kmyyyyyyywyymk.',
+      '.kmywwyyywwwymk.',
+      '.kkkkkkkkkkkkk..',
+      'kdddddddddddddk.',
+      'kdsdddsdddsdddk.',
+      'kddddddddddddddk',
+      'kddsdddsdddsdddk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+    ],
+    roller: [
+      '................',
+      '.kkkkkkkkkkk....',
+      'klllllllllllk...',
+      'klmmmmmmmmmmmk..',
+      'klmmmmmmmmmmmsk.',
+      'kmmmmmmmmmmmmksk',
+      '.kkkkkkkkkkkkksk',
+      '......ksssssssk.',
+      '......kskkkkkk..',
+      '......ksk.......',
+      '.....koook......',
+      '.....koook......',
+      '.....koook......',
+      '.....koook......',
+      '.....kdddk......',
+      '......kkk.......',
+    ],
+    blueprint: [
+      '.kkk............',
+      'klllkkkkkkkkkkk.',
+      'kllmmmmmmmmmmmmk',
+      'klmmwmmmmmmmwmmk',
+      'klmmwmmmmmmmwmmk',
+      'klmmwwwwwwwwwmmk',
+      'klmmmmmmwmmmmmmk',
+      'klmmmmmmwmmmmmmk',
+      'klmmwwwwwmmmmmmk',
+      'klmmwmmmmmmmmmmk',
+      'klmmwmmmmwwwwmmk',
+      'klmmwmmmmwmmmmmk',
+      'kllmmmmmmmmmmmmk',
+      'klllkkkkkkkkkkk.',
+      '.kkk............',
+      '................',
+    ],
+    yinyang: [
+      '.....kkkkkk.....',
+      '...kkwwwmmmkk...',
+      '..kwwwwwmmmmmk..',
+      '.kwwwwwmmmmmmmk.',
+      'kwwwwwmmmmmmmmmk',
+      'kwwwwwmmmllmmmmk',
+      'kwwwwwwmmllmmmmk',
+      'kwwwwwwwmmmmmmmk',
+      'kwwwwwwwwwmmmmmk',
+      'kwwwwwsswwwmmmmk',
+      'kwwwwwsswwwwmmmk',
+      '.kwwwwwwwwwwmmk.',
+      '..kwwwwwwwwwmk..',
+      '...kkwwwwwmmk...',
+      '.....kkkkkkk....',
+      '................',
+    ],
+    alarm: [
+      '..kk........kk..',
+      '.kmmk.kkkk.kmmk.',
+      'kmlmkkyyyykkmlmk',
+      'kmmkmmmmmmmmkmmk',
+      '.kkmmwwwwwwmmkk.',
+      '.kmmwwwkwwwwmmk.',
+      '.kmwwwwkwwwwwmk.',
+      '.kmwwwwkwwwwwmk.',
+      '.kmwwwwkkkwwwmk.',
+      '.kmwwwwwwwwwwmk.',
+      '.kmmwwwwwwwwmmk.',
+      '..kmmwwwwwwmmk..',
+      '...kmmmmmmmmk...',
+      '..kmmkkkkkkmmk..',
+      '...kk......kk...',
+      '................',
+    ],
+    rocket: [
+      '...........kkk..',
+      '.........kkmmmk.',
+      '........kmmmmmk.',
+      '.......kwwwmmmk.',
+      '......kwwwwwmmk.',
+      '....kkwwwwcwwmk.',
+      '...kmkwwwccwwk..',
+      '..kmmwwwwwwwk...',
+      '..kmmwwwwwwwk...',
+      '...kmwwwwwmk....',
+      '...kkmwwwmmk....',
+      '..kyokmmmmmk....',
+      '.kyyokkmmkk.....',
+      'kyyok..kk.......',
+      'kyok............',
+      '.kk.............',
+    ],
+    chart: [
+      '................',
+      '...........k....',
+      '..........kwk...',
+      '.........kwwwk..',
+      '........kwwwwwk.',
+      '........kkkwkk..',
+      '.......kwkkwk...',
+      '......kwmmkwk...',
+      '.....kwkmmkmmk..',
+      '.kk.kwkkmmkmmk..',
+      'kmmk.kkkmmkmmk..',
+      'kmmkkmmkmmkmmk..',
+      'kmmkkmmkmmkmmkk.',
+      'kssssssssssssssk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+    ],
+    snowball: [
+      '................',
+      '.....kkkkkk.....',
+      '...kkwwwwwwkk...',
+      '..kwwwwwwwwwwk..',
+      '.kwwwwwwwwwwwmk.',
+      '.kwwwwwwwwwwwmk.',
+      'kwwwwwwwwwwwwmmk',
+      'kwwwwwwwwwwwwmmk',
+      'kwwwwwwwwwwwmmmk',
+      'kwwwwwwwwwwmmmmk',
+      '.kwwwwwwwwmmmmk.',
+      '.kmwwwwwwmmmmmk.',
+      '..kmmmmmmmmmmk..',
+      '...kkmmmmmmkk...',
+      '.....kkkkkk.....',
+      '................',
+    ],
+    gauge: [
+      '................',
+      '.....kkkkkk.....',
+      '...kkgggyyykk...',
+      '..kgggggyyyyok..',
+      '.kggggkkkkkoook.',
+      'kgggkk...k.krrrk',
+      'kggk......k.krrk',
+      'kggkkkkkkkkkkrrk',
+      'kmmmmmmmmmmmmmmk',
+      'kmlllllllllllmmk',
+      'kmmmmmmmmmmmmmmk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+      '................',
+      '................',
+      '................',
+    ],
+    exponent: [
+      '.........kkkk...',
+      '........kmmmmk..',
+      '.........kkkmk..',
+      '.........kmmk...',
+      '........kmkkk...',
+      '........kmmmmk..',
+      '.kkk....kkkkk...',
+      'kmmmk..kmmmk....',
+      '.kmmmkkmmmk.....',
+      '..kmmmmmmk......',
+      '...kmmmmk.......',
+      '...kmmmmk.......',
+      '..kmmmmmmk......',
+      '.kmmmkkmmmk.....',
+      'kmmmk..kmmmk....',
+      '.kkk....kkk.....',
+    ],
+    note: [
+      '.......kkkkkkk..',
+      '......kmmmmmmmk.',
+      '......kmmmmmmmk.',
+      '......kmkkkkkmk.',
+      '......kmk...kmk.',
+      '......kmk...kmk.',
+      '......kmk...kmk.',
+      '......kmk...kmk.',
+      '...kkkkmk.kkkmk.',
+      '..kmmmmmkkmmmmk.',
+      '.kmlmmmmkmlmmmk.',
+      '.kmmmmmmkmmmmmk.',
+      '..kmmmmk.kmmmk..',
+      '...kkkk...kkk...',
+      '................',
+      '................',
+    ],
+    chomp: [
+      '.....kkkkkk.....',
+      '...kkmmmmmmkk...',
+      '..kmmmmmmmmmmk..',
+      '.kmmmmmmmkmmmk..',
+      'kmmmmmmmmmmmk...',
+      'kmmmmmmmmmmk....',
+      'kmmmmmmmmmk.....',
+      'kmmmmmmmmk...k..',
+      'kmmmmmmmmk..kwk.',
+      'kmmmmmmmmmk..k..',
+      'kmmmmmmmmmmkk...',
+      '.kmmmmmmmmmmmk..',
+      '..kmmmmmmmmmmk..',
+      '...kkmmmmmmkk...',
+      '.....kkkkkk.....',
+      '................',
+    ],
+    seven: [
+      '................',
+      '..kkkkkkkkkkk...',
+      '.kmmmmmmmmmmmk..',
+      '.kmlllllllllmk..',
+      '.kmmmmmmmmlmmk..',
+      '..kkkkkkklmmk...',
+      '.......klmmk....',
+      '......klmmk.....',
+      '.....klmmk......',
+      '.....klmmk......',
+      '....klmmk.......',
+      '....klmmk.......',
+      '....klmmk.......',
+      '....kmmmk.......',
+      '.....kkk........',
+      '................',
+    ],
+    sword: [
+      '............kkk.',
+      '...........kwwwk',
+      '..........kwllwk',
+      '.........kwllwk.',
+      '........kwllwk..',
+      '.......kwllwk...',
+      '..k...kwllwk....',
+      '.kyk.kwllwk.....',
+      '.kyykwllwk......',
+      '..kyymlwk.......',
+      '...kyymk........',
+      '..kookyyk.......',
+      '.kook.kyyk......',
+      'kddk...kk.......',
+      '.kk.............',
+      '................',
+    ],
+    pawn: [
+      '......kkk.......',
+      '.....kmmmk......',
+      '....kmllmmk.....',
+      '....kmlmmmk.....',
+      '.....kmmmk......',
+      '....kmmmmmk.....',
+      '.....kmmmk......',
+      '.....kmlmk......',
+      '....kmlmmmk.....',
+      '....kmlmmmk.....',
+      '...kmlmmmmmk....',
+      '..kmmmmmmmmmk...',
+      '.kmmmmmmmmmmmk..',
+      '.kmmmmmmmmmmmk..',
+      '..kkkkkkkkkkk...',
+      '................',
+    ],
+    crates: [
+      '................',
+      '.....kkkkkk.....',
+      '....kooooook....',
+      '....komddmok....',
+      '....koddmdok....',
+      '....kodmddok....',
+      '..kkkooooookkk..',
+      '.kooooooooooook.',
+      '.komddmoomddmok.',
+      '.koddmdoodmmdok.',
+      '.kodmddoomddmok.',
+      '.koddmdoodmmdok.',
+      '.kooooooooooook.',
+      '..kkkkkkkkkkkk..',
+      '................',
+      '................',
+    ],
+    chip: [
+      '.....kkkkkk.....',
+      '...kkmmwwmmkk...',
+      '..kmmmmwwmmmmk..',
+      '.kwmmllllllmmwk.',
+      '.kwmlllllllllwk.',
+      'kmmlllmmmmlllmmk',
+      'kmmllmmmmmmllmmk',
+      'kwwllmmmmmmllwwk',
+      'kwwllmmmmmmllwwk',
+      'kmmllmmmmmmllmmk',
+      'kmmlllmmmmlllmmk',
+      '.kwlllllllllmwk.',
+      '.kwmmllllllmmwk.',
+      '..kmmmmwwmmmmk..',
+      '...kkmmwwmmkk...',
+      '.....kkkkkk.....',
+    ],
+    revolver: [
+      '.....kkkkkk.....',
+      '...kkmmmmmmkk...',
+      '..kmmmmmmmmmmk..',
+      '.kmmmkkmmkkmmmk.',
+      '.kmmmkkmmkkmmmk.',
+      'kmkkmmmmmmmmkkmk',
+      'kmkkmmmmmmmmkkmk',
+      'kmmmmmmkkmmmmmmk',
+      'kmmmmmmkkmmmmmmk',
+      'kmkkmmmmmmmmrrmk',
+      'kmkkmmmmmmmmrrmk',
+      '.kmmmkkmmkkmmmk.',
+      '.kmmmkkmmkkmmmk.',
+      '..kmmmmmmmmmmk..',
+      '...kkmmmmmmkk...',
+      '.....kkkkkk.....',
+    ],
+    shark: [
+      '.......kk.......',
+      '......kssk......',
+      '.....ksssk......',
+      '....kssssk......',
+      '...ksssssk......',
+      '..kssssssk......',
+      '.ksssssssk......',
+      'ksssssssskk.....',
+      'ksssssssssskkkk.',
+      'kmmmmmmmmmmmmmmk',
+      'kmlllmmmmlllmmmk',
+      'kmmmmmmmmmmmmmmk',
+      'kmmmmlllmmmmlllk',
+      'kmmmmmmmmmmmmmmk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+    ],
+    ticket: [
+      '................',
+      '................',
+      '.kkkkkkkkkkkkkk.',
+      'kmmmmmmmmmmmmmmk',
+      'kmllllllllllllmk',
+      'klmkmmmwmmmmkmlk',
+      '.kmkmmwwwmmmkmk.',
+      '.kmkwwwwwwwmkmk.',
+      '.kmkmmwwwmmmkmk.',
+      'klmkmwmmmwmmkmlk',
+      'kmllllllllllllmk',
+      'kmmmmmmmmmmmmmmk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+      '................',
+      '................',
+    ],
+    briefcase: [
+      '................',
+      '.....kkkkkk.....',
+      '....kddddddk....',
+      '..kkkdkkkkdkkk..',
+      '.kmmmmmmmmmmmmk.',
+      'kmllllllllllllmk',
+      'kmlmmmmmmmmmmmmk',
+      'kmlmmmmmmmmmmmmk',
+      'kmmmmmmyymmmmmmk',
+      'kdddddyyyydddddk',
+      'kmmmmmmyymmmmmmk',
+      'kmlmmmmmmmmmmmmk',
+      'kmmmmmmmmmmmmmmk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+      '................',
+    ],
+    halo: [
+      '...kkkkkkkkkk...',
+      '..kmmmmmmmmmmk..',
+      '.kmllkkkkkkmmmk.',
+      '.kmmmmmmmmmmmmk.',
+      '..kkkkkkkkkkkk..',
+      '.kk..........kk.',
+      'kwwk........kwwk',
+      'kwwwk......kwwwk',
+      'kwwwwk....kwwwwk',
+      'kwwwwwk..kwwwwwk',
+      '.kwwwwwkkwwwwwk.',
+      '.kwwwwwkkwwwwwk.',
+      '..kwwwwkkwwwwk..',
+      '...kwwk..kwwk...',
+      '....kk....kk....',
+      '................',
+    ],
+    shield: [
+      '.kkkkkkkkkkkkkk.',
+      'kmmmmmmmmmmmmmmk',
+      'kmllllllllllllmk',
+      'kmlmmmmmmmmmmmmk',
+      'kmlmmmmmmmmmwmmk',
+      'kmlmmmmmmmmwwmmk',
+      'kmlmmmmmmmwwwmmk',
+      'kmlmwmmmmwwwmmmk',
+      'kmlmwwmmwwwmmmmk',
+      '.kmmwwwwwwmmmmk.',
+      '.kmmmwwwwmmmmmk.',
+      '..kmmmwwmmmmmk..',
+      '...kmmmmmmmmk...',
+      '....kkmmmmkk....',
+      '......kkkk......',
+      '................',
+    ],
+    flame_bomb: [
+      '.......k........',
+      '......kmk.k.....',
+      '.....kmmkkmk....',
+      '.....kmmmmmk....',
+      '....kmmyymmmk...',
+      '....kmyywymmk...',
+      '.....kyyyymk....',
+      '.....kksskk.....',
+      '...kkddddddk....',
+      '..kddssdddddk...',
+      '..kdsddddddddk..',
+      '.kddsddddddddk..',
+      '.kddddddddddddk.',
+      '..kddddddddddk..',
+      '...kddddddddk...',
+      '....kkkkkkkk....',
+    ],
+    net: [
+      '.......kkkkkk...',
+      '......kmmmmmmk..',
+      '.....kmkskskkmk.',
+      '....kmssssssskmk',
+      '....kmksksksksmk',
+      '....kmsssyssssmk',
+      '....kmksyyysksmk',
+      '....kmssyyysssmk',
+      '.....kmkykyksmk.',
+      '......kmmmmmmk..',
+      '.....kookkkkk...',
+      '....kook........',
+      '...kook.........',
+      '..kook..........',
+      '.kook...........',
+      '..kk............',
+    ],
+    midas: [
+      '......kkkk......',
+      '.....kooook.....',
+      '....koyyyyok....',
+      '....koywyyok....',
+      '....koyyyyok....',
+      '.....kooook.....',
+      '.kk...kkkk...kk.',
+      'kmmk........kmmk',
+      'kmmmk......kmmmk',
+      'kmlmmkkkkkkmmmmk',
+      '.kmlmmmmmmmmmmk.',
+      '.kmlllmmmmmmmmk.',
+      '..kmmmmmmmmmmk..',
+      '...kmmmmmmmmk...',
+      '....kddddddk....',
+      '.....kkkkkk.....',
+    ],
+    jester: [
+      '.k..........k...',
+      'kyk...kk...kyk..',
+      'kmmk.kyyk.kppk..',
+      '.kmmkkppkkppk...',
+      '.kmmmkppkpppk...',
+      '..kmmmpppppk....',
+      '..kmmmmppppk....',
+      '..kmmmmpppppk...',
+      '.kwwwwwwwwwwwk..',
+      '.kwywwwywwwywk..',
+      '.kwwwwwwwwwwwk..',
+      '..kkkkkkkkkkk...',
+      '................',
+      '................',
+      '................',
+      '................',
+    ],
+    droplet: [
+      '.......k........',
+      '......kmk.......',
+      '......kmk.......',
+      '.....kmmmk......',
+      '.....kmmmk......',
+      '....kmmmmmk.....',
+      '...kmmmmmmmk....',
+      '..kmmmmmmmmmk...',
+      '..kmwlmmmmmmk...',
+      '.kmmwlmmmmmmmk..',
+      '.kmmwmmmmmmmmk..',
+      '.kmmlmmmmmmmmk..',
+      '..kmmmmmmmmmk...',
+      '...kmmmmmmmk....',
+      '....kkmmmkk.....',
+      '......kkk.......',
+    ],
+    hourglass: [
+      '..kkkkkkkkkkkk..',
+      '.kooooooooooook.',
+      '.kooooooooooook.',
+      '..kwmmmmmmmmwk..',
+      '..kwlmmmmmmmwk..',
+      '...kwlmmmmmwk...',
+      '....kwlmmmwk....',
+      '.....kkmmkk.....',
+      '.....kkmmkk.....',
+      '....kwkmmkwk....',
+      '...kwkkmmkkwk...',
+      '..kwkkmmmmkkwk..',
+      '..kwmmmmmmmmwk..',
+      '.kooooooooooook.',
+      '.kooooooooooook.',
+      '..kkkkkkkkkkkk..',
+    ],
+    tornado: [
+      '.kkkkkkkkkkkkkk.',
+      'kmmmmmmmmmmmmmmk',
+      '.kllllllllllllk.',
+      '..kmmmmmmmmmmmk.',
+      '...kllllllllllk.',
+      '...kmmmmmmmmmk..',
+      '....kllllllllk..',
+      '....kmmmmmmmk...',
+      '.....klllllk....',
+      '......kmmmmk....',
+      '......klllk.....',
+      '.....kmmmk......',
+      '.....kllk.......',
+      '......kmk.......',
+      '.......k........',
+      '................',
+    ],
+    clover: [
+      '....kkk...kkk...',
+      '...kmmmk.kmmmk..',
+      '..kmmlmmkmmmmmk.',
+      '..kmlmmmmmmmmmk.',
+      '..kmmmmmmmmmmmk.',
+      '..kkmmmmmmmmmkk.',
+      '.kmmmmmmmmmmmmmk',
+      'kmmlmmmmmmmmmmmk',
+      'kmlmmmmkmmmmmmmk',
+      'kmmmmmkkkmmmmmk.',
+      '.kmmmkmmkkmmmk..',
+      '..kkk.kmmkkkk...',
+      '.......kmmk.....',
+      '........kmmk....',
+      '.........kk.....',
+      '................',
+    ],
+    goblet: [
+      '.kkkkkkkkkkkkk..',
+      'kmmmmmmmmmmmmmk.',
+      'kmlllllllllllmk.',
+      'kmlmmmmrrmmmmmk.',
+      'kmlmmmrwrrmmmmk.',
+      '.kmlmmmrrmmmmk..',
+      '.kmmmmmmmmmmmk..',
+      '..kmmmmmmmmmk...',
+      '...kkmmmmmkk....',
+      '.....kmmmk......',
+      '.....kmlmk......',
+      '....kkmmmkk.....',
+      '...kmmmmmmmk....',
+      '..kmmmmmmmmmk...',
+      '...kkkkkkkkk....',
+      '................',
+    ],
+    flask: [
+      '......kkkk......',
+      '.....kssssk.....',
+      '......kwwk......',
+      '......kwwk......',
+      '......kwwk......',
+      '.....kwwwwk.....',
+      '....kwwwwwwk....',
+      '...kwwwwwwwwk...',
+      '..kwmmwmmmmmwk..',
+      '..kmmmmmmmmmmk..',
+      '.kmmmmwmmmmmmmk.',
+      '.kmmmmmmmmwmmmk.',
+      '.kmmmmmmmmmmmmk.',
+      '..kmmmmmmmmmmk..',
+      '...kmmmmmmmmk...',
+      '....kkkkkkkk....',
+    ],
+    gavel: [
+      '.....kk.........',
+      '....kmmk........',
+      '...kmmmmk.......',
+      '..kmmlmmmk......',
+      '.kmmlmmmmmk.....',
+      '..kmlmmmmmok....',
+      '...kmmmmmoook...',
+      '....kmmmooook...',
+      '.....kkkkooook..',
+      '.........kooook.',
+      '..kkkkkkk.koook.',
+      '.kdddddddk.kok..',
+      'kdsssssssdk.k...',
+      'kdddddddddk.....',
+      '.kkkkkkkkk......',
+      '................',
+    ],
+    cpu: [
+      '...k.k.k.k.k....',
+      '..ksksksksksk...',
+      '.kdddddddddddkk.',
+      'ksddddddddddddsk',
+      '.kddmmmmmmmddkk.',
+      'ksddmmmmwmmddsk.',
+      '.kddmmmwwmmddk..',
+      'ksddmmwwwwmddsk.',
+      '.kddmmmmwwmddk..',
+      'ksddmmmwmmmddsk.',
+      '.kddmmmmmmmddkk.',
+      'ksddddddddddddsk',
+      '.kdddddddddddkk.',
+      '..ksksksksksk...',
+      '...k.k.k.k.k....',
+      '................',
+    ],
+    boot: [
+      '................',
+      '...kkkkkk.......',
+      '..kmmmmmmk......',
+      '..kmlllmmkkk....',
+      '..kmlmmmmkwwk...',
+      '..kmlmmmmkwwwk..',
+      '..kmlmmmmwwwwk..',
+      '..kmlmmmwwwwwk..',
+      '..kmlmmmmkkkk...',
+      '..kmlmmmmmmkkk..',
+      '..kmlmmmmmmmmmk.',
+      '.kmmmmmmmmmmmmk.',
+      '.kddddddddddddk.',
+      '..kkkkkkkkkkkk..',
+      '................',
+      '................',
+    ],
+    card_slot: [
+      '................',
+      '....kkkkkkkk....',
+      '...kwwwwwwwwk...',
+      '...kwmmmmmmwk...',
+      '...kwmlllmmwk...',
+      '...kwmlwlmmwk...',
+      '...kwmlllmmwk...',
+      '...kwmmmmmmwk...',
+      '.kkkwmmmmmmwkkk.',
+      'kddddddddddddddk',
+      'kdsssssssssssdk.',
+      'kddddddddddddddk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+      '................',
+      '................',
+    ],
+    reroll: [
+      '.....kkkkkk.....',
+      '...kkmmmmmmkk.k.',
+      '..kmmllllllmmkmk',
+      '.kmlmkkkkkkmmmmk',
+      'kmlmk......kmmmk',
+      'kmmk......kmmmmk',
+      'kmmk.......kkkk.',
+      '.kk..........kk.',
+      '.kkkk.......kmmk',
+      'kmmmmk......kmmk',
+      'kmmmk......kmlmk',
+      'kmmmmkkkkkkmlmk.',
+      'kmkmmllllllmmk..',
+      '.k.kkmmmmmmkk...',
+      '.....kkkkkk.....',
+      '................',
+    ],
+    palette: [
+      '................',
+      '....kkkkkkkk....',
+      '..kkmmmmmmmmkk..',
+      '.kmmmmmmmmmmmmk.',
+      'kmmrrmmbbmmmmmmk',
+      'kmmrrmmbbmmyymmk',
+      'kmmmmmmmmmmyymmk',
+      'kmmggkkkkkkkkmmk',
+      'kmmggkkkkk..kmk.',
+      'kmmmmmmmmmk..k..',
+      'kmmppmmmmmmk.kk.',
+      '.kmppmmmmmmmkssk',
+      '..kmmmmmmmmkssk.',
+      '...kkkkkkkkssk..',
+      '.........kssk...',
+      '..........kk....',
+    ],
+    pack_up: [
+      '..k.k.k.k.k.k...',
+      '.kdkdkdkdkdkdk..',
+      '.kdddddddddddk..',
+      '.kmlmmmmmmmmmk..',
+      '.kmlmmmwmmmmmk..',
+      '.kmlmmwwwmmmmk..',
+      '.kmlmwwwwwmmmk..',
+      '.kmlwwwwwwwmmk..',
+      '.kmlmmwwwmmmmk..',
+      '.kmlmmwwwmmmmk..',
+      '.kmlmmwwwmmmmk..',
+      '.kmlmmmmmmmmmk..',
+      '.kdddddddddddk..',
+      '.kdkdkdkdkdkdk..',
+      '..k.k.k.k.k.k...',
+      '................',
+    ],
+    pack_tile: [
+      '..k.k.k.k.k.k...',
+      '.kdkdkdkdkdkdk..',
+      '.kdddddddddddk..',
+      '.kmlmmmmmmmmmk..',
+      '.kmlmwwwwwmmmk..',
+      '.kmlmwlllwmmmk..',
+      '.kmlmwlwlwmmmk..',
+      '.kmlmwlllwmmmk..',
+      '.kmlmwwwwwmmmk..',
+      '.kmlmmmmmmmmmk..',
+      '.kmlmmmmmmmmmk..',
+      '.kmlmmmmmmmmmk..',
+      '.kdddddddddddk..',
+      '.kdkdkdkdkdkdk..',
+      '..k.k.k.k.k.k...',
+      '................',
+    ],
+    pack_jewel: [
+      '..k.k.k.k.k.k...',
+      '.kdkdkdkdkdkdk..',
+      '.kdddddddddddk..',
+      '.kmlmmmmmmmmmk..',
+      '.kmlmwwwwwmmmk..',
+      '.kmlwwwwwwwmmk..',
+      '.kmlwwwwwwwmmk..',
+      '.kmlmlllllmmmk..',
+      '.kmlmmlllmmmmk..',
+      '.kmlmmmlmmmmmk..',
+      '.kmlmmmmmmmmmk..',
+      '.kmlmmmmmmmmmk..',
+      '.kdddddddddddk..',
+      '.kdkdkdkdkdkdk..',
+      '..k.k.k.k.k.k...',
+      '................',
+    ],
+    pack_card: [
+      '..k.k.k.k.k.k...',
+      '.kdkdkdkdkdkdk..',
+      '.kdddddddddddk..',
+      '.kmlmmmmmmmmmk..',
+      '.kmlmmwwwwmmmk..',
+      '.kmlmmwssmwmmk..',
+      '.kmlmwwwwmwmmk..',
+      '.kmlmwsswmwmmk..',
+      '.kmlmwwwwmwmmk..',
+      '.kmlmwsswwwmmk..',
+      '.kmlmwwwwmmmmk..',
+      '.kmlmmmmmmmmmk..',
+      '.kdddddddddddk..',
+      '.kdkdkdkdkdkdk..',
+      '..k.k.k.k.k.k...',
+      '................',
+    ],
+    box_plus: [
+      '.........kkk....',
+      '........kmmmk...',
+      '.......kkmwmkk..',
+      '......kmmmwmmmk.',
+      '......kmwwwwwmk.',
+      '..kkkkkmmmwmmmk.',
+      '.koooookkmwmkkk.',
+      'koooooooommmoook',
+      'koooooooddoooook',
+      'koooooooddoooook',
+      'koooooooddoooook',
+      'koooooooddoooook',
+      'koooooooddoooook',
+      'kooooooooooooook',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+    ],
+    star_diag: [
+      '.kk..........kk.',
+      'kwwk........kwwk',
+      'kwwwk......kwwwk',
+      '.kwwk..kk..kwwk.',
+      '..kk..kmmk..kk..',
+      '...kkkmllmkkk...',
+      '..kmmmmlmmmmmk..',
+      '...kmllmmmmmk...',
+      '....kmmmmmmk....',
+      '...kmmmmmmmmk...',
+      '..kkmmmkkmmmkk..',
+      '.kwwkkk..kkkwwk.',
+      'kwwwk......kwwwk',
+      'kwwk........kwwk',
+      '.kk..........kk.',
+      '................',
+    ],
+    book: [
+      '...kkkkkkkkkkk..',
+      '..kmmmmmmmmmmmk.',
+      '.kmmlllllllllmk.',
+      '.kmlmmmmmmmmmmk.',
+      '.kmlmmmmwmmmmmk.',
+      '.kmlmmmwwwmmmmk.',
+      '.kmlmmwwmwwmmmk.',
+      '.kmlmmmwwwmmmmk.',
+      '.kmlmmmmwmmmmmk.',
+      '.kmlmmmmmmmmmmk.',
+      '.kmlmmmmmmmmmmk.',
+      '.kmlmmmmmmmmmmk.',
+      '.kmlwwwwwwwwwwwk',
+      '.kmmssssssssssk.',
+      '..kmmmmmmmmmmmk.',
+      '...kkkkkkkkkkk..',
+    ],
+    bat: [
+      '............kk..',
+      '...........kwwk.',
+      '..........kwrwwk',
+      '.........kkwwrk.',
+      '........kmmmkk..',
+      '.......kmlllmk..',
+      '......kmllmmmk..',
+      '.....kmllmmmk...',
+      '....kmllmmmk....',
+      '...kmlmmmmk.....',
+      '...kmmmmkk......',
+      '..kddkkk........',
+      '.kddk...........',
+      'kddk............',
+      '.kk.............',
+      '................',
+    ],
+    refract: [
+      '......k.........',
+      '.....kmk........',
+      '....kmlmk.......',
+      '....kmlmk.......',
+      '...kmllmmk......',
+      '.k.kmlllmkkk....',
+      'kwkmlllllmrrkk..',
+      '.kwmlllllmoorrk.',
+      '..kmlllllmyyook.',
+      '.kmllllllmggyyk.',
+      '.kmllllllmbbggk.',
+      'kmllllllllmpbbk.',
+      'kmmmmmmmmmmmppk.',
+      '.kkkkkkkkkkkkk..',
+      '................',
+      '................',
+    ],
+    scales: [
+      '.......kk.......',
+      '.kkkkkkmmkkkkkk.',
+      'kmmmmmmmmmmmmmmk',
+      '.kmkkkkmmkkkkmk.',
+      'kmkmk.kmmk.kmkmk',
+      'kmkkmkkmmkkmkkmk',
+      'kmmmmkkmmkkmmmmk',
+      '.kmmk.kmmk.kmmk.',
+      '..kk..kmmk..kk..',
+      '......kmmk......',
+      '......kmmk......',
+      '....kkkmmkkk....',
+      '...kmmmmmmmmk...',
+      '..kmmmmmmmmmmk..',
+      '...kkkkkkkkkk...',
+      '................',
+    ],
+    chain: [
+      '..kkkkk.........',
+      '.kmmmmmk........',
+      'kmmllmmmk.......',
+      'kmmkkkmmk.......',
+      'kmmk.kmmkk......',
+      'kmmkkkmmllk.....',
+      'kmmmmmmlllk.....',
+      '.kmmmmllllkkkk..',
+      '..kkkkklllmmmmk.',
+      '.......klmllmmmk',
+      '.......kmmkkkmmk',
+      '.......kmmk.kmmk',
+      '.......kmmkkkmmk',
+      '.......kmmmmmmmk',
+      '........kmmmmmk.',
+      '.........kkkkk..',
+    ],
+    house: [
+      '.......kk.......',
+      '......kmmk..kk..',
+      '.....kmllmkkssk.',
+      '....kmllmmmkssk.',
+      '...kmllmmmmmssk.',
+      '..kmllmmmmmmmmk.',
+      '.kmllmmmmmmmmmmk',
+      'kmmmmmmmmmmmmmmk',
+      '.kkwwwwwwwwwwwk.',
+      '..kwccwwwwooook.',
+      '..kwccwwwwooook.',
+      '..kwwwwwwwoyook.',
+      '..kwwwwwwwooook.',
+      '..kwwwwwwwooook.',
+      '...kkkkkkkkkkk..',
+      '................',
+    ],
+    rainbow: [
+      '................',
+      '....kkkkkkkk....',
+      '...krrrrrrrrk...',
+      '..krroooooorrk..',
+      '.krooyyyyyyoork.',
+      'krooyyggggyyoork',
+      'kroyggkkkkggyork',
+      'kroygbk..kbgyork',
+      'kroygbk..kbgyork',
+      'kwwwwwk..kwwwwwk',
+      'kwwwwwwkkwwwwwwk',
+      '.kkkkkk..kkkkkk.',
+      '................',
+      '................',
+      '................',
+      '................',
+    ],
+    bank: [
+      '.......kk.......',
+      '.....kkmmkk.....',
+      '...kkmmllmmkk...',
+      '.kkmmllllllmmkk.',
+      'kmmmmmmmmmmmmmmk',
+      'kmmmmmmmmmmmmmmk',
+      '.kwwkwwkkwwkwwk.',
+      '.kwwkwwkkwwkwwk.',
+      '.kwwkwwkkwwkwwk.',
+      '.kwwkwwkkwwkwwk.',
+      '.kwwkwwkkwwkwwk.',
+      'kmmmmmmmmmmmmmmk',
+      'kmmmmmmmmmmmmmmk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+      '................',
+    ],
+    rat: [
+      '................',
+      '................',
+      '..........kk....',
+      '.........kmmk...',
+      '.......kkmrrmk..',
+      '.....kkmmmmmmk..',
+      '...kkmmmmmmmmmk.',
+      '..kmmmmmmmmmkmmk',
+      '.kmlmmmmmmmmmmrk',
+      '.kmlmmmmmmmmmmk.',
+      'krmmmmmmmmmmmk..',
+      'krkmmmmmmmmmk...',
+      'krkkmkkmkkmk....',
+      '.krrk..k..k.....',
+      '..kk............',
+      '................',
+    ],
+    dove: [
+      '................',
+      '..kkk...........',
+      '.kwwwk..........',
+      'kwwwwkk.........',
+      'kmwwwwwk...kkk..',
+      '.kwwwwwkk.kwwwk.',
+      '..kwwwwwwkwwwwk.',
+      '...kwwwwwwwwwwk.',
+      '...kwwwwwwwwwwk.',
+      '....kwwwwwwwwwwk',
+      '.....kwwwwwwwwk.',
+      '......kwwwwkkk..',
+      '.....kmmkmk.....',
+      '....kmkkmmk.....',
+      '.....k..kk......',
+      '................',
+    ],
+    coupon: [
+      '................',
+      '................',
+      '.kkkkkkkkkkkkkk.',
+      'kmmmmmmmmmmmmmmk',
+      'kmlllldllllllmlk',
+      'kmlllllllkklkmlk',
+      'kmlllldllkkkllmk',
+      '.kllllllllklllk.',
+      '.klllldlllkllmk.',
+      'kmlllllllkllkkmk',
+      'kmlllldllkllkkmk',
+      'kmmmmmmmmmmmmmmk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+      '................',
+      '................',
+    ],
+    polish: [
+      '................',
+      '..........k.....',
+      '.........kwk....',
+      '........kkwkk...',
+      '.......kwwwwwk..',
+      '...kkkkkkkwkk...',
+      '..klllllllwk....',
+      '.klwlllllllmk...',
+      'klllllllllmmmk..',
+      'kmmmmmmmmmmmmk..',
+      '.klmmmmmmmmmk...',
+      '..klmmmmmmmk....',
+      '...klmmmmmk.....',
+      '....klmmmk......',
+      '.....kmmk.......',
+      '......kk........',
+    ],
+    polish2: [
+      '..k.........k...',
+      '.kwk.......kwk..',
+      'kwwwk.....kwwwk.',
+      '.kwk.......kwk..',
+      '..kkkkkkkkkkk...',
+      '..klllllllllk...',
+      '.klwllllllllmk..',
+      'klllllllllllmmk.',
+      'kmmmmmmmmmmmmmk.',
+      '.klmmmmmmmmmmk..',
+      '..klmmmmmmmmk...',
+      '...klmmmmmmk....',
+      '....klmmmmk.....',
+      '.....klmmk......',
+      '......kmk.......',
+      '.......k........',
+    ],
+    brilliance: [
+      '.......k........',
+      '..k...kwk...k...',
+      '.kwk..kwk..kwk..',
+      '..kwkkkwkkkwk...',
+      '...klllllllllk..',
+      '.kklwwllllllmkk.',
+      'kwklwlllllllmmwk',
+      '.klllllllllmmmk.',
+      '.kmmmmmmmmmmmmk.',
+      '..klmmmmmmmmmk..',
+      '..kwlmmmmmmmwkk.',
+      '.kwkklmmmmmkkkwk',
+      'kwk..klmmmk..kwk',
+      '.k....kmmk....k.',
+      '.......kk.......',
+      '................',
+    ],
+    sparkle: [
+      '......k.........',
+      '.....kmk........',
+      '.....kmk........',
+      '....kmlmk.......',
+      '...kkmlmkk......',
+      '.kkmmlwlmmkk....',
+      'kmmllwwwllmmk...',
+      '.kkmmlwlmmkkwk..',
+      '...kkmlmkkkkwkk.',
+      '....kmlmkkwwwwwk',
+      '.....kmk..kkwkk.',
+      '.....kmk...kwk..',
+      '......k.....k...',
+      '................',
+      '................',
+      '................',
+    ],
+    speaker: [
+      '................',
+      '......kk....k...',
+      '.....kddk.kkmk..',
+      '....kdddkkmkkmk.',
+      '.kkkddddkkkmkmk.',
+      'kmmmddddkmkkmkmk',
+      'kmllddddkmkkmkmk',
+      'kmllddddkmkkmkmk',
+      'kmmmddddkmkkmkmk',
+      '.kkkddddkkkmkmk.',
+      '....kdddkkmkkmk.',
+      '.....kddk.kkmk..',
+      '......kk....k...',
+      '................',
+      '................',
+      '................',
+    ],
+    prism: [
+      '.......kk.......',
+      '......kwwk......',
+      '.....kwllwk.....',
+      '.....kmllmk.....',
+      '....kmllllmk....',
+      '....kmrrrrmk....',
+      '...kmrrrrrrmk...',
+      '...kmoooooolk...',
+      '..kmlyyyyyymlk..',
+      '..kmgggggggmlk..',
+      '.kmcccccccccmlk.',
+      '.kmbbbbbbbbbmlk.',
+      'kmppppppppppppmk',
+      'kmmmmmmmmmmmmmmk',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+    ],
+    tag: [
+      '................',
+      '................',
+      '......kkkkkkkk..',
+      '.....kmmmmmmmmk.',
+      '....kmlllllllmk.',
+      '...kmllkklllkmk.',
+      '..kmlllkkllklmk.',
+      '.kmlklllllkllmk.',
+      '.kmlkllllklllmk.',
+      '..kmllllkllkkmk.',
+      '...kmllklllkkmk.',
+      '....kmlllllllmk.',
+      '.....kmmmmmmmmk.',
+      '......kkkkkkkk..',
+      '................',
+      '................',
+    ],
+    cannon: [
+      '................',
+      '...........kk...',
+      '..........kllk..',
+      '.........klwlmk.',
+      '........klwlmmk.',
+      '.......klwlmmk..',
+      '......klwlmmk...',
+      '.....klllmmk....',
+      '...kklllmmk.....',
+      '..kmmmmmmk......',
+      '.kmmooooookk....',
+      '.kmooooddoook...',
+      '..kooddddddok...',
+      '..kooooddoook...',
+      '...kooooookk....',
+      '....kkkkkk......',
+    ],
+  };
+  const P = (glyph, tint) => ({ glyph, tint });
+  const PERK = {
+    destroyer: P('hammer', 'grey'), bomb_lover: P('bomb', 'pink'), star_lover: P('star', 'pink'), prism_lover: P('prism', 'pink'),
+    domino_effect: P('domino', 'gold'), chad: P('arm', 6), last_hope: P('candle', 5), piggy_bank: P('piggy', 'pink'),
+    bomb_destroyer: P('explosion', 6), star_destroyer: P('shooting_star', 'gold'), diverging_prism: P('refract', 'cyan'),
+    trash_collector: P('trash', 'grey'), square: P('square', 'cyan'), credit_card: P('credit_card', 1), coal_miner: P('pickaxe', 'grey'),
+    dice_100: P('dice', 5), hot_crushers: P('flame', 0), jewel_collector: P('chest', 'gold'), c4: P('c4', 0),
+    star_struck: P('star_diag', 3), cold_crushers: P('snowflake', 'cyan'), equity: P('scales', 'gold'), bomb_maker: P('bomb', 'green'),
+    star_maker: P('star', 'green'), money_tree: P('tree', 'green'), looter: P('moneybag', 'gold'), cascader: P('cascade', 1),
+    gem_janitor: P('broom', 'cyan'), showman: P('tophat', 0), executer: P('copy_r', 'cyan'), imagination: P('cloud', 'pink'),
+    chain_reaction: P('chain', 'gold'), mirror: P('mirror', 'gold'), monochrome: P('eraser', 'pink'), nova_lover: P('supernova', 'pink'),
+    big_bang: P('explosion', 4), stellar_forge: P('anvil', 4), demolition: P('wrecking', 'grey'), coal_furnace: P('furnace', 6),
+    goldsmith: P('ring', 'gold'), polished_shine: P('sparkle', 'cyan'), wild_card: P('wild', 'pink'), chain_bomb: P('chain', 0),
+    prism_shard: P('shard', 'cyan'), star_collector: P('jar', 'gold'), architect: P('compass', 1), overcharge: P('lightning', 3),
+    tile_tycoon: P('tile', 'gold'), fast_forward: P('ffwd', 'cyan'), landlord: P('house', 0), hot_floor: P('hot_floor', 6),
+    clockmaker: P('clock', 'green'), arcane_study: P('book', 4), renovation: P('roller', 6), blueprint: P('blueprint', 1),
+    feng_shui: P('yinyang', 'green'), tile_collector: P('jar', 4), overtime: P('alarm', 6), momentum: P('rocket', 0),
+    compound: P('chart', 'green'), snowball: P('snowball', 'cyan'), combo_meter: P('gauge', 'grey'), glass_cannon: P('cannon', 'cyan'),
+    exponent: P('exponent', 4), crescendo: P('note', 'pink'), hungry: P('chomp', 3), echo_chamber: P('speaker', 4),
+    prism_power: P('prism', 'gold'), rainbow_road: P('rainbow', 'gold'), minimalist: P('gem', 5), lucky_seven: P('seven', 0),
+    whetstone: P('sword', 'cyan'), coupon: P('coupon', 'gold'), bank_account: P('bank', 'gold'), pawn_shop: P('pawn', 4),
+    stockpile: P('crates', 'gold'), gambler: P('chip', 0), russian_roulette: P('revolver', 'grey'), tip_jar: P('jar', 'green'),
+    loan_shark: P('shark', 1), golden_ticket: P('ticket', 'gold'), overworked: P('briefcase', 6), martyr: P('halo', 'gold'),
+    insurance: P('shield', 1), clearance_sale: P('tag', 0), baseball_bat: P('bat', 6), pyromaniac: P('flame_bomb', 6),
+    star_catcher: P('net', 'gold'),
+  };
+  const GEM = {
+    bomb: P('bomb', 'grey'), star: P('star', 'gold'), prism: P('prism', 'cyan'), supernova: P('supernova', 4),
+    gold: P('coin', 'gold'), shiny: P('shiny', 'cyan'), wild: P('wild', 'pink'),
+  };
+  const TILE = {
+    gold: GEM.gold, shiny: GEM.shiny, bomb: GEM.bomb, star: GEM.star, prism: GEM.prism, wild: GEM.wild,
+    clock: P('clock', 'cyan'), magic: P('wand', 4),
+  };
+  const CARD = {
+    forge: P('anvil', 'grey'), star_card: P('shooting_star', 3), midas: P('midas', 'gold'), gleam: P('sparkle', 'gold'),
+    chaos: P('jester', 'pink'), prism_card: P('refract', 'cyan'), nova: P('supernova', 4), purify: P('droplet', 'cyan'),
+    hourglass: P('hourglass', 'gold'), tempest: P('tornado', 'cyan'), fortune: P('clover', 'green'), temperance: P('goblet', 'gold'),
+    alchemy: P('flask', 'green'), judgement: P('gavel', 6), overclock: P('cpu', 'green'),
+  };
+  const PACK = { upgrade: P('pack_up', 'gold'), tile: P('pack_tile', 'cyan'), jewel: P('pack_jewel', 'pink'), enhance: P('pack_card', 'green') };
+  // Tier II vouchers share the tier I glyph in gold.
+  const VOUCHER = {
+    overstock_1: P('box_plus', 'green'), overstock_2: P('box_plus', 'gold'), stamina_1: P('boot', 'green'), stamina_2: P('boot', 'gold'),
+    card_holder_1: P('card_slot', 'cyan'), card_holder_2: P('card_slot', 'gold'), pack_rat: P('rat', 'grey'),
+    reroll_1: P('reroll', 'green'), reroll_2: P('reroll', 'gold'), black_friday_1: P('tag', 'grey'), black_friday_2: P('tag', 'gold'),
+    chain_reaction_v: P('chain', 'cyan'), palette_knife: P('palette', 6), mercy: P('dove', 'green'),
+  };
+  const UPGRADE = { polish1: P('polish', 'gold'), polish2: P('polish2', 'gold'), brilliance: P('brilliance', 'pink') };
+  const TABLES = { perk: PERK, tile: TILE, card: CARD, pack: PACK, voucher: VOUCHER, upgrade: UPGRADE, gem: GEM };
+  const COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'white', 'orange'];
+  COLORS.forEach((c, k) => { PERK[c + '_lover'] = P('heart', k); PERK[c + '_grinder'] = P('gear', k); });
+
+  function entry(kind, id) {
+    const t = TABLES[kind];
+    const e = t && t[id];
+    return e ? { glyph: e.glyph, tint: e.tint == null ? 'gold' : e.tint } : { glyph: 'unknown', tint: 'grey' };
+  }
+  function validate() {
+    const bad = [];
+    for (const name of Object.keys(GLYPHS)) {
+      const g = GLYPHS[name];
+      if (!Array.isArray(g) || g.length !== 16) { bad.push(name + ': rows'); continue; }
+      g.forEach((row, i) => {
+        if (row.length !== 16) bad.push(name + ': row ' + i + ' length ' + row.length);
+        for (const ch of row) if (ch !== '.' && ch !== 'm' && ch !== 'l' && !PAL[ch]) bad.push(name + ': char ' + ch);
+      });
+    }
+    for (const kind of Object.keys(TABLES)) for (const id of Object.keys(TABLES[kind])) {
+      if (!GLYPHS[TABLES[kind][id].glyph]) bad.push(kind + ':' + id + ': missing glyph ' + TABLES[kind][id].glyph);
+    }
+    return bad;
+  }
+  const cache = {};
+  function tintPair(t) { return typeof t === 'number' ? GEMTINT[t] : NAMED[t] || NAMED.gold; }
+  function canvas(kind, id) {
+    const e = entry(kind, id), key = kind + ':' + id;
+    if (cache[key]) return cache[key];
+    const cv = document.createElement('canvas'); cv.width = cv.height = 16;
+    const x = cv.getContext('2d'), [m, l] = tintPair(e.tint);
+    GLYPHS[e.glyph].forEach((row, y) => {
+      for (let i = 0; i < 16; i++) {
+        const ch = row[i]; if (ch === '.') continue;
+        x.fillStyle = ch === 'm' ? m : ch === 'l' ? l : PAL[ch]; x.fillRect(i, y, 1, 1);
+      }
+    });
+    cache[key] = cv;
+    return cv;
+  }
+  const urls = {};
+  function url(kind, id) { const k = kind + ':' + id; return urls[k] || (urls[k] = canvas(kind, id).toDataURL()); }
+
+  GF.Icons = { PAL, GLYPHS, entry, validate, canvas, url };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- audio.js
@@ -1420,8 +4024,11 @@ body.mobile #btn-shop-toggle { display: inline-block; }
   try { muted = localStorage.getItem('gemfactory.mute') === '1'; } catch (e) { muted = false; }
   function ac() {
     if (typeof window === 'undefined') return null;
-    if (!ctx) { const A = window.AudioContext || window.webkitAudioContext; if (!A) return null; ctx = new A(); }
-    if (ctx.state === 'suspended') ctx.resume();
+    try {
+      if (!ctx) { const A = window.AudioContext || window.webkitAudioContext; if (!A) return null; ctx = new A(); }
+      // a context locked by autoplay rules may reject resume(); sounds just stay silent until a gesture unlocks it
+      if (ctx.state === 'suspended') { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); }
+    } catch (e) { return null; }
     return ctx;
   }
   function tone(freq, dur, type, vol, slideTo, delay) {
@@ -1437,15 +4044,27 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     o.connect(g); g.connect(a.destination);
     o.start(t); o.stop(t + dur + 0.02);
   }
-  function noise(dur, vol) {
+  function noise(dur, vol, delay) {
     if (muted) return;
     const a = ac(); if (!a) return;
     const len = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
     const s = a.createBufferSource(), g = a.createGain();
     s.buffer = buf; g.gain.value = vol || 0.2;
-    s.connect(g); g.connect(a.destination); s.start();
+    s.connect(g); g.connect(a.destination); s.start(a.currentTime + (delay || 0));
   }
+  // one distinct synth per special gem kind, played when it is created
+  const CREATED = {
+    bomb() { tone(110, 0.28, 'sawtooth', 0.09, 40); noise(0.14, 0.14); },
+    star() { [784, 988, 1175, 1568, 1976].forEach((f, i) => tone(f, 0.1, 'triangle', 0.05, null, i * 0.045)); },
+    prism() { [1047, 1319, 1568, 1976, 2349, 2637].forEach((f, i) => tone(f, 0.55, 'sine', 0.035, null, i * 0.025)); tone(4186, 0.3, 'triangle', 0.015, null, 0.15); },
+    supernova() { tone(180, 0.32, 'sawtooth', 0.06, 2400); noise(0.3, 0.2, 0.3); tone(90, 0.35, 'square', 0.07, 35, 0.3); },
+    gold() { tone(988, 0.07, 'square', 0.045); tone(1319, 0.28, 'square', 0.045, null, 0.07); },
+    shiny() { tone(2093, 0.35, 'sine', 0.06); tone(2093 * 2.76, 0.18, 'sine', 0.02); tone(2093 * 5.4, 0.08, 'sine', 0.012); },
+    wild() { tone(260, 0.16, 'sawtooth', 0.05, 900); tone(900, 0.2, 'sawtooth', 0.05, 220, 0.16); },
+    coal() { tone(70, 0.3, 'triangle', 0.1, 45); noise(0.22, 0.12, 0.02); tone(140, 0.08, 'square', 0.03, 90); },
+  };
+  const safe = (fn) => function () { try { fn.apply(null, arguments); } catch (e) { /* audio is best-effort */ } };
   const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
   GF.Audio = {
     pop(level) { const n = SCALE[Math.min(Math.max(level, 1) - 1, SCALE.length - 1)]; tone(440 * Math.pow(2, n / 12), 0.12, 'square', 0.05); },
@@ -1457,11 +4076,13 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     mult() { tone(220, 0.3, 'sawtooth', 0.07, 880); },
     bad() { tone(160, 0.15, 'square', 0.05, 100); },
     win() { [523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, 0.18, 'square', 0.045, null, i * 0.09)); },
+    created(kind) { if (CREATED[kind]) CREATED[kind](); },
     lose() { [392, 330, 262, 196].forEach((f, i) => tone(f, 0.25, 'triangle', 0.05, null, i * 0.15)); },
     isMuted() { return muted; },
     setMuted(m) { muted = !!m; try { localStorage.setItem('gemfactory.mute', muted ? '1' : '0'); } catch (e) { /* ignore */ } },
     unlock() { ac(); },
   };
+  for (const k in GF.Audio) if (k !== 'isMuted') GF.Audio[k] = safe(GF.Audio[k]);
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- render.js
@@ -1624,7 +4245,7 @@ body.mobile #btn-shop-toggle { display: inline-block; }
   function colorHex(k) { return PAL[k] ? PAL[k][0] : '#ffffff'; }
 
   function drawGem(sp, time) {
-    const img = getSprite(sp.gem, time), s = cell * 0.84 * sp.s, cx = (sp.x + 0.5) * cell, cy = (sp.y + 0.5) * cell;
+    const img = getSprite(sp.gem, time), s = cell * 0.84 * sp.s, cx = (sp.x + (sp.ox || 0) + 0.5) * cell, cy = (sp.y + (sp.oy || 0) + 0.5) * cell;
     g.globalAlpha = Math.max(0, Math.min(1, sp.a));
     g.drawImage(img, Math.round(cx - s / 2), Math.round(cy - s / 2), Math.round(s), Math.round(s));
     if (sp.gem.kind === 'shiny') {
@@ -1633,6 +4254,29 @@ body.mobile #btn-shop-toggle { display: inline-block; }
       g.fillRect(cx - s / 2 + q[0] * p, cy - s / 2 + q[1] * p, p * 1.5, p * 1.5);
     }
     g.globalAlpha = 1;
+  }
+  function edgeColor(gem) { return gem.color != null ? PAL[gem.color][2] : gem.kind === 'coal' ? '#0d0b12' : '#1a1030'; }
+  function drawSpin(sp, elapsed, time) {
+    const t = GF.C.spinTransform(elapsed);
+    const base = cell * 0.84 * 1.15, cx = (sp.x + 0.5) * cell, cy = (sp.y + 0.5) * cell - cell * 0.06;
+    g.save();
+    g.globalAlpha = 0.35; g.fillStyle = '#000';
+    g.beginPath(); g.ellipse(cx, (sp.y + 0.93) * cell, base * 0.4 * Math.max(0.35, t.scaleX), base * 0.08, 0, 0, Math.PI * 2); g.fill();
+    g.restore();
+    const img = sp.gem.kind === 'prism'
+      ? prismSprite(Math.floor((t.theta / (Math.PI * 2)) * PRISM_FRAMES) % PRISM_FRAMES)
+      : getSprite(sp.gem, time);
+    const w = base * t.scaleX, px = base / 12;
+    g.save();
+    g.translate(cx, cy);
+    if (t.back && sp.gem.kind !== 'prism') { g.scale(-1, 1); g.filter = 'brightness(0.65)'; }
+    g.drawImage(img, Math.round(-w / 2), Math.round(-base / 2), Math.max(1, Math.round(w)), Math.round(base));
+    g.restore();
+    if (t.edge) {
+      const ew = t.edge * px, side = Math.sin(t.theta) >= 0 ? 1 : -1;
+      g.fillStyle = edgeColor(sp.gem);
+      g.fillRect(cx + (side > 0 ? w / 2 : -w / 2 - ew), cy - base * 0.35, ew, base * 0.7);
+    }
   }
   function frame(st) {
     if (!g) return;
@@ -1658,7 +4302,9 @@ body.mobile #btn-shop-toggle { display: inline-block; }
       g.strokeStyle = col; g.lineWidth = lw;
       g.strokeRect(c * cell + lw / 2 + 1, r * cell + lw / 2 + 1, cell - lw - 2, cell - lw - 2);
       g.fillStyle = col;
-      g.fillText(d.icon, c * cell + 4, (r + 1) * cell - 4);
+      const isz = Math.max(8, Math.round(cell * 0.4));
+      g.imageSmoothingEnabled = false;
+      g.drawImage(GF.Icons.canvas('tile', id), c * cell + 3, (r + 1) * cell - 3 - isz, isz, isz);
       if (d.period) {
         const t = String(d.period - b.tileState[r][c]);
         g.fillText(t, (c + 1) * cell - 4 - g.measureText(t).width, r * cell + 4 + Math.floor(cell / 5));
@@ -1670,10 +4316,16 @@ body.mobile #btn-shop-toggle { display: inline-block; }
       g.strokeRect(st.selected.c * cell + 2, st.selected.r * cell + 2, cell - 4, cell - 4);
     }
     const D = st.display.cells;
+    let spinSp = null;
+    if (st.selected && !st.busy && st.selectedAt != null) {
+      const q = D[st.selected.r] && D[st.selected.r][st.selected.c];
+      if (q && q.a > 0 && q.s > 0 && q.x === st.selected.c && q.y === st.selected.r) spinSp = q;
+    }
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
       const sp = D[r][c];
-      if (sp && sp.a > 0 && sp.s > 0) drawGem(sp, st.time || 0);
+      if (sp && sp.a > 0 && sp.s > 0 && !(spinSp && sp === spinSp)) drawGem(sp, st.time || 0);
     }
+    if (spinSp) drawSpin(spinSp, (st.time || 0) - st.selectedAt, st.time || 0);
     for (let i = flashes.length - 1; i >= 0; i--) {
       const f = flashes[i];
       g.globalAlpha = Math.max(0, f.t * 0.6); g.fillStyle = f.col;
@@ -1691,6 +4343,12 @@ body.mobile #btn-shop-toggle { display: inline-block; }
       g.fillRect(p.x * cell - ps / 2, p.y * cell - ps / 2, ps, ps);
     }
     g.globalAlpha = 1;
+    if (st.hint && (st.time || 0) < st.hint.until) {
+      const lw = Math.max(3, Math.floor(cell / 14)), pulse = 0.55 + 0.45 * Math.sin((st.time || 0) / 110);
+      g.globalAlpha = pulse; g.strokeStyle = '#ffd23f'; g.lineWidth = lw;
+      for (const h of st.hint.cells) g.strokeRect(h.c * cell + lw / 2 + 1, h.r * cell + lw / 2 + 1, cell - lw - 2, cell - lw - 2);
+      g.globalAlpha = 1;
+    }
     if (st.placing) {
       g.strokeStyle = 'rgba(255,210,63,0.5)'; g.setLineDash([4, 4]); g.lineWidth = 2;
       for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) g.strokeRect(c * cell + 3, r * cell + 3, cell - 6, cell - 6);
@@ -1699,9 +4357,22 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     g.restore();
   }
 
+  const gemIcons = {};
+  function gemIconURL(color) {
+    if (!gemIcons[color]) {
+      const c = document.createElement('canvas');
+      c.width = c.height = 16;
+      const x = c.getContext('2d');
+      x.imageSmoothingEnabled = false;
+      x.drawImage(getSprite({ kind: 'normal', color: color }), 0, 0, 16, 16);
+      gemIcons[color] = c.toDataURL();
+    }
+    return gemIcons[color];
+  }
+
   function maskCount(shape) { const f = mask(shape); let n = 0; for (let y = 0; y < PX; y++) for (let x = 0; x < PX; x++) if (f(x, y)) n++; return n; }
 
-  GF.Render = { init, resize, cellPx, cellAt, cellCenter, cellRect, shake, burst, flashCells, pulseTile, colorHex, frame, PAL, TILE_COL, _debug: { maskCount: maskCount, prismFrameData: (f) => prismSprite(f).toDataURL(), PRISM_FRAMES: PRISM_FRAMES } };
+  GF.Render = { init, resize, cellPx, cellAt, cellCenter, cellRect, shake, burst, flashCells, pulseTile, colorHex, gemIconURL, frame, spinTransform: GF.C.spinTransform, PAL, TILE_COL, _debug: { maskCount: maskCount, prismFrameData: (f) => prismSprite(f).toDataURL(), PRISM_FRAMES: PRISM_FRAMES } };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- animator.js
@@ -1725,7 +4396,8 @@ body.mobile #btn-shop-toggle { display: inline-block; }
       const tw = tweens[i];
       const p = Math.min(1, (now - tw.t0) / tw.ms);
       const e = tw.ease === 'in' ? p * p : 1 - (1 - p) * (1 - p);
-      for (const k in tw.to) tw.obj[k] = tw.from[k] + (tw.to[k] - tw.from[k]) * e;
+      // land exactly on the target so "at rest" checks (x === c, s === 1...) are exact
+      for (const k in tw.to) tw.obj[k] = p >= 1 ? tw.to[k] : tw.from[k] + (tw.to[k] - tw.from[k]) * e;
       if (p >= 1) { tweens.splice(i, 1); tw.res(); }
     }
   }
@@ -1735,91 +4407,211 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) display.cells[r][c] = cells[r][c] ? sprite(cells[r][c], c, r) : null;
   }
   function sync(board) { syncCells(board.cells); }
+  // The bump nudges a draw-only offset (ox/oy), never x/y, so it cannot fight a timeline's tweens on the same sprite.
   async function bump(a, b) {
     const A = display.cells[a.r] && display.cells[a.r][a.c];
     if (!A) return;
-    await tween(A, { x: a.c + (b.c - a.c) * 0.3, y: a.r + (b.r - a.r) * 0.3 }, 70);
-    await tween(A, { x: a.c, y: a.r }, 70);
+    A.ox = A.ox || 0; A.oy = A.oy || 0;
+    await tween(A, { ox: (b.c - a.c) * 0.3, oy: (b.r - a.r) * 0.3 }, 70);
+    await tween(A, { ox: 0, oy: 0 }, 70);
+  }
+  // A sprite is at rest when it sits exactly on its cell, fully visible.
+  function atRest(r, c) {
+    const sp = display.cells[r] && display.cells[r][c];
+    return !!sp && sp.x === c && sp.y === r && sp.s === 1 && sp.a === 1;
   }
 
-  async function play(tl, H) {
-    const D = display.cells;
-    for (const s of tl) {
-      switch (s.t) {
-        case 'swap': {
-          const A = D[s.a.r][s.a.c], B = D[s.b.r][s.b.c];
-          D[s.a.r][s.a.c] = B; D[s.b.r][s.b.c] = A;
-          await Promise.all([A && tween(A, { x: s.b.c, y: s.b.r }, 140), B && tween(B, { x: s.a.c, y: s.a.r }, 140)]);
-          break;
-        }
-        case 'match': break;
-        case 'cascade': H.cascade(s.level); break;
-        case 'special':
-          if (s.kind === 'supernova') { GF.Audio.boom(); GF.Audio.sweep(); }
-          else if (s.kind === 'bomb') GF.Audio.boom(); else if (s.kind === 'star') GF.Audio.sweep(); else GF.Audio.chord();
-          GF.Render.flashCells(s.cells, s.kind);
-          GF.Render.shake(s.kind === 'supernova' ? 14 : s.kind === 'bomb' ? 10 : 6);
-          await wait(140);
-          break;
-        case 'clear': {
-          GF.Audio.pop(s.level);
-          const ps = [];
-          for (const c of s.cells) {
-            const sp = D[c.r][c.c];
-            if (sp) { GF.Render.burst(c.r, c.c, sp.gem); ps.push(tween(sp, { s: 0, a: 0 }, 180)); }
-            H.float(c.r, c.c, '+' + GF.C.fmt(c.v), '');
-          }
-          H.setMovePoints(s.total, s.level);
-          GF.Render.shake(Math.min(8, s.cells.length / 2));
-          await Promise.all(ps);
-          for (const c of s.cells) D[c.r][c.c] = null;
-          break;
-        }
-        case 'money': GF.Audio.ching(); H.float(s.r, s.c, '+$' + s.money, 'money'); H.money(); await wait(60); break;
-        case 'perk':
-          H.perkFire(s);
-          if (s.mul) GF.Audio.mult(); else GF.Audio.tick(s.slot);
-          if (s.money) GF.Audio.ching();
-          H.setMovePoints(s.total);
-          await wait(s.mul ? 420 : 170);
-          break;
-        case 'create': {
-          const sp = sprite(s.gem, s.c, s.r); sp.s = 0;
-          D[s.r][s.c] = sp;
-          await tween(sp, { s: 1 }, 150);
-          break;
-        }
-        case 'fall': {
-          const ps = [];
-          const moved = s.moves.map((m) => [m, D[m.from[0]][m.from[1]]]);
-          for (const [m] of moved) D[m.from[0]][m.from[1]] = null;
-          for (const [m, sp] of moved) {
-            if (!sp) continue;
-            D[m.to[0]][m.to[1]] = sp;
-            ps.push(tween(sp, { y: m.to[0] }, 80 + 45 * (m.to[0] - m.from[0]), 'in'));
-          }
-          for (const n of s.spawns) {
-            const sp = sprite(n.gem, n.c, n.r - n.drop);
-            D[n.r][n.c] = sp;
-            ps.push(tween(sp, { y: n.r }, 80 + 45 * n.drop, 'in'));
-          }
-          await Promise.all(ps);
-          break;
-        }
-        case 'tile':
-          GF.Render.pulseTile(s.r, s.c);
-          if (s.gem) { const sp = sprite(s.gem, s.c, s.r); sp.s = 1.5; D[s.r][s.c] = sp; tween(sp, { s: 1 }, 180); }
-          if (s.moves) { H.float(s.r, s.c, '+1 MOVE', 'money'); H.moves(); }
-          await wait(110);
-          break;
-        case 'end': await H.endPoints(s.points); break;
-        case 'shuffle': H.banner('NO MOVES - SHUFFLE'); await wait(250); syncCells(s.cells); await wait(250); break;
-        default: break;
+  // ---------- footprints ----------
+  // Cells a step may read or write in the display grid (keys r * N + c).
+  function stepFootprint(s, out) {
+    const add = (r, c) => out.add(r * N + c);
+    switch (s.t) {
+      case 'swap': add(s.a.r, s.a.c); add(s.b.r, s.b.c); break;
+      case 'clear': for (const c of s.cells) add(c.r, c.c); break;
+      case 'special': add(s.r, s.c); for (const [r, c] of s.cells) add(r, c); break;
+      case 'create': case 'tile': add(s.r, s.c); break;
+      case 'fall': {
+        const maxRow = {};
+        const see = (r, c) => { if (maxRow[c] == null || r > maxRow[c]) maxRow[c] = r; };
+        for (const m of s.moves) see(m.to[0], m.to[1]);
+        for (const n of s.spawns) see(n.r, n.c);
+        for (const c in maxRow) for (let r = 0; r <= maxRow[c]; r++) add(r, +c);
+        break;
       }
+      case 'shuffle': for (let k = 0; k < N * N; k++) out.add(k); break;
+      default: break;
+    }
+    return out;
+  }
+  function footprint(steps) {
+    const out = new Set();
+    for (const s of steps) stepFootprint(s, out);
+    return out;
+  }
+
+  // ---------- scheduler ----------
+  // Logic is sequential; the display replays timelines. Timelines run concurrently only on disjoint cells:
+  // one starts when its whole footprint misses the remaining footprint of every active timeline and the
+  // full footprint of every earlier queued one. Re-checked whenever any step finishes.
+  const queue = [];
+  const stats = { started: 0, waited: 0, maxConcurrent: 0 }; // dev counters for the stress tools
+  let idleWaiters = [];
+  let gen = 0;
+  function remainingOf(e) { return e.suffix[e.started ? e.idx : 0]; }
+  function disjoint(a, b) {
+    const [s, l] = a.size < b.size ? [a, b] : [b, a];
+    for (const k of s) if (l.has(k)) return false;
+    return true;
+  }
+  function schedule() {
+    for (let i = 0; i < queue.length; i++) {
+      const e = queue[i];
+      if (e.started) continue;
+      const fp = e.suffix[0];
+      let ok = true;
+      for (let j = 0; j < queue.length && ok; j++) {
+        if (j === i) continue;
+        const o = queue[j];
+        if (o.started || j < i) ok = disjoint(fp, remainingOf(o));
+      }
+      if (ok) start(e); else e.waited = true;
+    }
+  }
+  async function start(e) {
+    e.started = true;
+    stats.started++;
+    if (e.waited) stats.waited++;
+    stats.maxConcurrent = Math.max(stats.maxConcurrent, queue.filter((q) => q.started).length);
+    const myGen = gen;
+    while (e.idx < e.steps.length) {
+      try { await playStep(e.steps[e.idx], e.hooks); } catch (err) { console.error(err); }
+      if (myGen !== gen) return;
+      e.idx++;
+      schedule();
+    }
+    finish(e);
+  }
+  function finish(e) {
+    const i = queue.indexOf(e);
+    if (i >= 0) queue.splice(i, 1);
+    e.resolve();
+    schedule();
+    if (!queue.length) { const w = idleWaiters; idleWaiters = []; w.forEach((f) => f()); }
+  }
+  function run(steps, hooks) {
+    const suffix = new Array(steps.length + 1);
+    suffix[steps.length] = new Set();
+    for (let i = steps.length - 1; i >= 0; i--) suffix[i] = stepFootprint(steps[i], new Set(suffix[i + 1]));
+    return new Promise((resolve) => {
+      const e = { steps: steps, hooks: hooks, suffix: suffix, idx: 0, started: false, resolve: resolve };
+      queue.push(e);
+      schedule();
+    });
+  }
+  function active() { return queue.length; }
+  function busyCells() {
+    const out = new Set();
+    for (const e of queue) for (const k of remainingOf(e)) out.add(k);
+    return out;
+  }
+  function idle() { return queue.length ? new Promise((r) => idleWaiters.push(r)) : Promise.resolve(); }
+  // Drop every timeline (leaving a run). Pending promises resolve; running loops stop at their next step.
+  function cancelAll() {
+    gen++;
+    const q = queue.splice(0);
+    q.forEach((e) => e.resolve());
+    const w = idleWaiters; idleWaiters = []; w.forEach((f) => f());
+  }
+
+  async function play(tl, H) { for (const s of tl) await playStep(s, H); }
+  async function playStep(s, H) {
+    const D = display.cells;
+    switch (s.t) {
+      case 'swap': {
+        const A = D[s.a.r][s.a.c], B = D[s.b.r][s.b.c];
+        D[s.a.r][s.a.c] = B; D[s.b.r][s.b.c] = A;
+        await Promise.all([A && tween(A, { x: s.b.c, y: s.b.r }, 140), B && tween(B, { x: s.a.c, y: s.a.r }, 140)]);
+        break;
+      }
+      case 'match': break;
+      case 'cascade': H.cascade(s.level); break;
+      case 'special':
+        if (s.kind === 'supernova') { GF.Audio.boom(); GF.Audio.sweep(); }
+        else if (s.kind === 'bomb') GF.Audio.boom(); else if (s.kind === 'star') GF.Audio.sweep(); else GF.Audio.chord();
+        GF.Render.flashCells(s.cells, s.kind);
+        GF.Render.shake(s.kind === 'supernova' ? 14 : s.kind === 'bomb' ? 10 : 6);
+        await wait(140);
+        break;
+      case 'clear': {
+        GF.Audio.pop(s.level);
+        const ps = [];
+        for (const c of s.cells) {
+          const sp = D[c.r][c.c];
+          if (sp) { GF.Render.burst(c.r, c.c, sp.gem); ps.push(tween(sp, { s: 0, a: 0 }, 180)); }
+          H.float(c.r, c.c, '+' + GF.C.fmt(c.v), '');
+        }
+        H.setMovePoints(s.total, s.level);
+        if (H.cleared) H.cleared(s.cells.length, s.level);
+        GF.Render.shake(Math.min(8, s.cells.length / 2));
+        const faded = s.cells.map((c) => D[c.r][c.c]);
+        await Promise.all(ps);
+        // only drop the sprites this step faded: a resync (new run, load) may have refilled the grid meanwhile
+        s.cells.forEach((c, i) => { if (D[c.r][c.c] === faded[i]) D[c.r][c.c] = null; });
+        break;
+      }
+      case 'money': GF.Audio.ching(); H.float(s.r, s.c, '+$' + s.money, 'money'); H.money(); await wait(60); break;
+      case 'perk':
+        H.perkFire(s);
+        if (s.mul) GF.Audio.mult(); else GF.Audio.tick(s.slot);
+        if (s.money) GF.Audio.ching();
+        H.setMovePoints(s.total);
+        await wait(s.mul ? 420 : 170);
+        break;
+      case 'create': {
+        const sp = sprite(s.gem, s.c, s.r); sp.s = 0;
+        D[s.r][s.c] = sp;
+        GF.Audio.created(s.gem.kind);
+        await tween(sp, { s: 1 }, 150);
+        break;
+      }
+      case 'fall': {
+        const ps = [];
+        const moved = s.moves.map((m) => [m, D[m.from[0]][m.from[1]]]);
+        for (const [m] of moved) D[m.from[0]][m.from[1]] = null;
+        for (const [m, sp] of moved) {
+          if (!sp) continue;
+          D[m.to[0]][m.to[1]] = sp;
+          ps.push(tween(sp, { y: m.to[0] }, 80 + 45 * (m.to[0] - m.from[0]), 'in'));
+        }
+        for (const n of s.spawns) {
+          const sp = sprite(n.gem, n.c, n.r - n.drop);
+          D[n.r][n.c] = sp;
+          ps.push(tween(sp, { y: n.r }, 80 + 45 * n.drop, 'in'));
+        }
+        await Promise.all(ps);
+        break;
+      }
+      case 'tile': {
+        GF.Render.pulseTile(s.r, s.c);
+        let pop = null;
+        if (s.gem) { GF.Audio.created(s.gem.kind); const sp = sprite(s.gem, s.c, s.r); sp.s = 1.5; D[s.r][s.c] = sp; pop = tween(sp, { s: 1 }, 180); }
+        if (s.moves) { H.float(s.r, s.c, '+1 MOVE', 'money'); H.moves(); }
+        await Promise.all([wait(110), pop]); // the cell stays in this step's footprint until the pop settles
+        break;
+      }
+      case 'end': await H.endPoints(s.points); break;
+      case 'shuffle': {
+        const g0 = gen;
+        H.banner('NO MOVES - SHUFFLE'); await wait(250);
+        if (g0 === gen) syncCells(s.cells); // a cancelled run must not paint its board over the next one
+        await wait(250);
+        break;
+      }
+      default: break;
     }
   }
 
-  Object.assign(Anim, { tween, update, wait, sync, syncCells, bump, play });
+  Object.assign(Anim, { tween, update, wait, sync, syncCells, bump, play, atRest, footprint, run, active, busyCells, idle, cancelAll, stats });
   GF.Anim = Anim;
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
@@ -1841,7 +4633,8 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     supernova: 'SUPERNOVA: clears its row, its column and a 3x3 area around it.',
     coal: 'COAL: never matches. Only Bombs and Stars can break it.',
   };
-  const S = { run: null, busy: false, selected: null, placing: null, shownScore: 0, speedIdx: 0, crt: true };
+  const S = { run: null, locked: false, live: [], tick: 0, mpFly: 0, desyncs: 0, selected: null, selectedAt: 0, targeting: null, roundMoves: 0, lastLeft: null, shownScore: 0, cp: null, speedIdx: 0, crt: true, frozen: null, hint: null };
+  const iconImg = (kind, id) => '<img class="icon" alt="" src="' + GF.Icons.url(kind, id) + '">';
 
   const fmt = (n) => GF.C.fmt(n);
   const money = (n) => (n < 0 ? '-$' + -n : '$' + n);
@@ -1859,23 +4652,41 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     el.addEventListener('animationend', () => el.remove());
     setTimeout(() => el.remove(), 2000);
   }
+  // Floating idle animation: phase follows a shared clock so re-rendering the DOM never snaps it back to the start.
+  function floatPhase(el, period, i) { el.style.animationDelay = (-((performance.now() / 1000) % period) - i * 0.4) + 's'; }
   function restart(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
   function flash() { restart($('flash'), 'on'); }
   function big(t) { $('big').textContent = t; restart($('big'), 'on'); }
   function toast(t) { $('toast').textContent = t; restart($('toast'), 'on'); }
+  function roundBanner(t) { $('board-banner').textContent = t; restart($('board-banner'), 'on'); }
+
+  // Animation state. Logic is sequential (Run.doMove applies at once); the display replays timelines, several at a time.
+  const animating = () => GF.Anim.active() > 0;
+  const N = C.SIZE;
+  const inBoard = (p) => !!p && p.r >= 0 && p.c >= 0 && p.r < N && p.c < N;
+  const sameGem = (sp, g) => (!sp && !g) || (!!sp && !!g && sp.gem.id === g.id && sp.gem.kind === g.kind && sp.gem.color === g.color);
+  function displayMatchesBoard() {
+    const run = S.run;
+    if (!run) return true;
+    const D = GF.Anim.display.cells;
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!sameGem(D[r][c], run.board.cells[r][c])) return false;
+    return true;
+  }
+  // A cell can take part in a new swap: no timeline will touch it again, and its sprite rests there showing the logic gem.
+  function settled(p, busy) {
+    if (!inBoard(p) || (busy || GF.Anim.busyCells()).has(p.r * N + p.c) || !GF.Anim.atRest(p.r, p.c)) return false;
+    return sameGem(GF.Anim.display.cells[p.r][p.c], S.run.board.cells[p.r][p.c]);
+  }
 
   const hooks = {
     float(r, c, text, cls) { const p = GF.Render.cellCenter(r, c); spawnFloat($('fx'), p.x, p.y, text, cls); },
-    setMovePoints(total, level) {
-      const el = $('move-points');
-      el.textContent = fmt(total);
-      if (level) el.style.setProperty('--mp-scale', String(Math.min(2, 1 + (level - 1) * 0.2)));
-    },
-    cascade(level) { toast('CASCADE x' + level); },
     perkFire(s) {
-      const card = $('perk-row').children[s.slot];
+      // uid (tagged in trySwap) survives perks removed by an earlier, still-animating move
+      const row = $('perk-row');
+      const card = s.uid != null ? row.querySelector('.perk[data-uid="' + s.uid + '"]') : row.children[s.slot];
       if (card) {
-        restart(card, 'fire');
+        const inner = card.querySelector('.inner');
+        if (inner) restart(inner, 'shake');
         const r = card.getBoundingClientRect(), a = $('app').getBoundingClientRect();
         const txt = s.mul ? 'x' + (Math.round(s.mul * 100) / 100) : s.add ? '+' + fmt(s.add) : s.money ? '+$' + s.money
           : s.sellBonus ? '+$' + s.sellBonus + ' SELL' : s.store ? 'STORED' : s.clear ? 'ZAP!' : '!';
@@ -1886,36 +4697,153 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     },
     money() { refreshHud(); },
     moves() { refreshHud(); },
-    async endPoints(points) {
-      const el = $('move-points');
-      el.textContent = fmt(points);
-      el.classList.add('fly');
-      await GF.Anim.wait(320);
-      el.classList.remove('fly');
-      el.textContent = '';
-      el.style.setProperty('--mp-scale', '1');
-      S.shownScore += points;
-      refreshHud();
-    },
     banner(t) { toast(t); },
   };
+  // Per-move hooks: each timeline keeps its own running total and cascade panel numbers;
+  // the shared widgets show whichever live move updated last.
+  function makeHooks(ctx) {
+    return Object.assign({}, hooks, {
+      setMovePoints(total, level) { ctx.total = total; if (level) ctx.level = level; ctx.t = ++S.tick; showMovePoints(); },
+      cascade(level) { ctx.cp.cascades = Math.max(ctx.cp.cascades, level); ctx.t = ++S.tick; S.cp = ctx.cp; renderCascadePanel(); },
+      cleared(n, level) { ctx.cp.gems += n; if (level) ctx.cp.cascades = Math.max(ctx.cp.cascades, level); ctx.t = ++S.tick; S.cp = ctx.cp; renderCascadePanel(); },
+      endPoints(points) { return endPoints(ctx, points); },
+    });
+  }
+  function latestLive() { let best = null; for (const x of S.live) if (!best || x.t > best.t) best = x; return best; }
+  function showMovePoints() {
+    if (S.mpFly) return;
+    const el = $('move-points'), x = latestLive();
+    el.textContent = x && x.total != null ? fmt(x.total) : '';
+    el.style.setProperty('--mp-scale', String(x ? Math.min(2, 1 + (x.level - 1) * 0.2) : 1));
+  }
+  async function endPoints(ctx, points) {
+    S.live = S.live.filter((x) => x !== ctx);
+    if (S.cp === ctx.cp) { const o = latestLive(); if (o && o.t) { S.cp = o.cp; renderCascadePanel(); } else fadeCascadePanel(); }
+    const el = $('move-points');
+    S.mpFly++;
+    el.textContent = fmt(points);
+    restart(el, 'fly');
+    await GF.Anim.wait(320);
+    if (--S.mpFly <= 0) { S.mpFly = 0; el.classList.remove('fly'); showMovePoints(); }
+    S.shownScore += points;
+    refreshHud();
+  }
+
+  function fadeCascadePanel() {
+    const cp = S.cp;
+    if (!cp) return;
+    cp.fading = true; renderCascadePanel();
+    setTimeout(() => { if (S.cp === cp) { S.cp = { cascades: 0, gems: 0 }; renderCascadePanel(); } }, 600 / GF.Anim.speed);
+  }
+  function renderCascadePanel() {
+    const panel = $('cascade-panel');
+    panel.classList.toggle('show', !!S.cp && S.cp.cascades >= 3);
+    panel.classList.toggle('fade', !!S.cp && !!S.cp.fading);
+    [['cp-cascades', S.cp ? S.cp.cascades : 0], ['cp-gems', S.cp ? S.cp.gems : 0]].forEach(([id, v]) => {
+      const el = $(id), t = String(v);
+      if (el.textContent !== t) { el.textContent = t; if (S.cp) restart(el, 'bump'); }
+    });
+  }
+  const PACK_DESC = { tile: 'Power tiles to place on the board', jewel: 'Special gems to drop onto normal gems', enhance: 'One-use cards for your card tray', upgrade: 'Polish upgrades that raise gem values' };
+  const PACK_NAME = { tile: 'Tile', jewel: 'Jewel', enhance: 'Enhance', upgrade: 'Upgrade' };
+  const PACK_COL = { tile: '#3a86ff', jewel: '#ff6bd6', enhance: '#ff4d6d', upgrade: '#ffd23f' };
+  // rarity: 'common' | 'uncommon' | 'rare', a raw '#hex' colour, or nothing for the default
+  const rarityColor = (r, dflt) => (!r ? dflt : r.charAt(0) === '#' ? r : 'var(--' + r + ')');
+  function bindHover(el, name, rarity) {
+    el.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const h = $('hover-label'); h.textContent = name; h.style.color = rarityColor(rarity, 'var(--accent)'); h.classList.remove('hidden');
+      const r = el.getBoundingClientRect(), a = $('app').getBoundingClientRect();
+      h.style.left = (r.left - a.left + r.width / 2 - h.offsetWidth / 2) + 'px'; h.style.top = (r.top - a.top - h.offsetHeight - 6) + 'px';
+    });
+    el.addEventListener('pointerleave', () => $('hover-label').classList.add('hidden'));
+  }
 
   // ---------- rendering of DOM parts ----------
   function refreshHud() {
     const run = S.run;
     if (!run) return;
-    const playing = S.busy || run.phase === 'play' || run.phase === 'won' || run.phase === 'over';
-    const round = run.phase === 'victory' ? C.ROUNDS : run.round;
-    const target = GF.Run.target(round);
-    const score = S.busy ? S.shownScore : playing ? run.score : 0;
+    const fz = S.frozen;
+    const playing = animating() || run.phase === 'play' || run.phase === 'won' || run.phase === 'over';
+    const round = fz ? fz.round : run.phase === 'victory' ? C.ROUNDS : run.round;
+    const target = GF.Run.targetFor(run, round);
+    const score = fz ? fz.score : animating() ? S.shownScore : playing ? run.score : 0;
     $('hud-round').textContent = round + (run.endless ? '' : '/' + C.ROUNDS);
     $('hud-target').textContent = fmt(target);
     $('hud-score').textContent = fmt(score);
     $('bar-fill').style.width = Math.min(100, (score / target) * 100) + '%';
-    $('hud-moves').textContent = playing ? run.movesLeft : nextRoundMoves(run);
-    $('hud-money').textContent = money(run.money);
-    $('hud-money').classList.toggle('neg', run.money < 0);
+    renderMovesBar();
+    const m = fz ? fz.money : run.money;
+    $('hud-money').textContent = money(m);
+    $('hud-money').classList.toggle('neg', m < 0);
+    $('btn-hint').disabled = !canHint();
   }
+  function canHint() { return !!S.run && !animating() && !S.locked && !S.frozen && S.run.phase === 'play'; }
+  function showHint() {
+    if (!canHint()) return;
+    const run = S.run;
+    const h = GF.Board.findHint(run.board, GF.Perks.flags(run.perks), GF.Run.colors(run));
+    if (!h) { GF.Audio.bad(); toast('NO MOVES'); return; }
+    S.selected = null;
+    S.hint = { cells: [h.a, h.b], until: performance.now() + 2500 };
+    GF.Audio.tick(3);
+  }
+  function renderMovesBar() {
+    const run = S.run; if (!run) return;
+    const inShop = !S.frozen && (run.phase === 'shop' || run.phase === 'victory');
+    const left = S.frozen ? S.frozen.movesLeft : inShop ? nextRoundMoves(run) : run.movesLeft;
+    const base = inShop ? left : (S.roundMoves || left);
+    const total = Math.max(base, left);
+    const cells = $('moves-cells');
+    if (cells.children.length !== total) {
+      cells.innerHTML = '';
+      for (let i = 0; i < total; i++) { const d = document.createElement('div'); d.className = 'mcell'; cells.appendChild(d); }
+    }
+    cells.classList.toggle('tight', total > 30);
+    Array.from(cells.children).forEach((d, i) => {
+      d.classList.toggle('on', i < left);
+      if (!inShop && S.lastLeft != null && i >= S.lastLeft && i < left) { d.classList.remove('new'); void d.offsetWidth; d.classList.add('new'); }
+    });
+    S.lastLeft = inShop ? null : left;
+    const ratio = left / Math.max(1, base);
+    $('moves-bar').classList.toggle('warn', !inShop && left > 1 && ratio <= 0.5 && ratio > 0.25);
+    $('moves-bar').classList.toggle('danger', !inShop && (left <= 1 || ratio <= 0.25));
+    $('moves-text').textContent = inShop ? 'NEXT ROUND: ' + left + ' MOVES' : 'MOVES LEFT: ' + left;
+  }
+  function renderCardTray() {
+    const run = S.run, tray = $('card-tray'); tray.innerHTML = '';
+    run.consumables.forEach((id, i) => {
+      const el = document.createElement('div');
+      el.className = 'card-slot full' + (S.targeting === i ? ' targeting' : '');
+      el.innerHTML = iconImg('card', id); el.onclick = () => showCardTip(el, i); bindHover(el, GF.Cards.DEFS[id].name, GF.Cards.DEFS[id].rarity); floatPhase(el, 3.4, i);
+      tray.appendChild(el);
+    });
+    $('tray-count').textContent = run.consumables.length + '/' + run.cardSlots;
+  }
+  function showCardTip(el, i) {
+    const run = S.run, id = run.consumables[i], d = GF.Cards.DEFS[id];
+    const can = GF.Cards.canUse(run, id);
+    const btns = [];
+    if (S.targeting === i) { S.targeting = null; refresh(); return; }
+    if (!animating() && can.ok) btns.push(['USE', () => {
+      if (d.target) { S.targeting = i; toast('PICK A TARGET'); refresh(); } else doUseCard(i, undefined);
+    }]);
+    btns.push(['DISCARD', () => { S.targeting = null; run.consumables.splice(i, 1); saveIfShop(); refresh(); }]);
+    showTip(el.getBoundingClientRect(), iconImg('card', id) + '<b>' + d.name + '</b><small>' + d.rarity.toUpperCase() + ' CARD</small><p>' + d.desc + '</p>' + (can.ok ? '' : '<p><i>' + (can.reason === 'phase' ? 'Only during a round' : 'No free perk slot') + '</i></p>'), btns, d.rarity);
+  }
+  function doUseCard(i, target) {
+    if (animating() || S.locked) { GF.Audio.bad(); toast('WAIT FOR THE BOARD'); return; }
+    const r = GF.Cards.use(S.run, i, target);
+    S.targeting = null;
+    if (!r.ok) { GF.Audio.bad(); toast(r.reason === 'target' ? 'INVALID TARGET' : r.reason === 'phase' ? 'ONLY DURING A ROUND' : r.reason === 'slots' ? 'NO FREE PERK SLOT' : 'CANNOT DO THAT'); refresh(); return; }
+    const made = (r.events || []).filter((e) => e.gem && e.gem.kind !== 'normal');
+    if (made.length) made.forEach((e) => GF.Audio.created(e.gem.kind)); else GF.Audio.ching();
+    GF.Anim.sync(S.run.board);
+    (r.events || []).forEach((e) => { if (e.r != null) GF.Render.pulseTile(e.r, e.c); });
+    saveIfShop();
+    layout(); refresh();
+  }
+  function saveIfShop() { if (S.run.phase === 'shop') GF.Run.save(S.run); }
   function nextRoundMoves(run) {
     let m = C.START_MOVES + run.extraMoves;
     for (const p of run.perks) {
@@ -1936,84 +4864,144 @@ body.mobile #btn-shop-toggle { display: inline-block; }
   function renderPerks() {
     const run = S.run, row = $('perk-row');
     row.innerHTML = '';
-    for (let i = 0; i < run.perkSlots; i++) {
-      const inst = run.perks[i];
+    run.perks.forEach((inst, i) => {
       const el = document.createElement('div');
-      if (!inst) { el.className = 'perk empty'; el.textContent = 'EMPTY'; row.appendChild(el); continue; }
       const d = GF.Perks.byId[inst.id];
       el.className = 'perk ' + d.rarity;
       el.dataset.i = String(i);
-      el.innerHTML = '<div class="pn">' + d.name + '</div><div class="pd">' + perkDesc(d, inst) + '</div>';
-      bindPerkCard(el, i);
+      el.dataset.uid = String(inst.uid);
+      el.innerHTML = '<div class="inner">' + iconImg('perk', inst.id) + '</div>';
+      floatPhase(el, 3, i);
+      bindHover(el, d.name, d.rarity);
+      bindPerkCard(el);
       row.appendChild(el);
-    }
+    });
+    $('perk-count').textContent = run.perks.length + '/' + run.perkSlots;
   }
   function cardEl(cls, html) { const el = document.createElement('div'); el.className = cls; el.innerHTML = html; return el; }
+  const KIND_TAG = { perk: 'PERK', card: 'CARD', tile: 'TILE', upgrade: 'UPGRADE CARD' };
+  function itemInfo(it) {
+    if (it.kind === 'perk') { const d = GF.Perks.byId[it.id]; return { icon: iconImg('perk', it.id), name: d.name, desc: d.desc, cls: d.rarity, rar: d.rarity }; }
+    if (it.kind === 'card') { const d = GF.Cards.DEFS[it.id]; return { icon: iconImg('card', it.id), name: d.name, desc: d.desc, cls: d.rarity === 'rare' ? 'rare' : 'uncommon', rar: d.rarity }; }
+    if (it.kind === 'tile') { const d = GF.Tiles.DEFS[it.id]; return { icon: iconImg('tile', it.id), name: d.name, desc: d.desc, cls: 'tile' }; }
+    if (it.kind === 'gem') return { icon: iconImg('gem', it.id), name: it.id.toUpperCase(), desc: GEM_INFO[it.id], cls: 'tile' };
+    const col = it.color != null ? C.COLORS[it.color] : null;
+    const name = it.id === 'brilliance' ? 'BRILLIANCE' : 'POLISH ' + col.toUpperCase() + (it.id === 'polish2' ? ' +2' : ' +1');
+    const desc = it.id === 'brilliance' ? '+1 Polish to every color' : '+' + (it.id === 'polish2' ? 10 : 5) + ' points per ' + col + ' gem';
+    const polish = (it.id === 'polish1' || it.id === 'polish2') && it.color != null;
+    const icon = polish
+      ? '<span class="iconwrap"><img class="icon" alt="" src="' + GF.Render.gemIconURL(it.color) + '"><span class="plus">' + (it.id === 'polish2' ? '+2' : '+1') + '</span></span>'
+      : iconImg('upgrade', it.id);
+    return { icon: icon, name: name, desc: desc, cls: 'upgrade' };
+  }
   function renderShop() {
-    const run = S.run, s = run && run.shop;
-    if (!s) return;
+    const run = S.run, s = run && run.shop; if (!s) return;
     const can = (p) => GF.Shop.canAfford(run, p);
-    const P = $('shop-perks'); P.innerHTML = '';
-    s.perks.forEach((id, i) => {
-      if (!id) { P.appendChild(cardEl('card sold', '<div class="cn">SOLD</div>')); return; }
-      const d = GF.Perks.byId[id], pp = GF.Shop.perkPrice(run, id);
-      const el = cardEl('card ' + d.rarity, '<div class="cn">' + d.name + '</div><div class="cd">' + d.desc + '</div><div class="cp">$' + pp + '</div>');
-      if (!can(pp) || run.perks.length >= run.perkSlots) el.classList.add('off');
-      el.onclick = () => act(GF.Shop.buyPerk(run, i));
+    const busy = !!run.openPack || run.pendingPlace.length > 0;
+    const soldSlot = () => cardEl('slot sold', '<div class="frame"></div><div class="price">SOLD</div>');
+    const slotEl = (cls, info, price, off, i) => {
+      const el = cardEl('slot ' + cls + (off ? ' off' : ''), '<div class="frame">' + info.icon + '</div><div class="price">$' + price + '</div>');
+      floatPhase(el, 3.2, i);
+      bindHover(el, info.name, info.rar);
+      return el;
+    };
+    const I = $('shop-items'); I.innerHTML = '';
+    s.items.forEach((it, i) => {
+      if (!it) { I.appendChild(soldSlot()); return; }
+      const info = itemInfo(it), price = GF.Shop.itemPrice(run, it), ok = can(price);
+      const el = slotEl(info.cls, info, price, !ok, i);
+      el.onclick = () => showTip(el.getBoundingClientRect(), info.icon + '<b>' + info.name + '</b><small>' + KIND_TAG[it.kind] + '</small><p>' + info.desc + '</p><p>Price $' + price + '</p>' + (ok ? '' : '<p><i>Not enough money</i></p>'),
+        ok ? [['BUY $' + price, () => act(GF.Shop.buyItem(run, i))]] : [], info.rar);
+      I.appendChild(el);
+    });
+    const P = $('shop-packs'); P.innerHTML = '';
+    s.packs.forEach((pk, i) => {
+      if (!pk) { P.appendChild(cardEl('pack sold', '<div class="frame"></div><div class="price">SOLD</div>')); return; }
+      const sz = C.PACK_SIZES[pk.size], price = GF.Shop.packPrice(run, pk), ok = can(price);
+      const name = PACK_NAME[pk.type] + ' Pack (' + pk.size + ')';
+      const el = cardEl('pack t-' + pk.type + (!ok || busy ? ' off' : ''), '<div class="frame">' + iconImg('pack', pk.type) + '<span class="size s-' + pk.size + '">' + pk.size + '</span></div><div class="price">$' + price + '</div>');
+      floatPhase(el, 3.2, i + 0.75);
+      bindHover(el, name, PACK_COL[pk.type]);
+      el.onclick = () => {
+        const btn = ['BUY $' + price, () => { const r = GF.Shop.buyPack(run, i); act(r); if (r.ok) openPackModal(); }];
+        const why = busy ? 'Finish your current pack first' : !ok ? 'Not enough money' : '';
+        showTip(el.getBoundingClientRect(), iconImg('pack', pk.type) + '<b>' + name + '</b><small>Pick ' + sz.picks + ' of ' + sz.show + '</small><p>' + PACK_DESC[pk.type] + '</p>' + (why ? '<p><i>' + why + '</i></p>' : ''), why ? [] : [btn], PACK_COL[pk.type]);
+      };
       P.appendChild(el);
     });
-    const T = $('shop-tiles'); T.innerHTML = '';
-    s.tiles.forEach((id, i) => {
-      if (!id) { T.appendChild(cardEl('card sold', '<div class="cn">SOLD</div>')); return; }
-      const d = GF.Tiles.DEFS[id], tp = GF.Shop.tilePrice(run, id);
-      const el = cardEl('card tile' + (S.placing === i ? ' picked' : ''),
-        '<div class="cn" style="color:' + GF.Render.TILE_COL[id] + '">[' + d.icon + '] ' + d.name + '</div><div class="cd">' + d.desc + '</div><div class="cp">$' + tp + '</div>');
-      if (!can(tp)) el.classList.add('off');
-      el.onclick = () => {
-        if (!can(tp)) { act({ ok: false, reason: 'money' }); return; }
-        S.placing = S.placing === i ? null : i;
-        if (document.body.classList.contains('mobile')) $('shop').classList.toggle('collapsed', S.placing != null);
-        renderShop();
-      };
-      T.appendChild(el);
-    });
-    const U = $('shop-upgrade'); U.innerHTML = '';
-    const up = s.upgrade;
-    if (!up) U.appendChild(cardEl('card sold', '<div class="cn">SOLD</div>'));
+    const V = $('shop-voucher'); V.innerHTML = '';
+    if (!run.voucherOffer) V.appendChild(soldSlot());
     else {
-      const label = up.type === 'moves' ? '+1 MOVE / ROUND' : up.type === 'slot' ? '+1 PERK SLOT' : 'POLISH ' + C.COLORS[up.color].toUpperCase();
-      const desc = up.type === 'moves' ? 'Start every round with one more move.' : up.type === 'slot' ? 'Hold one more perk.' : '+5 points for every ' + C.COLORS[up.color] + ' gem. Stacks.';
-      const upp = GF.Shop.upgradePrice(run, up);
-      const el = cardEl('card upgrade', '<div class="cn">' + label + '</div><div class="cd">' + desc + '</div><div class="cp">$' + upp + '</div>');
-      if (!can(upp)) el.classList.add('off');
-      el.onclick = () => act(GF.Shop.buyUpgrade(run));
-      U.appendChild(el);
+      const d = GF.Vouchers.DEFS[run.voucherOffer], price = GF.Shop.voucherPrice(run), ok = can(price);
+      const info = { icon: iconImg('voucher', run.voucherOffer), name: d.name, rar: 'rare' };
+      const el = slotEl('rare', info, price, !ok, 2);
+      const voucherId = run.voucherOffer;
+      const buy = () => { const nRem = run.removedColors.length; const r = GF.Shop.buyVoucher(run); act(r); if (r.ok) { if (voucherId === 'palette_knife' && run.removedColors.length > nRem) toast('REMOVED ' + C.COLORS[run.removedColors[run.removedColors.length - 1]].toUpperCase()); layout(); } };
+      el.onclick = () => showTip(el.getBoundingClientRect(), info.icon + '<b>' + d.name + '</b><small>UPGRADE</small><p>' + d.desc + '</p><p>Price $' + price + '</p>' + (ok ? '' : '<p><i>Not enough money</i></p>'), ok ? [['BUY $' + price, buy]] : [], 'rare');
+      V.appendChild(el);
     }
     const rp = GF.Shop.rerollPrice(run);
     $('btn-reroll').textContent = rp === 0 ? 'REROLL FREE' : 'REROLL $' + rp;
     $('btn-reroll').disabled = !can(rp);
-    $('shop-hint').textContent = S.placing != null && s.tiles[S.placing]
-      ? 'Tap a board cell to place the ' + GF.Tiles.DEFS[s.tiles[S.placing]].name + '. ESC to cancel.'
-      : 'Tap a perk to see or sell it. Drag perks to reorder. Long-press or right-click a cell for info.';
+    $('btn-next').disabled = busy;
+    const pend = run.pendingPlace[0];
+    $('pending').classList.toggle('hidden', !pend);
+    if (pend) $('pending-label').textContent = 'PLACE: ' + (pend.kind === 'tile' ? GF.Tiles.DEFS[pend.id].name : pend.id.toUpperCase()) + (run.pendingPlace.length > 1 ? ' (+' + (run.pendingPlace.length - 1) + ' more)' : '');
+    $('shop-hint').textContent = pend ? (pend.kind === 'tile' ? 'Tap any board cell to place the tile.' : 'Tap a normal gem to turn it into a ' + pend.id + '.') : 'Tap a perk to see or sell it. Drag perks to reorder.';
+  }
+  function choiceInfo(c) { return itemInfo(c.kind === 'gem' ? { kind: 'gem', id: c.id } : c); }
+  function openPackModal() {
+    const run = S.run, op = run.openPack;
+    if (!op) { $('pack-modal').classList.add('hidden'); refresh(); return; }
+    $('pack-title').textContent = op.type.toUpperCase() + ' PACK · ' + op.size;
+    const full = op.type === 'enhance' && run.consumables.length >= run.cardSlots;
+    $('pack-sub').textContent = full ? 'Cards full: discard one to pick' : 'Pick ' + (op.picks - op.picked) + ' more';
+    const box = $('pack-choices'); box.innerHTML = '';
+    op.choices.forEach((c, i) => {
+      const info = choiceInfo(c);
+      const el = cardEl('choice ' + info.cls + (op.taken[i] ? ' sold' : '') + (full && !op.taken[i] ? ' off' : ''), '<div class="frame">' + info.icon + '</div><div>' + info.name + '</div>');
+      const pick = () => {
+        const r = GF.Packs.pick(run, i);
+        if (!r.ok) { GF.Audio.bad(); toast(r.reason === 'cards' ? 'CARD SLOTS FULL' : 'CANNOT DO THAT'); return; }
+        GF.Audio.ching(); GF.Run.save(run); refresh(); openPackModal();
+      };
+      bindHover(el, info.name, info.rar);
+      if (!op.taken[i]) el.onclick = () => showTip(el.getBoundingClientRect(), info.icon + '<b>' + info.name + '</b><p>' + info.desc + '</p>' + (full ? '<p><i>Card slots full: discard one below</i></p>' : ''), full ? [] : [['SELECT', pick]], info.rar);
+      box.appendChild(el);
+    });
+    const tray = $('pack-tray'); tray.innerHTML = '';
+    if (op.type === 'enhance') run.consumables.forEach((id, i) => {
+      const b = document.createElement('button'); b.textContent = 'DISCARD ' + GF.Cards.DEFS[id].name;
+      b.onclick = () => { S.targeting = null; run.consumables.splice(i, 1); GF.Run.save(run); refresh(); openPackModal(); };
+      tray.appendChild(b);
+    });
+    $('pack-modal').classList.remove('hidden');
   }
   function refresh() {
     refreshHud();
     if (!S.run) return;
-    if (!S.busy) renderPerks();
+    if (!animating()) renderPerks();
+    renderCardTray();
     if (S.run.phase === 'shop') renderShop();
+    const shopEl = $('shop');
+    const hold = document.body.classList.contains('mobile') && (S.run.pendingPlace.length > 0 || S.targeting != null);
+    if (hold) { if (!shopEl.classList.contains('collapsed')) { shopEl.classList.add('collapsed'); S.autoCollapsed = true; } }
+    else if (S.autoCollapsed) { shopEl.classList.remove('collapsed'); S.autoCollapsed = false; }
   }
   function act(r) {
     if (r && r.ok) { GF.Audio.ching(); GF.Run.save(S.run); }
     else {
       GF.Audio.bad();
-      toast(r && r.reason === 'slots' ? 'NO FREE PERK SLOT' : r && r.reason === 'money' ? 'NOT ENOUGH MONEY' : r && r.reason === 'debt' ? 'PAY OFF DEBT FIRST' : 'CANNOT DO THAT');
+      toast(r && r.reason === 'slots' ? 'NO FREE PERK SLOT' : r && r.reason === 'money' ? 'NOT ENOUGH MONEY' : r && r.reason === 'debt' ? 'PAY OFF DEBT FIRST' : r && r.reason === 'cards' ? 'CARD SLOTS FULL' : r && r.reason === 'pack' ? 'FINISH YOUR PACK FIRST' : 'CANNOT DO THAT');
     }
     refresh();
   }
 
   // ---------- tips & modal ----------
-  function showTip(rect, html, btns) {
+  function showTip(rect, html, btns, rarity) {
     const tip = $('tip');
+    tip.style.borderColor = rarityColor(rarity, 'var(--ink)');
+    $('hover-label').classList.add('hidden');
     tip.innerHTML = html;
     tip.classList.remove('hidden');
     (btns || []).forEach(([label, fn]) => {
@@ -2035,13 +5023,18 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     if (!inst) return;
     const d = GF.Perks.byId[inst.id];
     const btns = [];
-    if (!S.busy) {
-      const mv = (to) => () => { hideTip(); if (GF.Shop.movePerk(S.run, i, to)) { if (S.run.phase === 'shop') GF.Run.save(S.run); refresh(); } };
+    if (!animating()) {
+      const mv = (to) => () => {
+        hideTip();
+        if (animating()) { GF.Audio.bad(); return; }
+        const first = flipRects();
+        if (GF.Shop.movePerk(S.run, i, to)) { if (S.run.phase === 'shop') GF.Run.save(S.run); refresh(); flipPlay(first); }
+      };
       if (i > 0) btns.push(['< MOVE', mv(i - 1)]);
       if (i < S.run.perks.length - 1) btns.push(['MOVE >', mv(i + 1)]);
       if (S.run.phase === 'shop') btns.push(['SELL ' + money(GF.Perks.sellValue(inst, S.run.perks)), () => act(GF.Shop.sellPerk(S.run, inst.uid))]);
     }
-    showTip(el.getBoundingClientRect(), '<b class="' + d.rarity + '">' + d.name + '</b><small>' + d.rarity.toUpperCase() + '</small><p>' + perkDesc(d, inst) + '</p>', btns);
+    showTip(el.getBoundingClientRect(), iconImg('perk', inst.id) + '<b class="' + d.rarity + '">' + d.name + '</b><small>' + d.rarity.toUpperCase() + '</small><p>' + perkDesc(d, inst) + '</p>', btns, d.rarity);
   }
   function showCellTip(cell) {
     const run = S.run, g = run.board.cells[cell.r][cell.c], tile = run.board.tiles[cell.r][cell.c];
@@ -2071,44 +5064,97 @@ body.mobile #btn-shop-toggle { display: inline-block; }
   }
 
   // ---------- input ----------
-  function bindPerkCard(el, i) {
-    el.addEventListener('pointerdown', (e) => {
-      if (S.busy) return;
-      e.preventDefault();
-      const sx = e.clientX, sy = e.clientY;
-      let dragging = false;
-      try { el.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
-      const move = (ev) => { if (!dragging && Math.hypot(ev.clientX - sx, ev.clientY - sy) > 8) { dragging = true; el.classList.add('dragging'); } };
-      const cleanup = () => {
-        el.removeEventListener('pointermove', move);
-        el.removeEventListener('pointerup', up);
-        el.removeEventListener('pointercancel', cancel);
-        el.classList.remove('dragging');
-      };
-      const cancel = () => cleanup();
-      const up = (ev) => {
-        cleanup();
-        if (!dragging) { showPerkTip(el, i); return; }
-        const target = document.elementFromPoint(ev.clientX, ev.clientY);
-        const card = target && target.closest('.perk[data-i]');
-        if (card && GF.Shop.movePerk(S.run, i, +card.dataset.i)) { if (S.run.phase === 'shop') GF.Run.save(S.run); refresh(); }
-      };
-      el.addEventListener('pointermove', move);
-      el.addEventListener('pointerup', up);
-      el.addEventListener('pointercancel', cancel);
+  // FLIP helpers: record the perk cards' rects (keyed by uid), change the DOM, then animate each card from its old spot.
+  function flipRects(except) {
+    const m = {};
+    Array.from($('perk-row').children).forEach((c) => { if (c !== except) m[c.dataset.uid] = c.getBoundingClientRect(); });
+    return m;
+  }
+  function flipPlay(first, except) {
+    Array.from($('perk-row').children).forEach((c) => {
+      const f = first[c.dataset.uid];
+      if (!f || c === except || !c.animate) return;
+      const n = c.getBoundingClientRect(), dx = f.left - n.left, dy = f.top - n.top;
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+      c.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 150, easing: 'ease-out' });
     });
   }
-  async function placeTile(cell) {
-    const run = S.run, idx = S.placing;
-    const existing = run.board.tiles[cell.r][cell.c];
-    if (existing) {
-      const ok = await modal('REPLACE TILE?', '<p>This cell already has a ' + GF.Tiles.DEFS[existing].name + '.</p>', [['REPLACE', true], ['CANCEL', false]]);
+  function bindPerkCard(el) {
+    el.addEventListener('pointerdown', (e) => {
+      if (!S.run || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      // the row is only rebuilt when the board is idle, so look the perk up by uid, not by a captured index
+      const i = S.run.perks.findIndex((p) => p.uid === +el.dataset.uid);
+      if (i < 0) return;
+      e.preventDefault();
+      const row = $('perk-row');
+      const sx = e.clientX, sy = e.clientY, r0 = el.getBoundingClientRect();
+      const grabX = sx - r0.left, grabY = sy - r0.top;
+      let dragging = false, lastX = sx, vx = 0, cur = i;
+      const place = (ev) => {
+        // natural (untransformed) position of the card, then translate it to follow the pointer
+        el.style.transform = 'none';
+        const n = el.getBoundingClientRect();
+        const dx = ev.clientX - grabX - n.left, dy = ev.clientY - grabY - n.top;
+        const rot = Math.max(-12, Math.min(12, vx * 0.6));
+        el.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(1.1) rotate(' + rot + 'deg)';
+      };
+      const indexAt = (x) => {
+        // layout midpoints (offset*) ignore running FLIP transforms, so the index cannot flicker
+        const op = el.offsetParent, ob = op.getBoundingClientRect();
+        const base = ob.left + op.clientLeft;
+        let k = 0;
+        Array.from(row.children).forEach((c) => { if (c !== el && base + c.offsetLeft + c.offsetWidth / 2 < x) k++; });
+        return k;
+      };
+      const move = (ev) => {
+        vx = ev.clientX - lastX; lastX = ev.clientX;
+        if (!dragging) {
+          if (animating() || Math.hypot(ev.clientX - sx, ev.clientY - sy) <= 8) return;
+          dragging = true; hideTip(); $('hover-label').classList.add('hidden');
+          el.classList.add('dragging');
+          el.style.position = 'relative'; el.style.zIndex = '50'; el.style.animation = 'none';
+        }
+        const k = indexAt(ev.clientX);
+        if (k !== cur) {
+          const first = flipRects(el);
+          const sibs = Array.from(row.children).filter((c) => c !== el);
+          if (k >= sibs.length) row.appendChild(el); else row.insertBefore(el, sibs[k]);
+          cur = k;
+          flipPlay(first, el);
+        }
+        place(ev);
+      };
+      const detach = () => {
+        document.removeEventListener('pointermove', move);
+        document.removeEventListener('pointerup', up);
+        document.removeEventListener('pointercancel', cancel);
+      };
+      const cancel = () => { detach(); if (dragging) refresh(); };
+      const up = () => {
+        detach();
+        if (!dragging) { showPerkTip(el, i); return; }
+        if (cur !== i && GF.Shop.movePerk(S.run, i, cur) && S.run.phase === 'shop') GF.Run.save(S.run);
+        // settle: drop the lift transform and glide into the slot, then rebuild the row from the data
+        el.style.transition = 'transform .15s ease-out';
+        el.style.transform = 'none';
+        setTimeout(() => refresh(), 160);
+      };
+      document.addEventListener('pointermove', move);
+      document.addEventListener('pointerup', up);
+      document.addEventListener('pointercancel', cancel);
+    });
+  }
+  async function placePending(cell) {
+    const run = S.run, p = run.pendingPlace[0];
+    if (p.kind === 'tile' && run.board.tiles[cell.r][cell.c]) {
+      const ok = await modal('REPLACE TILE?', '<p>This cell already has a ' + GF.Tiles.DEFS[run.board.tiles[cell.r][cell.c]].name + '.</p>', [['REPLACE', true], ['CANCEL', false]]);
       if (!ok) return;
     }
-    S.placing = null;
-    $('shop').classList.remove('collapsed');
-    act(GF.Shop.buyTile(run, idx, cell.r, cell.c));
+    const r = GF.Packs.place(run, cell.r, cell.c);
+    if (!r.ok) { GF.Audio.bad(); toast(p.kind === 'gem' ? 'PICK A NORMAL GEM' : 'CANNOT PLACE HERE'); return; }
+    if (p.kind === 'gem') GF.Audio.created(p.id); else GF.Audio.ching();
     GF.Render.pulseTile(cell.r, cell.c);
+    GF.Anim.sync(run.board); GF.Run.save(run); refresh();
   }
   function bindBoard() {
     const cv = $('board');
@@ -2116,11 +5162,12 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     const clearLp = () => { if (lp) { clearTimeout(lp); lp = null; } };
     cv.addEventListener('pointerdown', (e) => {
       const run = S.run;
-      if (!run || S.busy) return;
+      if (!run || S.locked) return;
       const cell = GF.Render.cellAt(e.clientX, e.clientY);
       if (!cell) return;
       e.preventDefault();
-      if (S.placing != null) { placeTile(cell); return; }
+      if (S.targeting != null) { doUseCard(S.targeting, cell); return; }
+      if (run.phase === 'shop' && run.pendingPlace.length) { placePending(cell); return; }
       if (run.phase !== 'play') { showCellTip(cell); return; }
       down = { cell: cell, x: e.clientX, y: e.clientY };
       try { cv.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
@@ -2128,7 +5175,7 @@ body.mobile #btn-shop-toggle { display: inline-block; }
       lp = setTimeout(() => { if (down) { showCellTip(down.cell); down = null; } }, 500);
     });
     cv.addEventListener('pointermove', (e) => {
-      if (!down || S.busy) return;
+      if (!down || S.locked) return;
       const dx = e.clientX - down.x, dy = e.clientY - down.y;
       if (Math.max(Math.abs(dx), Math.abs(dy)) < GF.Render.cellPx() * 0.4) return;
       clearLp();
@@ -2143,7 +5190,8 @@ body.mobile #btn-shop-toggle { display: inline-block; }
       const cell = down.cell, sel = S.selected;
       down = null;
       if (sel && Math.abs(sel.r - cell.r) + Math.abs(sel.c - cell.c) === 1) trySwap(sel, cell);
-      else S.selected = sel && sel.r === cell.r && sel.c === cell.c ? null : cell;
+      else if (sel && sel.r === cell.r && sel.c === cell.c) S.selected = null;
+      else if (settled(cell)) { S.selected = cell; S.selectedAt = performance.now(); } // a busy cell just doesn't select
     });
     cv.addEventListener('pointercancel', () => { clearLp(); down = null; });
     cv.addEventListener('contextmenu', (e) => {
@@ -2159,11 +5207,13 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     document.body.classList.toggle('mobile', mobile);
     const shopOpen = S.run && S.run.phase === 'shop';
     const availW = mobile ? w - 24 : w - 220 - (shopOpen ? 320 : 0) - 64;
-    const availH = mobile ? h - 330 : h - 190;
+    const availH = (mobile ? h - 330 - 30 : h - 190) - 36; // 30: mobile cascade row; 36: HINT button
     GF.Render.resize(Math.max(28, Math.min(72, Math.floor(Math.min(availW, availH) / 8))));
+    $('board-col').style.setProperty('--board-h', ($('board').offsetHeight || 0) + 'px');
   }
   function toTitle() {
-    S.run = null; S.busy = false; S.placing = null; S.selected = null;
+    GF.Anim.cancelAll(); S.live = []; S.locked = false;
+    S.run = null; S.targeting = null; S.selected = null; S.hint = null; $('pack-modal').classList.add('hidden');
     show('screen-title');
     $('btn-continue').classList.toggle('hidden', !GF.Run.hasSave());
   }
@@ -2171,67 +5221,133 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     const txt = $('seed-input').value.trim();
     const seed = txt ? (/^\d+$/.test(txt) ? +txt : GF.RNG.hash(txt)) : undefined;
     S.run = GF.Run.create(seed);
+    GF.Anim.cancelAll(); S.live = []; S.locked = false;
+    S.cp = null; renderCascadePanel();
     show('screen-game');
+    $('shop').classList.add('hidden');
     GF.Anim.sync(S.run.board);
-    enterShop();
+    S.roundMoves = S.run.movesLeft; S.lastLeft = null;
+    GF.Run.save(S.run);
+    layout(); refresh();
+    roundBanner('ROUND 1');
   }
   function resume(run) {
-    S.run = run;
+    GF.Anim.cancelAll(); S.live = []; S.locked = false;
+    S.run = run; S.cp = null; renderCascadePanel();
     show('screen-game');
     GF.Anim.sync(run.board);
     if (run.phase === 'shop') enterShop();
     else if (run.phase === 'victory') { layout(); refresh(); victory(); }
-    else { run.phase = 'play'; $('shop').classList.add('hidden'); layout(); refresh(); }
+    else { run.phase = 'play'; S.roundMoves = run.movesLeft; S.lastLeft = null; $('shop').classList.add('hidden'); layout(); refresh(); }
   }
   function enterShop() {
     const run = S.run;
     if (!run.shop) GF.Shop.open(run);
     run.phase = 'shop';
+    S.locked = false;
     $('shop').classList.remove('hidden', 'collapsed');
-    $('toast').classList.remove('on'); $('big').classList.remove('on');
+    $('toast').classList.remove('on'); $('big').classList.remove('on'); $('board-banner').classList.remove('on');
     GF.Run.save(run);
     layout(); refresh();
+    if (run.openPack) openPackModal();
   }
   function startRound() {
-    if (S.busy || !S.run || S.run.phase !== 'shop') return;
+    if (animating() || !S.run || S.run.phase !== 'shop') return;
     const run = S.run;
-    S.placing = null; run.shop = null; hideTip();
-    $('shop').classList.add('hidden');
+    hideTip();
     const events = GF.Run.startRound(run);
+    if (!events) { toast('FINISH YOUR PACK FIRST'); return; }
+    S.targeting = null; S.hint = null; S.locked = false; S.roundMoves = run.movesLeft; S.lastLeft = null;
+    $('shop').classList.add('hidden');
     GF.Anim.sync(run.board);
     GF.Run.save(run);
     layout(); refresh();
-    toast('ROUND ' + run.round);
+    roundBanner('ROUND ' + run.round);
     events.forEach((e, i) => setTimeout(() => {
       hooks.float(e.r, e.c, String(e.gem.kind).toUpperCase(), 'money');
+      GF.Audio.created(e.gem.kind);
       GF.Render.pulseTile(e.r, e.c);
     }, 300 + i * 150));
   }
-  async function trySwap(a, b) {
+  // Accepts a swap even while other moves animate (Blitz-style), as long as both cells are settled.
+  // Returns true when the move happened. Never awaits the animation: callers (and tools) get control back at once.
+  function trySwap(a, b) {
     const run = S.run;
-    if (S.busy || !run || run.phase !== 'play') return;
-    S.selected = null;
-    const before = run.score;
-    const res = GF.Run.doMove(run, a, b);
-    if (!res) { GF.Audio.bad(); GF.Anim.bump(a, b); return; }
-    S.busy = true;
-    S.shownScore = before;
+    if (!run || S.locked || run.phase !== 'play') return false;
+    S.selected = null; S.hint = null;
+    const busy = GF.Anim.busyCells();
+    const before = run.score, uids = run.perks.map((p) => p.uid);
+    const res = settled(a, busy) && settled(b, busy) ? GF.Run.doMove(run, a, b) : null;
+    if (!res) {
+      GF.Audio.bad();
+      if (GF.Anim.atRest(a.r, a.c) && (!inBoard(b) || GF.Anim.atRest(b.r, b.c))) GF.Anim.bump(a, b);
+      return false;
+    }
+    for (const st of res.timeline) if (st.t === 'perk' && st.slot != null) st.uid = uids[st.slot];
+    if (!animating()) S.shownScore = before;
+    const ctx = { total: null, level: 1, t: 0, cp: { cascades: 0, gems: 0 } }; // t: last widget update (0 = none yet)
+    if (!S.live.length) { S.cp = ctx.cp; renderCascadePanel(); }
+    S.live.push(ctx);
+    const ending = run.phase !== 'play'; // won or over: lock input, let every timeline finish, then the modal
+    if (ending) S.locked = true;
+    const done = GF.Anim.run(res.timeline, makeHooks(ctx));
     refreshHud();
-    try { await GF.Anim.play(res.timeline, hooks); } catch (e) { console.error(e); }
+    if (ending) GF.Anim.idle().then(() => endRound(run, res));
+    else done.then(settleIfIdle);
+    return true;
+  }
+  function checkDisplay() {
+    if (displayMatchesBoard()) return;
+    S.desyncs++;
+    console.error('GF: display drifted from the logic board; resyncing');
+  }
+  // When the last timeline ends: verify, resync (safety), and redraw what waits for idle (perk row, hint button).
+  function settleIfIdle() {
+    const run = S.run;
+    if (!run || animating() || S.locked) return;
+    checkDisplay();
+    GF.Anim.sync(run.board);
+    S.shownScore = run.score;
+    refresh();
+  }
+  async function endRound(run, res) {
+    if (S.run !== run) return; // left the run meanwhile
+    checkDisplay();
     if (res.insured) toast('INSURANCE!');
     GF.Anim.sync(run.board);
-    S.busy = false;
+    S.shownScore = run.score;
     refresh();
     if (run.phase === 'won') await roundWon();
     else if (run.phase === 'over') await gameOver();
   }
+  function animateMoney(from, to, ms) {
+    return new Promise((resolve) => {
+      const t0 = performance.now(), el = $('hud-money');
+      const tick = () => {
+        const p = Math.min(1, (performance.now() - t0) / ms);
+        el.textContent = money(Math.round(from + (to - from) * p));
+        if (p >= 1) { clearInterval(iv); resolve(); }
+      };
+      const iv = setInterval(tick, 30);
+      tick();
+    });
+  }
   async function roundWon() {
     const run = S.run;
     GF.Audio.win();
+    S.frozen = { score: run.score, movesLeft: run.movesLeft, money: run.money, round: run.round };
+    const before = run.money;
     const info = GF.Run.finishRound(run);
-    info.steps.forEach((s) => hooks.perkFire(s));
+    info.steps.forEach((st) => hooks.perkFire(st));
     refresh();
-    await modal('ROUND CLEAR!', '<p>Base income <b>$' + info.base + '</b></p><p>Leftover moves <b>' + info.leftover + ' x $1</b></p>' + (info.perkIncome ? '<p>Perks <b>' + (info.perkIncome >= 0 ? '+$' : '-$') + Math.abs(info.perkIncome) + '</b></p>' : '') + '<p class="big">+$' + info.income + '</p>', [['CONTINUE', true]]);
+    const rows = [['Win reward', info.base], ['Moves left (' + info.leftover + ', $1 per 2)', info.leftoverIncome]];
+    if (info.perkIncome || info.perkMoney) rows.push(['Perks', info.perkIncome + info.perkMoney]);
+    if (info.interest > 0) rows.push(['Interest ($1 per $5, max $10)', info.interest]);
+    const html = '<div class="payout">' + rows.map(([l, v]) => '<div class="row"><span>' + l + '</span><i></i><b>' + (v < 0 ? '-$' + (-v) : '$' + v) + '</b></div>').join('') + '</div>';
+    await modal('ROUND CLEAR!', html, [['OBTAIN ' + money(info.total), true]]);
+    S.frozen = null;
+    await animateMoney(before, run.money, 400);
+    refresh();
     if (run.phase === 'victory') { GF.Run.save(run); await victory(); } else enterShop();
   }
   async function victory() {
@@ -2243,7 +5359,7 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     const run = S.run;
     GF.Audio.lose();
     GF.Run.clearSave();
-    await modal('GAME OVER', '<p>Reached round <b>' + run.round + '</b>' + (run.endless ? ' (endless)' : '') + '</p><p>Score <b>' + fmt(run.score) + ' / ' + fmt(GF.Run.target(run.round)) + '</b></p><p>Best move <b>' + fmt(run.stats.bestMove) + '</b></p><p>Seed <b>' + run.seed + '</b></p>', [['MENU', true]]);
+    await modal('GAME OVER', '<p>Reached round <b>' + run.round + '</b>' + (run.endless ? ' (endless)' : '') + '</p><p>Score <b>' + fmt(run.score) + ' / ' + fmt(GF.Run.targetFor(run, run.round)) + '</b></p><p>Best move <b>' + fmt(run.stats.bestMove) + '</b></p><p>Seed <b>' + run.seed + '</b></p>', [['MENU', true]]);
     toTitle();
   }
   function updateToggles() {
@@ -2257,7 +5373,8 @@ body.mobile #btn-shop-toggle { display: inline-block; }
   }
   function loop(now) {
     GF.Anim.update(now);
-    if (S.run) GF.Render.frame({ display: GF.Anim.display, board: S.run.board, selected: S.selected, placing: S.placing != null, time: now });
+    if (S.selected && S.run && animating() && !settled(S.selected)) S.selected = null; // a selected gem that becomes busy loses selection
+    if (S.run) GF.Render.frame({ display: GF.Anim.display, board: S.run.board, selected: S.selected, selectedAt: S.selectedAt, busy: S.locked, hint: S.hint, placing: !!(S.run.pendingPlace && S.run.pendingPlace.length) || S.targeting != null, time: now });
     requestAnimationFrame(loop);
   }
   function findMove() {
@@ -2270,9 +5387,25 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     }
     return null;
   }
+  // A logic-valid swap whose two cells are settled (for tools; mirrors what a player could do right now).
+  function findSettledMove() {
+    const run = S.run;
+    if (!run || S.locked || run.phase !== 'play') return null;
+    const f = GF.Perks.flags(run.perks), cols = GF.Run.colors(run), busy = GF.Anim.busyCells();
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const a = { r: r, c: c };
+      for (const b of [{ r: r, c: c + 1 }, { r: r + 1, c: c }]) {
+        if (inBoard(b) && settled(a, busy) && settled(b, busy) && GF.Board.canSwap(run.board, a, b, f, cols)) return { a: a, b: b };
+      }
+    }
+    return null;
+  }
   function state() {
     const r = S.run;
-    return r ? { phase: r.phase, busy: S.busy, movesLeft: r.movesLeft, score: r.score, round: r.round, money: r.money } : { phase: 'title', busy: S.busy };
+    const hint = !!S.hint && performance.now() < S.hint.until;
+    const anims = GF.Anim.active();
+    return r ? { phase: r.phase, busy: anims > 0, anims: anims, locked: S.locked, desyncs: S.desyncs, movesLeft: r.movesLeft, score: r.score, round: r.round, money: r.money, hint: hint }
+      : { phase: 'title', busy: anims > 0, anims: anims, locked: S.locked, desyncs: S.desyncs, hint: false };
   }
   function init() {
     GF.Render.init($('board'));
@@ -2285,11 +5418,26 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     [$('btn-mute'), $('btn-mute-t')].forEach((b) => { b.onclick = () => { GF.Audio.setMuted(!GF.Audio.isMuted()); updateToggles(); }; });
     [$('btn-crt'), $('btn-crt-t')].forEach((b) => { b.onclick = () => { S.crt = !S.crt; prefSet('crt', S.crt ? '1' : '0'); updateToggles(); }; });
     $('btn-speed').onclick = () => { S.speedIdx = (S.speedIdx + 1) % 3; GF.Anim.speed = SPEEDS[S.speedIdx]; prefSet('speed', String(S.speedIdx)); updateToggles(); };
-    $('btn-reroll').onclick = () => { S.placing = null; $('shop').classList.remove('collapsed'); act(GF.Shop.reroll(S.run)); };
+    $('btn-reroll').onclick = () => { $('shop').classList.remove('collapsed'); act(GF.Shop.reroll(S.run)); };
+    $('btn-pack-skip').onclick = () => { GF.Packs.skip(S.run); GF.Run.save(S.run); openPackModal(); };
+    $('btn-discard').onclick = () => { GF.Packs.discardPending(S.run); GF.Run.save(S.run); refresh(); };
     $('btn-next').onclick = () => startRound();
+    $('btn-hint').onclick = showHint;
     $('btn-shop-toggle').onclick = () => $('shop').classList.toggle('collapsed');
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { S.placing = null; hideTip(); $('shop').classList.remove('collapsed'); renderShop(); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { S.targeting = null; hideTip(); $('shop').classList.remove('collapsed'); if (S.run) refresh(); } });
     document.addEventListener('pointerdown', (e) => { if (!$('tip').contains(e.target)) hideTip(); }, true);
+    const scoreStat = $('hud-score').parentElement;
+    const scoreTip = () => {
+      if (!S.run) return;
+      const st = S.run.stats;
+      showTip(scoreStat.getBoundingClientRect(), '<b>SCORE</b><p>Best move (round): ' + fmt(st.bestMoveRound) + '</p><p>Best move (run): ' + fmt(st.bestMove) + '</p>');
+      scoreTipOpen = true;
+    };
+    let scoreTipOpen = false;
+    scoreStat.style.cursor = 'help';
+    scoreStat.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') scoreTip(); });
+    scoreStat.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && scoreTipOpen) hideTip(); });
+    scoreStat.addEventListener('click', scoreTip);
     bindBoard();
     window.addEventListener('resize', layout);
     layout();
@@ -2297,7 +5445,7 @@ body.mobile #btn-shop-toggle { display: inline-block; }
     requestAnimationFrame(loop);
   }
 
-  GF.UI = { init: init, state: state, findMove: findMove, trySwap: trySwap, debugRun: () => S.run };
+  GF.UI = { init: init, state: state, findMove: findMove, findSettledMove: findSettledMove, trySwap: trySwap, displayMatchesBoard: displayMatchesBoard, debugRun: () => S.run, refresh: refresh };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 </script>
