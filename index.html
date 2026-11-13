@@ -12,7 +12,8 @@
   --bg: #120b1f; --panel: #1e1433; --panel2: #2a1d47; --ink: #f5efff; --muted: #a99cc7;
   --accent: #ffd23f; --good: #3ddc84; --bad: #ff4d6d;
   --common: #9ad1ff; --uncommon: #3ddc84; --rare: #ff6bd6;
-  --enh: #a259ff; --upg: #ffd23f; /* card borders: Enhance cards purple, Upgrade cards yellow */
+  --enh: #a259ff; --upg: #ffd23f; /* card borders: Enhance cards purple, Upgrade (polish) cards yellow */
+  --vch: #ff8fc7; /* v3.10: UPGRADES (vouchers) are rose pink everywhere: shop slot, About, Glossary, hover label, tooltip */
   --tilec: #3a86ff; /* tray: tile consumables blue */
   color-scheme: dark; /* single deliberate dark arcade look */
 }
@@ -65,7 +66,7 @@ canvas#board { display: block; image-rendering: pixelated; border: 3px solid var
 .card { width: 88px; min-height: 112px; background: var(--panel2); border: 3px solid var(--common); padding: 6px; font-size: 7px; line-height: 1.5; cursor: pointer; box-shadow: 3px 3px 0 #000; display: flex; flex-direction: column; gap: 4px; }
 .card.uncommon { border-color: var(--uncommon); }
 .card.rare { border-color: var(--rare); }
-.card.tile, .card.upgrade { border-color: var(--accent); }
+.card.tile { border-color: var(--accent); } .card.upgrade { border-color: var(--upg); }
 .card .cn { font-size: 8px; color: var(--accent); line-height: 1.3; }
 .card .cd { flex: 1; }
 .card .cp { font-size: 10px; color: var(--good); }
@@ -80,7 +81,7 @@ canvas#board { display: block; image-rendering: pixelated; border: 3px solid var
 .float { position: absolute; transform: translate(-50%, -50%); pointer-events: none; font-size: 10px; color: #fff; text-shadow: 2px 2px 0 #000; animation: floatUp .8s ease-out forwards; white-space: nowrap; z-index: 20; }
 .float.mul { color: var(--bad); font-size: 16px; }
 .float.money { color: var(--accent); }
-.float.coal { color: #ffd23f; font-size: 24px; z-index: 22; text-shadow: 3px 3px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 0 10px #ff8c42; animation: coalPop 1.3s ease-out forwards; }
+.float.coal { color: #e9d4ff; font-size: 17px; z-index: 22; text-shadow: 3px 3px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 0 10px #a259ff; animation: coalPop 1.2s ease-out forwards; } /* one per landing geode */
 .float.match { font-size: 16px; z-index: 21; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; animation: matchPop .95s ease-out forwards; }
 @keyframes coalPop { 0% { transform: translate(-50%, -50%) scale(.2); opacity: 0; } 15% { transform: translate(-50%, -50%) scale(1.35); opacity: 1; } 28% { transform: translate(-50%, -50%) scale(1); } 75% { transform: translate(-50%, -90%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -130%) scale(.9); opacity: 0; } }
 @keyframes matchPop { 0% { transform: translate(-50%, -50%) scale(.5); opacity: 0; } 18% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 30% { transform: translate(-50%, -50%) scale(1); } 70% { opacity: 1; } 100% { transform: translate(-50%, -160%) scale(1); opacity: 0; } }
@@ -213,7 +214,7 @@ body.mobile #cascade-panel div { margin: 0; font-size: 12px; }
 .slot.sold { opacity: .25; cursor: default; animation: none; }
 .slot.uncommon .frame { border-color: var(--uncommon); } .slot.rare .frame { border-color: var(--rare); }
 .slot.tile .frame { border-color: var(--accent); }
-.slot.enh .frame, .choice.enh .frame { border-color: var(--enh); } .slot.upgrade .frame, .choice.upgrade .frame { border-color: var(--upg); }
+.slot.enh .frame, .choice.enh .frame { border-color: var(--enh); } .slot.upgrade .frame, .choice.upgrade .frame { border-color: var(--upg); } .slot.voucher .frame { border-color: var(--vch); }
 .pack { width: 56px; cursor: pointer; text-align: center; animation: float 3.2s ease-in-out infinite; }
 .pack .frame { position: relative; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; background: var(--panel2); border: 3px solid; box-shadow: 3px 3px 0 #000; padding: 4px; }
 .pack .frame .icon { width: 40px; height: 40px; margin: 0; }
@@ -345,7 +346,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
 .bars-x .x .spawned { color: var(--muted); font-size: 6px; }
 #tip .tip-lv.up { background: #140d24; }
 .chart-note { margin: 6px 0 0; font-size: 6px; color: var(--muted); text-align: center; line-height: 1.6; }
-.set-row.menu { justify-content: center; margin-top: 16px; }
+.set-row.menu { justify-content: center; gap: 12px; margin-top: 16px; }
 .set-row.menu button { color: var(--bad); border-color: var(--bad); }
 /* About > UPGRADES: one stack per voucher family, tiers overlap */
 #about-upgrades .empty { text-align: center; color: var(--muted); font-size: 9px; margin: 28px 0; }
@@ -355,10 +356,10 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
 .vslot { width: 56px; height: 56px; flex: none; position: relative; animation: float 3.2s ease-in-out infinite; z-index: calc(1 + var(--j, 0)); }
 .vslot + .vslot { margin-left: -30px; margin-top: -6px; }
 .vslot:nth-child(2) .vcard { rotate: 4deg; } .vslot:nth-child(3) .vcard { rotate: 8deg; }
-.vcard { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; background: var(--panel2); border: 3px solid var(--upg); box-shadow: 3px 3px 0 #000; cursor: grab; touch-action: none; position: relative; }
+.vcard { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; background: var(--panel2); border: 3px solid var(--vch); box-shadow: 3px 3px 0 #000; cursor: grab; touch-action: none; position: relative; }
 .vcard:hover { filter: brightness(1.15); }
 .vcard .icon { width: 40px; height: 40px; margin: 0; pointer-events: none; }
-.vcard .vtier { position: absolute; left: -6px; top: -8px; font-size: 7px; padding: 2px 3px 1px; color: #000; background: var(--upg); border: 2px solid #000; line-height: 1; }
+.vcard .vtier { position: absolute; left: -6px; top: -8px; font-size: 7px; padding: 2px 3px 1px; color: #000; background: var(--vch); border: 2px solid #000; line-height: 1; }
 .vcard.dragging { z-index: 41; cursor: grabbing; box-shadow: 0 14px 18px rgba(0,0,0,.65); pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .vslot { animation: none !important; } }
 /* Glossary: full-screen panel, scrollable grid */
@@ -446,7 +447,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     <div class="set-row"><span>CRT EFFECT</span><button id="set-crt">ON</button></div>
     <div class="set-row"><span>SOUND</span><button id="set-sound">ON</button></div>
     <div class="set-row vol"><label for="set-volume">VOLUME</label><input id="set-volume" type="range" min="0" max="100" step="5" value="100"><span id="set-volume-v">100</span></div>
-    <div class="set-row menu"><button id="set-menu">MAIN MENU</button></div>
+    <div class="set-row menu"><button id="set-newrun">NEW RUN</button><button id="set-menu">MAIN MENU</button></div>
     <div class="panel-btns"><button class="panel-close">CLOSE</button></div>
   </div></div>
   <div id="about-modal" class="panel-modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-title"><div class="box">
@@ -566,7 +567,10 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
   C.SAVE_VER = 2; // 2: v3.6 vouchers/cards (saves without it are migrated)
   C.JEWEL_WEIGHTS = { bomb: 20, star: 20, gold: 15, shiny: 15, wild: 12, prism: 8, coal: 10 };
   C.COLORLESS = { prism: 1, wild: 1, coal: 1 };
-  C.COAL_MULT = 5; // a broken coal awards COAL_MULT x base gem value
+  // v3.10: a broken coal bursts into GEODE_MIN..GEODE_MAX geodes; geode k (1-based) is worth (GEODE_FIRST - 1 + k) x base
+  // (3 geodes: 5b + 6b + 7b). No cascade, polish or modifiers.
+  C.GEODE_MIN = 3; C.GEODE_MAX = 5; C.GEODE_FIRST = 5;
+  C.geodeValues = function (n, base) { const out = []; for (let k = 1; k <= n; k++) out.push((C.GEODE_FIRST - 1 + k) * base); return out; };
   C.MYSTERY_KINDS = ['bomb', 'star', 'prism', 'gold', 'shiny', 'wild', 'coal']; // gold/shiny: add that mod (gems without one)
   C.GOLD_MONEY = 2; // a gold gem pays this when cleared
   C.VOUCHER_EVERY = 5;
@@ -1255,9 +1259,9 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     on: { gemClear: (x) => (x.gem.color != null && x.gem.color === x.leastColor ? { add: 15 } : null) }, force: add(15) });
   def({ id: 'square', name: 'Square', desc: '2x2 blocks count as match-4', passive: true });
   def({ id: 'credit_card', name: 'Credit Card', desc: 'Money can go down to -$20', passive: true });
-  // v3.6: coal lines of 3+ match like a colour (flag coalMatch); each matched coal is worth COAL_MULT x base;
+  // v3.6: coal lines of 3+ match like a colour (flag coalMatch); each matched coal breaks into 3-5 geodes (v3.10);
   // a coal match never makes a special.
-  def({ id: 'coal_miner', name: 'Coal Miner', desc: 'Coal matches in lines of 3+. Each matched Coal scores 5x', passive: true });
+  def({ id: 'coal_miner', name: 'Coal Miner', desc: 'Coal matches in lines of 3+ and breaks into 3-5 geodes', passive: true });
   def({ id: 'dice_100', name: '100D Dice', desc: '+1 to +100 points per match',
     on: { match: (x) => ({ add: x.rng.int(100) + 1 }) }, force: (x) => ({ add: x.rng.int(100) + 1 }) });
   def({ id: 'hot_crushers', name: 'Hot Crushers', desc: '+15 per Red, Orange or Yellow gem cleared',
@@ -1366,7 +1370,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     on: { roundStart: () => ({ transform: { kind: 'supernova', count: 1 } }) } });
   def({ id: 'demolition', name: 'Demolition', desc: '+25 per gem destroyed by an explosion',
     on: { gemClear: (x) => (isBlast(x.gem) ? { add: 25 } : null) }, force: add(25) });
-  def({ id: 'coal_furnace', rarity: 'uncommon', name: 'Coal Furnace', desc: '+250 per Coal broken',
+  def({ id: 'coal_furnace', rarity: 'uncommon', name: 'Coal Furnace', desc: '+250 per Coal broken. Coal breaks into 3-5 geodes',
     on: { gemClear: (x) => (x.gem.kind === 'coal' ? { add: 250 } : null) }, force: add(250) });
   def({ id: 'goldsmith', name: 'Goldsmith', desc: 'Gold gems give +$1 more',
     on: { gemClear: (x) => (x.gem.mod === 'gold' ? { money: 1 } : null) }, force: () => ({ money: 1 }) });
@@ -2019,7 +2023,8 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     const chainBoost = GF.Vouchers ? GF.Vouchers.chainMul(run) : 1;
     const shinyMul = C.SHINY_MUL;
     const vopts = (src, mul) => ({ mul: mul, source: src, chainBoost: chainBoost });
-    const coalValue = () => C.COAL_MULT * C.base(run.round);
+    // what a coal match group is guaranteed per coal (the fewest geodes); the geodes themselves roll in the coal step
+    const coalValue = () => C.geodeValues(C.GEODE_MIN, C.base(run.round)).reduce((a, b) => a + b, 0);
 
     const apply = (eff, slot, meta) => {
       const step = { t: 'perk', slot: slot, level: x.level };
@@ -2213,11 +2218,13 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
             emit('gemClear');
           }
           x.gem = null; x.cell = null; x.gemValue = 0;
-          // coal fireworks: each broken coal (blast or coal match) awards COAL_MULT x base (no cascade, polish, mods)
+          // coal geodes: each broken coal (blast or coal match) bursts into 3-5 geodes, each scored as it lands:
+          // 5x base, then +1x base per geode (no cascade, polish, mods). v = their sum, total = points after all of them.
           coals.forEach(([r, c], i) => {
-            const v = coalValue();
+            const n = C.GEODE_MIN + run.rng.int(C.GEODE_MAX - C.GEODE_MIN + 1);
+            const geodes = C.geodeValues(n, C.base(run.round)), v = geodes.reduce((a, b) => a + b, 0);
             points = Math.min(points + v, Number.MAX_VALUE);
-            tl.push({ t: 'coal', r: r, c: c, sparks: 3 + run.rng.int(3), v: v, i: i, total: points });
+            tl.push({ t: 'coal', r: r, c: c, geodes: geodes, v: v, i: i, total: points });
           });
           for (const s of actFresh) { if (s.kind === 'shiny') continue; x.special = s; emit('special'); }
           x.special = null;
@@ -2294,9 +2301,9 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
   }
 
   // What one gem is worth right now in a plain first-cascade match (polish, round, its own shiny x2 included);
-  // coal: what breaking it awards. Used by the gem tooltip.
+  // coal: what its first geode is worth (5x base; each further geode +1x base). Used by the gem tooltip.
   function gemPoints(run, g) {
-    if (g.kind === 'coal') return C.COAL_MULT * C.base(run.round);
+    if (g.kind === 'coal') return C.GEODE_FIRST * C.base(run.round);
     return gemValue(run, g, 1, { source: 'match' });
   }
 
@@ -6012,6 +6019,9 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     pop(level) { const n = SCALE[Math.min(Math.max(level, 1) - 1, SCALE.length - 1)]; tone(440 * Math.pow(2, n / 12), 0.12, 'square', 0.05); },
     boom() { noise(0.35, 0.25); tone(120, 0.3, 'sawtooth', 0.08, 40); },
     sweep() { tone(300, 0.25, 'sawtooth', 0.05, 1800); },
+    // coal bursting into geodes (a rocky crack), then a crystal tink per landing geode, rising
+    crack() { noise(0.18, 0.16); tone(90, 0.2, 'triangle', 0.08, 45); tone(600, 0.2, 'sawtooth', 0.03, 1600, 0.03); },
+    geode(k) { const f = 1319 * Math.pow(2, SCALE[Math.min(k || 0, SCALE.length - 1)] / 12); tone(f, 0.12, 'triangle', 0.05); tone(f * 2, 0.07, 'sine', 0.02, null, 0.03); },
     chord() { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.4, 'triangle', 0.05, null, i * 0.04)); },
     ching() { tone(1568, 0.08, 'square', 0.04); tone(2093, 0.15, 'square', 0.04, null, 0.06); },
     tick(i) { tone(660 + (i || 0) * 60, 0.05, 'square', 0.035); },
@@ -6096,76 +6106,14 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
       [[5, 1], [6, 1], [5, 10], [6, 10], [1, 5], [1, 6], [10, 5], [10, 6], [2, 2], [9, 2], [2, 9], [9, 9]].forEach(([a, b]) => px(a, b, '#ffd23f'));
     }
   }
-  const PRISM_FRAMES = 16;
-  const prismFrames = [];
   function hexRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
-  function prismGrid(f) {
-    const ang = (f / PRISM_FRAMES) * Math.PI * 2, tilt = -0.42, R = 1.0, H = 1.0;
-    const rot = (p) => { const [x0, y0, z0] = p; return [x0, y0 * Math.cos(tilt) - z0 * Math.sin(tilt), y0 * Math.sin(tilt) + z0 * Math.cos(tilt)]; };
-    const eq = [0, 1, 2, 3].map((k) => rot([Math.cos(ang + k * Math.PI / 2) * R, 0, Math.sin(ang + k * Math.PI / 2) * R]));
-    const top = rot([0, -H, 0]), bot = rot([0, H, 0]);
-    const faces = [];
-    for (let k = 0; k < 4; k++) { faces.push([top, eq[k], eq[(k + 1) % 4], k]); faces.push([bot, eq[(k + 1) % 4], eq[k], k + 4]); }
-    const L = (() => { const v = [-0.45, -0.6, 0.66]; const m = Math.hypot(v[0], v[1], v[2]); return v.map((q) => q / m); })();
-    const grid = [];
-    for (let py = 0; py < PX; py++) {
-      grid.push([]);
-      for (let px = 0; px < PX; px++) {
-        const X = (px + 0.5 - 6) / 5.7, Y = (py + 0.5 - 6) / 5.7;
-        let best = null, bestZ = -Infinity;
-        for (const [a, b, c, idx] of faces) {
-          const d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]);
-          if (Math.abs(d) < 1e-9) continue;
-          const w1 = ((b[1] - c[1]) * (X - c[0]) + (c[0] - b[0]) * (Y - c[1])) / d;
-          const w2 = ((c[1] - a[1]) * (X - c[0]) + (a[0] - c[0]) * (Y - c[1])) / d;
-          const w3 = 1 - w1 - w2;
-          if (w1 < -1e-6 || w2 < -1e-6 || w3 < -1e-6) continue;
-          const z = w1 * a[2] + w2 * b[2] + w3 * c[2];
-          if (z <= bestZ) continue;
-          const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
-          let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
-          const cen = [(a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3];
-          if (n[0] * cen[0] + n[1] * cen[1] + n[2] * cen[2] < 0) n = n.map((q) => -q);
-          const m = Math.hypot(n[0], n[1], n[2]) || 1;
-          const lit = 0.38 + 0.62 * Math.max(0, (n[0] * L[0] + n[1] * L[1] + n[2] * L[2]) / m);
-          const rgb = hexRgb(PAL[idx % 7][0]).map((q) => Math.min(255, Math.round(q * lit)));
-          bestZ = z; best = 'rgb(' + rgb.join(',') + ')';
-        }
-        grid[py].push(best);
-      }
-    }
-    return grid;
-  }
-  function prismSprite(f) {
-    if (!prismFrames[f]) {
-      const grid = prismGrid(f);
-      prismFrames[f] = makeSprite((x, y) => y >= 0 && y < PX && x >= 0 && x < PX && grid[y][x] != null, (x, y) => grid[y][x], '#ffffff');
-    }
-    return prismFrames[f];
-  }
-  // ---------- wild: an amoeba-like blob whose outline wobbles and whose rainbow cycles ----------
-  const WILD_FRAMES = 24, WILD_MS = 110;
-  const wildFrames = [];
-  function wildRadius(phi, ph) { return 5.0 + 0.6 * Math.sin(3 * phi + ph) + 0.35 * Math.sin(5 * phi - 2 * ph + 1.3) + 0.25 * Math.sin(2 * phi + 0.7); }
   function hsl(h, s, l) { return 'hsl(' + (((h % 360) + 360) % 360).toFixed(0) + ',' + s + '%,' + l + '%)'; }
-  function wildSprite(f) {
-    if (!wildFrames[f]) {
-      const ph = (f / WILD_FRAMES) * Math.PI * 2;
-      const inside = (x, y) => {
-        if (x < 0 || y < 0 || x >= PX || y >= PX) return false;
-        const dx = x + 0.5 - 6, dy = y + 0.5 - 6;
-        return Math.hypot(dx, dy) <= wildRadius(Math.atan2(dy, dx), ph);
-      };
-      wildFrames[f] = makeSprite(inside, (x, y) => {
-        const dx = x + 0.5 - 6, dy = y + 0.5 - 6;
-        if ((x === 3 || x === 4) && y === 3 && inside(x, y)) return '#ffffff';
-        // diagonal rainbow bands drifting across a domed blob (lit from the upper left)
-        const hue = (f / WILD_FRAMES) * 360 + (dx - dy) * 15;
-        const rr = Math.hypot(dx, dy) / wildRadius(Math.atan2(dy, dx), ph);
-        return hsl(hue, 92, Math.max(38, Math.min(76, 64 - (dx + dy) * 1.6 - rr * rr * 12)));
-      }, '#1a1030');
-    }
-    return wildFrames[f];
+  // hsl -> [r, g, b] (0..255), for pixel buffers
+  function hslRgb(h, s, l) {
+    h = (((h % 360) + 360) % 360) / 360; s /= 100; l /= 100;
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+    const f = (t) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 0.5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+    return [f(h + 1 / 3), f(h), f(h - 1 / 3)].map((v) => Math.round(v * 255));
   }
   // ---------- coal: a rough, chunky lump (cut as a jewel below) ----------
   const COAL_POLY = [[-5.4, -1.6], [-3.6, -4.6], [-1.2, -4.0], [1.0, -5.6], [4.0, -3.8], [4.4, -1.0], [5.8, 1.4], [3.8, 4.6], [0.8, 4.0], [-1.6, 5.6], [-4.6, 3.8], [-4.0, 1.0]];
@@ -6192,9 +6140,13 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     { v: DROP, o: [0, 1.4] },                                                                          // orange drop
   ];
   SHAPES.coal = { v: COAL_POLY, o: [0, 0] }; // a rough lump, cut like a stone (dark ramp, dull highlights)
+  // wild: a freeform, lopsided crystal (11 uneven sides, one notch), small table and a tall crown so many facets show
+  SHAPES.wild = { v: [[-0.9, -6.3], [2.3, -5.1], [4.7, -4.3], [6.1, -0.8], [4.8, 2.4], [5.4, 4.7], [1.8, 6.1], [-2.0, 5.5], [-5.2, 3.9], [-6.1, 0.3], [-4.7, -3.6]],
+    o: [0.2, 0.1], tf: 0.34, hc: 2.8 };
   const COAL_PAL = ['#3b3646', '#6a6577', '#14111a'];
   function buildSolid(shape) {
     const V = shape.v, O = shape.o, tris = [];
+    const hc = shape.hc || HC, tf = shape.tf || TF, hp = shape.hp || HP; // crown height, table size, pavilion depth
     for (let i = 0; i < V.length; i++) {
       const A = V[i], B = V[(i + 1) % V.length];
       const d1 = [A[0] - O[0], A[1] - O[1]], d2 = [B[0] - O[0], B[1] - O[1]];
@@ -6203,9 +6155,9 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     }
     // extreme points, for the projected half width at each angle
     const key = [];
-    for (const p of V) { key.push([p[0], GIRD], [p[0], -GIRD], [O[0] + (p[0] - O[0]) * TF, HC + GIRD]); }
-    key.push([O[0], -HP - GIRD]);
-    return { O, tris, key };
+    for (const p of V) { key.push([p[0], GIRD], [p[0], -GIRD], [O[0] + (p[0] - O[0]) * tf, hc + GIRD]); }
+    key.push([O[0], -hp - GIRD]);
+    return { O, tris, key, hc, tf, hp };
   }
   // which fan triangle holds (x, y) and its rho (0 at O, 1 on the outline); null outside every triangle
   function rhoAt(S, x, y) {
@@ -6244,7 +6196,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
           let state;
           if (!q || q.rho > 1) state = 'side';
           else {
-            const zf = GIRD + HC * Math.min(1, (1 - q.rho) / (1 - TF)), zb = -GIRD - HP * (1 - q.rho);
+            const zf = GIRD + S.hc * Math.min(1, (1 - q.rho) / (1 - S.tf)), zb = -GIRD - S.hp * (1 - q.rho);
             state = z > zf ? 'front' : z < zb ? 'back' : 'in';
           }
           if (state === 'in') { hit = { q, from: prev || 'front', x }; break; }
@@ -6256,14 +6208,14 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
         let n, fid;
         if (hit.from === 'side') { n = [g[0] / gm, g[1] / gm, 0]; fid = 300 + hit.q.i; }
         else if (hit.from === 'front') {
-          if (hit.q.rho < TF) { n = [0, 0, 1]; fid = 100; } else { const a = HC / (1 - TF); n = [a * g[0], a * g[1], 1]; fid = hit.q.i; }
-        } else { n = [HP * g[0], HP * g[1], -1]; fid = 200 + hit.q.i; }
+          if (hit.q.rho < S.tf) { n = [0, 0, 1]; fid = 100; } else { const a = S.hc / (1 - S.tf); n = [a * g[0], a * g[1], 1]; fid = hit.q.i; }
+        } else { n = [S.hp * g[0], S.hp * g[1], -1]; fid = 200 + hit.q.i; }
         const m = Math.hypot(n[0], n[1], n[2]);
         const nv = [(n[0] * c + n[2] * s) / m, n[1] / m, (-n[0] * s + n[2] * c) / m];
         const dif = Math.max(0, nv[0] * L0[0] + nv[1] * L0[1] + nv[2] * L0[2]);
         const spec = Math.pow(Math.max(0, nv[0] * HH[0] + nv[1] * HH[1] + nv[2] * HH[2]), 18);
         const jit = (((fid * 37) % 7) - 3) * 0.035; // neighbouring facets never share a shade
-        px[j * R + i] = { lit: 0.16 + 0.84 * dif + jit, spec: spec, side: hit.from === 'side', ix: Math.floor(hit.x + 6), iy: Math.floor(Y + 6) };
+        px[j * R + i] = { lit: 0.16 + 0.84 * dif + jit, spec: spec, side: hit.from === 'side', fid: fid, tri: hit.q.i, ix: Math.floor(hit.x + 6), iy: Math.floor(Y + 6), fx: hit.x, fy: Y };
       }
     }
     const has = (a, b) => a >= 0 && b >= 0 && a < R && b < R && px[b * R + a] != null;
@@ -6321,84 +6273,115 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     ox.putImageData(img, 0, 0);
     return (frames[f] = out);
   }
-  // kinds with their own art (prism octahedron, wild blob); every other kind, coal included, is a cut jewel
-  const OWN_ART = { prism: 1, wild: 1 };
-  function getSprite(gem, time) {
-    if (gem.kind === 'prism') return prismSprite(Math.floor((time || 0) / 70) % PRISM_FRAMES);
-    if (gem.kind === 'wild') return wildSprite(Math.floor((time || 0) / WILD_MS) % WILD_FRAMES);
-    return jewelFrame(gem, 0);
-  }
-
-  // ---------- wild turning: their own still sprite on a vertical axis ----------
-  // Every sprite row is wrapped round an elliptic slab about the axis x = 6: half width a = the row's reach, depth
-  // b = DEPTH * a. The point at angle phi sits at (x, z) = (a sin phi, b cos phi) and shows sprite column 6 + a sin phi,
-  // so the front half is the sprite itself and the back half its mirror image (darker). Turned by theta, each output
-  // pixel shows the nearer of the two points that project onto it. Shading is relative to theta = 0 (facet normals,
-  // phi snapped to FACETS steps, lit now minus lit at rest, plus a specular glint that fades in with |sin theta|), so
-  // frame 0 is the still sprite pixel for pixel, and the silhouette never gets narrower than DEPTH of its width.
-  // Frames are cached per source sprite (wild: per wobble frame).
-  const DEPTH = 0.62, FACETS = 10, BACK = 0.78;
-  const unit = (v) => { const m = Math.hypot(v[0], v[2]); return [v[0] / m, 0, v[2] / m]; };
-  const SL = unit([-0.6, 0, 0.8]), SH = unit([SL[0], 0, SL[2] + 1]);
-  const spinCache = new WeakMap();
-  // diffuse from the facet normal (phi snapped to FACETS steps), specular from the smooth normal: a thin glint
-  function facetLight(phi, th) {
-    const st = (Math.PI * 2) / FACETS, pf = Math.round(phi / st) * st, c = Math.cos(th), s = Math.sin(th);
-    const lit = (p, v) => { const n = unit([Math.sin(p), 0, Math.cos(p) / DEPTH]); const nx = n[0] * c + n[2] * s, nz = -n[0] * s + n[2] * c; return Math.max(0, nx * v[0] + nz * v[2]); };
-    return { dif: lit(pf, SL), spec: Math.pow(lit(phi, SH), 60) };
-  }
-  function spinSprite(src, f) {
-    let frames = spinCache.get(src);
-    if (!frames) { frames = []; spinCache.set(src, frames); }
+  // ---------- wild: the freeform crystal in a hue-cycling rainbow ----------
+  // Facets take hues round the stone (the table a diagonal rainbow), stepped light/dark by their own light, with
+  // alternate facets a shade apart (bands); a white highlight sweeps diagonally over the faces. The colour clock
+  // ph (WILD_FRAMES steps of WILD_MS) drives hue and sweep alike, so the still gem at ph and the turning gem at the
+  // same ph share frame 0. Lightness never drops below the second step: side-on it stays bright.
+  const WILD_FRAMES = 24, WILD_MS = 110, WILD_L = [40, 52, 62, 72, 84];
+  const wildCache = [];
+  function wildFrame(ph, f) {
+    const frames = wildCache[ph] || (wildCache[ph] = []);
     if (frames[f]) return frames[f];
-    const W = src.width, H = src.height, ax = W / 2;
-    const sd = src.getContext('2d').getImageData(0, 0, W, H).data;
-    const out = document.createElement('canvas'); out.width = W; out.height = H;
-    const ox = out.getContext('2d'), img = ox.createImageData(W, H), od = img.data;
-    const th = (f / SPIN_FRAMES) * Math.PI * 2, c = Math.cos(th), s = Math.sin(th), glint = Math.min(1, Math.abs(s) * 2.5);
-    for (let y = 0; y < H; y++) {
-      let lo = -1, hi = -1;
-      for (let x = 0; x < W; x++) if (sd[(y * W + x) * 4 + 3]) { if (lo < 0) lo = x; hi = x; }
-      if (lo < 0) continue;
-      const a = Math.max(ax - lo, hi + 1 - ax), b = DEPTH * a;
-      const R = Math.hypot(a * c, b * s), dl = Math.atan2(b * s, a * c);
-      const row = [];
-      for (let x = 0; x < W; x++) {
-        const X = x + 0.5 - ax;
-        // turned frames keep a pixel the solid covers by half (so an even width never loses a column per side)
-        if (Math.abs(X) > (f ? R + 0.5 : R)) { row.push(null); continue; }
-        const as = Math.asin(Math.max(-1, Math.min(1, X / R)));
-        const p1 = as - dl, p2 = Math.PI - as - dl;
-        const z = (p) => -a * Math.sin(p) * s + b * Math.cos(p) * c;
-        const phi = z(p1) >= z(p2) ? p1 : p2;
-        const tx = a * Math.sin(phi), col = Math.floor(ax + tx - 1e-9); // tx = +a is the last pixel, not past it
-        if (col < 0 || col >= W) { row.push(null); continue; }
-        const si = (y * W + col) * 4;
-        if (!sd[si + 3]) { row.push(null); continue; }
-        let k = 1, sp = 0;
-        if (f) {
-          const now = facetLight(phi, th), rest = facetLight(Math.asin(Math.max(-1, Math.min(1, tx / a))), 0);
-          k = Math.max(0.6, Math.min(1.3, 1 + 0.55 * (now.dif - rest.dif))) * (Math.cos(phi) < 0 ? BACK : 1);
-          k = Math.round(k * 8) / 8; // stepped, like the sprite's own flat shades
-          sp = now.spec * glint;
-        }
-        const rgb = [0, 1, 2].map((q) => Math.min(255, Math.round(sd[si + q] * k)));
-        row.push(sp > 0.6 ? rgb.map((q) => Math.round(q + (255 - q) * 0.8)).concat(sd[si + 3]) : sp > 0.3 ? rgb.map((q) => Math.round(q + (255 - q) * 0.4)).concat(sd[si + 3]) : rgb.concat(sd[si + 3]));
+    const geo = jewelGeo('wild', f), nt = solids.wild.tris.length;
+    const hue0 = (ph / WILD_FRAMES) * 360, sweep = (ph / WILD_FRAMES) * 46 - 12;
+    const out = document.createElement('canvas'); out.width = out.height = JR;
+    const ox = out.getContext('2d'), img = ox.createImageData(JR, JR), od = img.data;
+    for (let q = 0; q < JR * JR; q++) {
+      const p = geo.px[q];
+      if (!p) continue;
+      // a diagonal rainbow over the stone (it turns with it), nudged per facet and stepped like pixel art
+      const fj = ((((p.fid * 53) % 11) + 11) % 11 - 5) * 14;
+      const hue = Math.round((hue0 + (p.fx - p.fy) * 7 + fj) / 24) * 24;
+      let col;
+      if (geo.edge[q]) col = hslRgb(hue0 + 200, 60, 16); // a dark rim like the jewels'
+      else {
+        let lv = Math.max(1, Math.min(4, Math.floor(p.lit * 4.6)));
+        if (p.side && lv < 3) lv++; // girdle and back facets stay bright side-on
+        col = hslRgb(hue, 92, WILD_L[lv]);
+        if (p.spec > 0.62) col = [255, 255, 255];
+        else if (p.spec > 0.35) col = mixRgb(col, [255, 255, 255], 0.55);
+        const d = p.fx + p.fy + 12 - sweep; // the sweeping highlight, in stone coordinates (it turns with the stone)
+        if (!p.side && d >= 0 && d < 2.2) col = mixRgb(col, [255, 255, 255], d < 1.1 ? 0.65 : 0.35);
       }
-      // turned frames: the side silhouette keeps the row's outline pixel
-      if (f) {
-        const L = (lo * 4) + y * W * 4, Rr = (hi * 4) + y * W * 4;
-        for (let x = 0; x < W; x++) {
-          if (!row[x]) continue;
-          if (x === 0 || !row[x - 1]) row[x] = [sd[L], sd[L + 1], sd[L + 2], sd[L + 3]];
-          else if (x === W - 1 || !row[x + 1]) row[x] = [sd[Rr], sd[Rr + 1], sd[Rr + 2], sd[Rr + 3]];
-        }
-      }
-      for (let x = 0; x < W; x++) if (row[x]) od.set(row[x], (y * W + x) * 4);
+      od[q * 4] = col[0]; od[q * 4 + 1] = col[1]; od[q * 4 + 2] = col[2]; od[q * 4 + 3] = 255;
     }
     ox.putImageData(img, 0, 0);
-    frames[f] = out;
-    return out;
+    return (frames[f] = out);
+  }
+  const wildPh = (time) => ((Math.floor((time || 0) / WILD_MS) % WILD_FRAMES) + WILD_FRAMES) % WILD_FRAMES;
+
+  // ---------- prism: a rainbow bipyramid crystal, cut and lit like the jewels ----------
+  // Eight sides, each its own colour from red round to pink (the upper and lower facet of a side share it), tipped
+  // slightly towards the viewer. Shaded with the jewels' five-step ramps, light, specular and dark rim, on the same
+  // 16px grid. Frame f is the spin angle; frame 0 is the still gem.
+  const PRISM_PAL = [PAL[0], PAL[6], PAL[3], PAL[2], ['#7fe7ff', '#d6f8ff', '#0a4f66'], PAL[1], PAL[4], ['#ff6bd6', '#ffc2f0', '#6b0a52']];
+  const PS = 8, PR = 5.5, PH = 6.4, PTILT = 0.3, prismGeoCache = [], prismCache = [];
+  function prismGeo(f) {
+    if (prismGeoCache[f]) return prismGeoCache[f];
+    const th = (f / SPIN_FRAMES) * Math.PI * 2 + Math.PI / PS / 2, ct = Math.cos(PTILT), st = Math.sin(PTILT);
+    const tf = (p) => { const x = p[0] * Math.cos(th) + p[2] * Math.sin(th), z = -p[0] * Math.sin(th) + p[2] * Math.cos(th); return [x, p[1] * ct - z * st, p[1] * st + z * ct]; };
+    const eq = []; for (let k = 0; k < PS; k++) { const a = (k / PS) * Math.PI * 2; eq.push(tf([Math.cos(a) * PR, 0, Math.sin(a) * PR])); }
+    const top = tf([0, -PH, 0]), bot = tf([0, PH * 0.92, 0]), faces = [];
+    for (let k = 0; k < PS; k++) { faces.push([top, eq[k], eq[(k + 1) % PS], k, 0]); faces.push([bot, eq[(k + 1) % PS], eq[k], k, 1]); }
+    const fn = faces.map(([a, b, c]) => {
+      const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+      let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+      const cen = [(a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3];
+      if (n[0] * cen[0] + n[1] * cen[1] + n[2] * cen[2] < 0) n = n.map((q) => -q);
+      const m = Math.hypot(n[0], n[1], n[2]) || 1;
+      return n.map((q) => q / m);
+    });
+    const R = JR, U = 12 / R, px = new Array(R * R).fill(null);
+    for (let j = 0; j < R; j++) for (let i = 0; i < R; i++) {
+      const X = (i + 0.5) * U - 6, Y = (j + 0.5) * U - 6;
+      let best = -1, bz = -Infinity;
+      faces.forEach(([a, b, c], fi) => {
+        if (fn[fi][2] <= 0) return; // back faces
+        const d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]);
+        if (Math.abs(d) < 1e-9) return;
+        const w1 = ((b[1] - c[1]) * (X - c[0]) + (c[0] - b[0]) * (Y - c[1])) / d, w2 = ((c[1] - a[1]) * (X - c[0]) + (a[0] - c[0]) * (Y - c[1])) / d, w3 = 1 - w1 - w2;
+        if (w1 < -1e-6 || w2 < -1e-6 || w3 < -1e-6) return;
+        const z = w1 * a[2] + w2 * b[2] + w3 * c[2];
+        if (z > bz) { bz = z; best = fi; }
+      });
+      if (best < 0) continue;
+      const n = fn[best], dif = Math.max(0, n[0] * L0[0] + n[1] * L0[1] + n[2] * L0[2]);
+      const spec = Math.pow(Math.max(0, n[0] * HH[0] + n[1] * HH[1] + n[2] * HH[2]), 14);
+      px[j * R + i] = { lit: 0.3 + 0.8 * dif - faces[best][4] * 0.08, spec: spec, side: faces[best][3], low: faces[best][4] };
+    }
+    const has = (a, b) => a >= 0 && b >= 0 && a < R && b < R && px[b * R + a] != null;
+    const edge = px.map((p, q) => !!p && (!has(q % R - 1, (q / R) | 0) || !has(q % R + 1, (q / R) | 0) || !has(q % R, ((q / R) | 0) - 1) || !has(q % R, ((q / R) | 0) + 1)));
+    return (prismGeoCache[f] = { px: px, edge: edge });
+  }
+  function prismFrame(f) {
+    if (prismCache[f]) return prismCache[f];
+    const geo = prismGeo(f);
+    const out = document.createElement('canvas'); out.width = out.height = JR;
+    const ox = out.getContext('2d'), img = ox.createImageData(JR, JR), od = img.data;
+    for (let q = 0; q < JR * JR; q++) {
+      const p = geo.px[q];
+      if (!p) continue;
+      const pal = PRISM_PAL[p.side];
+      let col;
+      if (geo.edge[q]) col = rgbOf(pal[2]);
+      else {
+        const ramp = [mixRgb(pal[2], pal[0], 0.55), mixRgb(pal[2], pal[0], 0.8), rgbOf(pal[0]), mixRgb(pal[0], pal[1], 0.5), rgbOf(pal[1])];
+        col = ramp[Math.max(0, Math.min(4, Math.floor(p.lit * 4.6)))];
+        if (p.spec > 0.62) col = [255, 255, 255];
+        else if (p.spec > 0.35) col = mixRgb(col, [255, 255, 255], 0.55);
+      }
+      od[q * 4] = col[0]; od[q * 4 + 1] = col[1]; od[q * 4 + 2] = col[2]; od[q * 4 + 3] = 255;
+    }
+    ox.putImageData(img, 0, 0);
+    return (prismCache[f] = out);
+  }
+
+  // every kind is a 16px faceted stone now; prism and wild have their own cut and colouring, wild's colour cycles
+  function getSprite(gem, time) {
+    if (gem.kind === 'prism') return prismFrame(0);
+    if (gem.kind === 'wild') return wildFrame(wildPh(time), 0);
+    return jewelFrame(gem, 0);
   }
 
   function init(canvas) { cv = canvas; g = cv.getContext('2d'); resize(cell); }
@@ -6432,6 +6415,8 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
   const FX_CAP = 150, fx = [], pool = [];
   function fxNew() { return pool.pop() || {}; }
   function fxAdd(p) { if (fx.length >= FX_CAP + 40) { pool.push(p); return null; } fx.push(p); return p; }
+  // leaving a run: drop every particle in flight (geodes included)
+  function clearFx() { while (fx.length) pool.push(fx.pop()); particles.length = 0; }
   function shake(m) { shakeMag = Math.min(14, Math.max(shakeMag, m)); }
   function burst(r, c, gem) {
     const coal = gem.kind === 'coal';
@@ -6452,6 +6437,65 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
         col: SPARK_COLS[(i + r + c) % SPARK_COLS.length], tx: [], ty: [] });
       fxAdd(p);
     }
+  }
+  // Broken coal: geodes. Each shard is a small cut-open geode (grey rock shell, purple or teal crystal inside) that
+  // flies up like a firework along the animator's plan (dx, dy: landing offset in cells; h: arc height; ms: flight)
+  // with a crystal trail, tumbling in quarter turns; it lands with a twinkle, rests a moment and fades.
+  const GEODE = ['...kkk..', '..kCWBk.', '.kCBCBAk', 'kBCWBArk', 'kABCArRk', 'kAArrRdk', '.krRRdk.', '..kkkk..'];
+  const GEODE_COL = [{ A: '#5a2a9e', B: '#a259ff', C: '#dcc2ff' }, { A: '#0f6f78', B: '#2fd3c8', C: '#b8fff6' }];
+  const GEODE_ROCK = { k: '#1a1030', W: '#ffffff', r: '#6a6577', R: '#9a96a8', d: '#3b3646' };
+  const geodeSprites = {};
+  function geodeSprite(v, rot) {
+    const key = v + ':' + rot;
+    if (geodeSprites[key]) return geodeSprites[key];
+    const c = document.createElement('canvas'); c.width = c.height = 8;
+    const x = c.getContext('2d');
+    for (let y = 0; y < 8; y++) for (let i = 0; i < 8; i++) {
+      // quarter turns of the 8x8 grid
+      const [sx, sy] = rot === 0 ? [i, y] : rot === 1 ? [y, 7 - i] : rot === 2 ? [7 - i, 7 - y] : [7 - y, i];
+      const ch = GEODE[sy][sx];
+      if (ch === '.') continue;
+      x.fillStyle = GEODE_COL[v][ch] || GEODE_ROCK[ch]; x.fillRect(i, y, 1, 1);
+    }
+    return (geodeSprites[key] = c);
+  }
+  function geodes(r, c, plan) {
+    if (reduced() || !plan) return;
+    plan.forEach((q, k) => {
+      const p = fxNew();
+      Object.assign(p, { type: 'geode', r: r, c: c, k: k, x0: c + 0.5, y0: r + 0.5, x1: c + 0.5 + q.dx, y1: r + 0.5 + q.dy, h: q.h, T: Math.max(1, q.ms),
+        age: 0, max: Math.max(1, q.ms) + 460, v: (k + r + c) % 2, x: c + 0.5, y: r + 0.5, tx: [], ty: [], landed: false });
+      fx.push(p); // never dropped by the particle cap: each geode carries points
+    });
+  }
+  // the animator's landing beat: snap a geode that is still in the air onto its spot
+  function geodeLand(r, c, k) { for (const p of fx) if (p.type === 'geode' && p.r === r && p.c === c && p.k === k && p.age < p.T) p.age = p.T; }
+  function drawGeode(p, ps) {
+    const w = ps * 8;
+    let a = 1, rot = 0;
+    if (p.age < p.T) {
+      const u = p.age / p.T;
+      p.tx.unshift(p.x); p.ty.unshift(p.y); if (p.tx.length > 6) { p.tx.pop(); p.ty.pop(); }
+      p.x = p.x0 + (p.x1 - p.x0) * u; p.y = p.y0 + (p.y1 - p.y0) * u - p.h * 4 * u * (1 - u);
+      rot = Math.floor(p.age / 85 + p.k) % 4;
+      const col = GEODE_COL[p.v];
+      for (let j = p.tx.length - 1; j >= 1; j--) px(p.tx[j], p.ty[j], ps, j < 3 ? col.C : col.B, (1 - j / p.tx.length) * 0.85);
+    } else {
+      p.x = p.x1; p.y = p.y1;
+      const t = p.age - p.T;
+      if (!p.landed) {
+        p.landed = true;
+        if (!reduced()) for (let i = 0; i < 4; i++) {
+          const q = fxNew(), an = (i / 4) * Math.PI * 2 + 0.6, sp = 0.0012;
+          Object.assign(q, { type: 'twinkle', x: p.x1, y: p.y1, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp, age: 0, max: 360, col: i % 2 ? '#ffffff' : GEODE_COL[p.v].C, tx: null });
+          fxAdd(q);
+        }
+      }
+      if (t < 140) p.y -= Math.sin((t / 140) * Math.PI) * 0.12; // a little bounce
+      a = t < 220 ? 1 : Math.max(0, 1 - (t - 220) / (p.max - p.T - 220));
+    }
+    g.globalAlpha = a;
+    g.drawImage(geodeSprite(p.v, rot), Math.round(p.x * cell - w / 2), Math.round(p.y * cell - w / 2), w, w);
   }
   // Blasts: stars and novas fire beams along every full row and column they clear, bombs a square shockwave.
   function flashCells(cells, kind, r, c) {
@@ -6528,6 +6572,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
       p.age += dt;
       if (p.age >= p.max) { fx.splice(i, 1); pool.push(p); continue; }
       const k = p.age / p.max;
+      if (p.type === 'geode') { drawGeode(p, Math.max(2, Math.round(cell / 15))); continue; }
       if (p.type === 'spark') {
         p.tx.unshift(p.x); p.ty.unshift(p.y); if (p.tx.length > 7) { p.tx.pop(); p.ty.pop(); }
         p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.999;
@@ -6689,17 +6734,13 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     }
     g.globalAlpha = 1;
   }
-  // The selected gem's frame: f = spin step since selection (frame 0 = the still gem). Jewels turn their cut stone;
-  // prism keeps turning its own octahedron, twice as fast, continuing from the frame it showed when selected;
-  // wild and coal turn their current still sprite (spinSprite).
+  // The selected gem's frame: f = spin step since selection (frame 0 = the still gem). Every kind turns its cut
+  // stone; wild keeps cycling its colours on the board clock while it turns.
   function spinFrame(gem, elapsed, time) {
     const f = Math.floor((((elapsed % SPIN_MS) + SPIN_MS) % SPIN_MS) / SPIN_MS * SPIN_FRAMES) % SPIN_FRAMES;
-    if (gem.kind === 'prism') {
-      const f0 = Math.floor((time - elapsed) / 70);
-      return { f: f, img: prismSprite((((f0 + Math.floor(Math.max(0, elapsed) / 35)) % PRISM_FRAMES) + PRISM_FRAMES) % PRISM_FRAMES) };
-    }
-    if (!OWN_ART[gem.kind]) return { f: f, img: jewelFrame(gem, f) };
-    return { f: f, img: spinSprite(getSprite(gem, time), f) };
+    if (gem.kind === 'prism') return { f: f, img: prismFrame(f) };
+    if (gem.kind === 'wild') return { f: f, img: wildFrame(wildPh(time), f) };
+    return { f: f, img: jewelFrame(gem, f) };
   }
   // drawn exactly where and as large as drawGem draws the still sprite (the yellow frame marks the selection)
   function drawSpin(sp, elapsed, time) {
@@ -6836,7 +6877,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     }
     return gemIcons[key];
   }
-  // Prism and wild icons are live canvases redrawn from the board's animation frames (one shared loop: frame()).
+  // Prism and wild icons are live canvases redrawn from the board's frames (one shared loop: frame()); wild cycles.
   const ANIMATED = { prism: 1, wild: 1 };
   function gemIconHTML(color, kind, cls, mod) {
     kind = kind || 'normal';
@@ -6859,11 +6900,11 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
   // opaque pixels of a colour's still jewel (check-render: no colour reads much smaller than the others)
   function jewelArea(color) { return jewelGeo(color, 0).px.filter(Boolean).length; }
 
-  // spin frame f of a gem selected at time t (t: the still sprite's clock, for prism/wild)
+  // spin frame f of a gem selected at time t (t: the still sprite's clock, for wild)
   function dbgSpin(gem, f, t) { return spinFrame(gem, ((f + 0.5) / SPIN_FRAMES) * SPIN_MS, (t || 0) + ((f + 0.5) / SPIN_FRAMES) * SPIN_MS).img; }
-  GF.Render = { init, resize, cellPx, cellAt, cellCenter, cellRect, shake, burst, fireworks, flashCells, boardWave, pulseTile, colorHex, gemIconURL, gemIconHTML, drawIcons, frame, spinTransform: GF.C.spinTransform, PAL, TILE_COL,
-    _debug: { jewelArea: jewelArea, JR: JR, prismFrameData: (f) => prismSprite(f).toDataURL(), PRISM_FRAMES: PRISM_FRAMES, SPIN_FRAMES: SPIN_FRAMES,
-      spinFrameData: (gem, f, t) => dbgSpin(gem, f, t).toDataURL(), spinFrame: dbgSpin, sprite: (gem, t) => getSprite(gem, t || 0), wildFrameData: (f) => wildSprite(f).toDataURL(), WILD_FRAMES: WILD_FRAMES, fxCount: () => fx.length, overlays: () => Object.assign({}, drawn), beamCount: () => beams.length, waveCount: () => waves.length } };
+  GF.Render = { init, resize, cellPx, cellAt, cellCenter, cellRect, shake, burst, fireworks, geodes, geodeLand, clearFx, flashCells, boardWave, pulseTile, colorHex, gemIconURL, gemIconHTML, drawIcons, frame, spinTransform: GF.C.spinTransform, PAL, TILE_COL,
+    _debug: { jewelArea: jewelArea, JR: JR, prismFrameData: (f) => prismFrame(f).toDataURL(), SPIN_FRAMES: SPIN_FRAMES,
+      spinFrameData: (gem, f, t) => dbgSpin(gem, f, t).toDataURL(), spinFrame: dbgSpin, sprite: (gem, t) => getSprite(gem, t || 0), wildFrameData: (ph, f) => wildFrame(ph, f || 0).toDataURL(), WILD_FRAMES: WILD_FRAMES, WILD_MS: WILD_MS, fxCount: () => fx.length, geodeCount: () => fx.filter((p) => p.type === 'geode').length, overlays: () => Object.assign({}, drawn), beamCount: () => beams.length, waveCount: () => waves.length } };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- animator.js
@@ -6911,6 +6952,24 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
   function atRest(r, c) {
     const sp = display.cells[r] && display.cells[r][c];
     return !!sp && sp.x === c && sp.y === r && sp.s === 1 && sp.a === 1;
+  }
+
+  // ---------- coal geodes ----------
+  // Where and when each geode of a coal step lands (cell units from the coal's centre, ms from the break at speed 1).
+  // Deterministic per step (no Math.random), so the popup and the flying shard always meet. Geodes fan out to both
+  // sides in a shuffled order and land one after another; a later coal of the same batch is quicker.
+  function geodePlan(s) {
+    const n = (s.geodes || [s.v]).length, quick = !!s.i;
+    const h = (k, m) => { let x = Math.imul((s.r * 31 + s.c) * 131 + k * 977 + m * 7919 + 12345, 2654435761) >>> 0; x ^= x >>> 15; return (x % 1000) / 1000; };
+    const slots = Array.from({ length: n }, (_, k) => k).sort((a, b) => h(a, 1) - h(b, 1));
+    const out = [];
+    for (let k = 0; k < n; k++) {
+      let dx = ((slots[k] + 0.5) / n - 0.5) * (1.1 + 0.25 * n) + (h(k, 2) - 0.5) * 0.25, dy = 0.3 + h(k, 3) * 0.35;
+      dx = Math.max(0.4 - (s.c + 0.5), Math.min(N - 0.4 - (s.c + 0.5), dx));
+      dy = Math.max(0.4 - (s.r + 0.5), Math.min(N - 0.4 - (s.r + 0.5), dy));
+      out.push({ dx: dx, dy: dy, h: 1.0 + 0.3 * k + h(k, 4) * 0.3, ms: quick ? 360 + 90 * k : 560 + 150 * k });
+    }
+    return out;
   }
 
   // ---------- footprints ----------
@@ -7095,15 +7154,23 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
         s.cells.forEach((c, i) => { if (D[c.r][c.c] === faded[i]) D[c.r][c.c] = null; });
         break;
       }
-      // Broken coal: fireworks (H.coalBreak), then after a delay the "+V" popup and the running total.
-      // The first coal of a clear batch waits 400 ms, later ones 150 ms so a big blast does not stall.
-      case 'coal':
-        if (H.coalBreak) H.coalBreak(s);
-        await wait(s.i ? 150 : 480);
-        H.float(s.r, s.c, '+' + GF.C.fmt(s.v), 'coal');
-        if (s.total != null) H.setMovePoints(s.total);
+      // Broken coal: it bursts into geodes (H.coalBreak gets the flight plan), each one pops "+v" where it lands
+      // and adds to the running total; the last landing brings the total to s.total.
+      case 'coal': {
+        const geodes = s.geodes || [s.v], plan = geodePlan(s);
+        if (H.coalBreak) H.coalBreak(s, plan.map((p) => ({ dx: p.dx, dy: p.dy, h: p.h, ms: p.ms / Anim.speed })));
+        let acc = s.total != null ? s.total - geodes.reduce((a, b) => a + b, 0) : null, t = 0;
+        const g0 = gen;
+        for (let k = 0; k < geodes.length; k++) {
+          await wait(plan[k].ms - t); t = plan[k].ms;
+          if (g0 !== gen) return; // the run was left mid-burst: no popups or totals on the next one
+          H.float(s.r + plan[k].dy, s.c + plan[k].dx, '+' + GF.C.fmt(geodes[k]), 'coal');
+          if (acc != null) { acc += geodes[k]; H.setMovePoints(k === geodes.length - 1 ? s.total : acc); }
+          if (H.geodeLand) H.geodeLand(s, k);
+        }
         if (H.coalAward) H.coalAward(s);
         break;
+      }
       case 'money': GF.Audio.ching(); H.float(s.r, s.c, '+$' + s.money, 'money'); H.money(); await wait(60); break;
       case 'perk':
         H.perkFire(s);
@@ -7167,7 +7234,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     }
   }
 
-  Object.assign(Anim, { tween, update, wait, sync, syncCells, bump, play, atRest, footprint, run, active, busyCells, idle, cancelAll, stats });
+  Object.assign(Anim, { tween, update, wait, sync, syncCells, bump, play, atRest, footprint, geodePlan, run, active, busyCells, idle, cancelAll, stats });
   GF.Anim = Anim;
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
@@ -7188,7 +7255,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     shiny: 'Drop on a gem: x2 match points, bigger blast',
     wild: 'Matches any color',
     supernova: 'Clears 3 rows and 3 columns',
-    coal: 'Never matches. Explosions break it for 5x points',
+    coal: 'Never matches. Breaks into 3-5 geodes when blasted',
   };
   // modifier lines for the gem tooltip (a gem has at most one)
   const MOD_INFO = {
@@ -7247,7 +7314,9 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     float(r, c, text, cls) { const p = GF.Render.cellCenter(r, c); spawnFloat($('fx'), p.x, p.y, text, cls); },
     // one popup per match group, at its centre, in its colour (r/c may be fractional)
     matchPop(r, c, text, color) { const p = GF.Render.cellCenter(r, c); const el = spawnFloat($('fx'), p.x, p.y, text, 'match'); el.style.color = color != null ? GF.Render.colorHex(color) : '#ffffff'; },
-    coalBreak(s) { GF.Render.fireworks(s.r, s.c, s.sparks || 3); GF.Audio.sweep(); },
+    // broken coal: its geodes fly up like fireworks and fall where the animator pops their points (plan: landings)
+    coalBreak(s, plan) { GF.Render.geodes(s.r, s.c, plan); GF.Audio.crack(); },
+    geodeLand(s, k) { GF.Render.geodeLand(s.r, s.c, k); GF.Audio.geode(k); },
     perkFire(s) {
       // uid (tagged in trySwap) survives perks removed by an earlier, still-animating move
       const row = $('perk-row');
@@ -7394,7 +7463,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     $('moves-bar').classList.toggle('danger', !inShop && (left <= 1 || ratio <= 0.25));
     $('moves-text').textContent = inShop ? 'NEXT ROUND: ' + left + ' MOVES' : 'MOVES LEFT: ' + left;
   }
-  // v3.7: tray entries are Enhance cards (purple), tiles (blue) and polish cards (yellow); drag to reorder.
+  // v3.7: tray entries are Enhance cards (purple), tiles (blue) and polish cards (yellow; UPGRADES/vouchers are pink); drag to reorder.
   const ENTRY_TAG = { card: 'ENHANCE CARD', tile: 'TILE', polish: 'UPGRADE CARD' };
   const ENTRY_COL = { card: 'enh', tile: 'tilec', polish: 'upg' }; // rarityColor names: var(--enh) etc.
   function entryItem(e) { return typeof e === 'string' ? { kind: 'card', id: e } : e; }
@@ -7653,7 +7722,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     const icon = polish
       ? '<span class="iconwrap"><img class="icon" alt="" src="' + GF.Render.gemIconURL(it.color) + '"><span class="plus">' + (it.id === 'polish2' ? '+2' : '+1') + '</span></span>'
       : iconImg('upgrade', it.id);
-    return { icon: icon, name: name, desc: desc, cls: 'upgrade' };
+    return { icon: icon, name: name, desc: desc, cls: 'upgrade', rar: 'upg' };
   }
   function renderShop() {
     const run = S.run, s = run && run.shop; if (!s) return;
@@ -7700,11 +7769,11 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     if (!run.voucherOffer) V.appendChild(soldSlot());
     else {
       const d = GF.Vouchers.DEFS[run.voucherOffer], price = GF.Shop.voucherPrice(run), ok = can(price);
-      const info = { icon: iconImg('voucher', run.voucherOffer), name: d.name, rar: 'rare' };
-      const el = slotEl('rare', info, price, !ok, 2);
+      const info = { icon: iconImg('voucher', run.voucherOffer), name: d.name, rar: 'vch' };
+      const el = slotEl('voucher', info, price, !ok, 2);
       const voucherId = run.voucherOffer;
       const buy = () => { const nRem = run.removedColors.length; const r = GF.Shop.buyVoucher(run); act(r); if (r.ok) { if (voucherId === 'palette_knife' && run.removedColors.length > nRem) toast('REMOVED ' + C.COLORS[run.removedColors[run.removedColors.length - 1]].toUpperCase()); layout(); } };
-      el.onclick = () => showTip(el.getBoundingClientRect(), info.icon + '<b>' + d.name + '</b><small>UPGRADE</small><p>' + d.desc + '</p>' + (ok ? '' : '<p><i>Not enough money</i></p>'), ok ? [['BUY $' + price, buy]] : [], 'rare');
+      el.onclick = () => showTip(el.getBoundingClientRect(), info.icon + '<b>' + d.name + '</b><small>UPGRADE</small><p>' + d.desc + '</p>' + (ok ? '' : '<p><i>Not enough money</i></p>'), ok ? [['BUY $' + price, buy]] : [], 'vch');
       V.appendChild(el);
     }
     const rp = GF.Shop.rerollPrice(run);
@@ -7865,7 +7934,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
       html += '<span class="tip-lv' + (lvc ? ' up' : '') + '" style="' + (lvc ? 'border-color:' + (col || '#ffd23f') + ';color:' + lvc : 'background:' + (col || '#ffd23f')) + '">Lv ' + lv + '</span>' + GF.Render.gemIconHTML(g.color, g.kind, 'icon tip-gem', g.mod)
         + '<b class="gem-title' + (col ? '' : ' rainbow') + '"' + (col ? ' style="color:' + col + '"' : '') + '>' + name + '</b><p>' + info + '</p>'
         + (modInfo ? '<p class="mod-' + g.mod + '">' + modInfo + '</p>' : '')
-        + '<p class="gem-pts">' + (g.kind === 'coal' ? 'Breaks for <span class="pts">' + pts + '</span> points' : 'Worth <span class="pts">' + pts + '</span> points') + '</p>';
+        + '<p class="gem-pts">' + (g.kind === 'coal' ? 'Geodes: <span class="pts">5x</span> base, +1x each' : 'Worth <span class="pts">' + pts + '</span> points') + '</p>';
     }
     if (tile) {
       const d = GF.Tiles.DEFS[tile];
@@ -8068,17 +8137,27 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
   }
   function toTitle() {
     GF.Anim.cancelAll(); S.live = []; S.locked = false; S.freeing = false; closeTimer();
+    if (GF.Render.clearFx) GF.Render.clearFx();
     S.run = null; cancelTargeting(); S.selected = null; S.hint = null; S.frozen = null; S.movesHold = null; S.dragging = false; S.cp = null;
     $('pack-modal').classList.add('hidden'); hideTip(); $('hover-label').classList.add('hidden');
     $('toast').classList.remove('on'); $('big').classList.remove('on'); $('board-banner').classList.remove('on');
     show('screen-title');
     $('btn-continue').classList.toggle('hidden', !GF.Run.hasSave());
   }
-  function newRun() {
-    const txt = $('seed-input').value.trim();
+  // fresh: started from Settings > NEW RUN mid-run (a new random seed; the title's seed box is ignored)
+  function newRun(fresh) {
+    const txt = fresh ? '' : $('seed-input').value.trim();
     const seed = txt ? (/^\d+$/.test(txt) ? +txt : GF.RNG.hash(txt)) : undefined;
-    S.run = GF.Run.create(seed);
     GF.Anim.cancelAll(); S.live = []; S.locked = false; S.freeing = false; closeTimer();
+    if (GF.Render.clearFx) GF.Render.clearFx();
+    if (fresh) { // drop everything the old run had on screen (as toTitle does)
+      cancelTargeting(); S.selected = null; S.hint = null; S.frozen = null; S.movesHold = null; S.dragging = false; S.wrongTurns = 0;
+      $('pack-modal').classList.add('hidden'); hideTip(); $('hover-label').classList.add('hidden');
+      $('toast').classList.remove('on'); $('big').classList.remove('on'); $('board-banner').classList.remove('on');
+      $('fx').innerHTML = '';
+      GF.Run.clearSave(); // the old run's save goes; the new run is saved below
+    }
+    S.run = GF.Run.create(seed);
     S.cp = null; renderCascadePanel();
     show('screen-game');
     $('shop').classList.add('hidden');
@@ -8426,7 +8505,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
   const vFamily = (id) => id.replace(/_\d+$/, '');
   function voucherTip(el, id) {
     const d = GF.Vouchers.DEFS[id];
-    showTip(el.getBoundingClientRect(), iconImg('voucher', id) + '<b>' + d.name + '</b><small>UPGRADE' + (d.requires || GF.Vouchers.DEFS[vFamily(id) + '_2'] ? ' · TIER ' + ROMAN[d.tier] : '') + '</small><p>' + d.desc + '</p>', [], 'upg');
+    showTip(el.getBoundingClientRect(), iconImg('voucher', id) + '<b>' + d.name + '</b><small>UPGRADE' + (d.requires || GF.Vouchers.DEFS[vFamily(id) + '_2'] ? ' · TIER ' + ROMAN[d.tier] : '') + '</small><p>' + d.desc + '</p>', [], 'vch');
   }
   function renderAboutUpgrades() {
     const box = $('about-upgrades'), owned = (S.run && S.run.vouchers) || [];
@@ -8445,7 +8524,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
         const card = document.createElement('div'); card.className = 'vcard'; card.dataset.id = id;
         card.innerHTML = iconImg('voucher', id) + (ids.length > 1 || d.tier > 1 ? '<span class="vtier">' + ROMAN[d.tier] + '</span>' : '');
         floatPhase(slot, 3.2, fi + j * 0.3);
-        bindHover(card, d.name, 'upg');
+        bindHover(card, d.name, 'vch');
         bindToyDrag(card, slot, () => { voucherTip(card, id); });
         slot.appendChild(card); cards.appendChild(slot);
       });
@@ -8538,7 +8617,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
         ids.forEach((id) => {
           const d = GF.Vouchers.DEFS[id];
           const tag = 'UPGRADE' + (ids.length > 1 ? ' · TIER ' + ROMAN[d.tier] : '') + (d.requires ? ' · NEEDS ' + GF.Vouchers.DEFS[d.requires].name.toUpperCase() : '');
-          box.appendChild(glItem({ icon: iconImg('voucher', id), name: d.name, rar: 'upg', price: d.price, tag: tag, desc: d.desc }));
+          box.appendChild(glItem({ icon: iconImg('voucher', id), name: d.name, rar: 'vch', price: d.price, tag: tag, desc: d.desc }));
         });
         grid.appendChild(box);
       });
@@ -8563,6 +8642,14 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     if (!ok || S.run !== run) return;
     if (run && run.phase === 'shop') GF.Run.save(run);
     toTitle();
+  }
+  // Settings > NEW RUN: confirm, then start over with a new random seed (the old run's save is replaced)
+  async function confirmNewRun() {
+    closePanels();
+    const run = S.run;
+    const ok = await modal('NEW RUN', '<p>Start a new run? Current run progress will be lost.</p>', [['YES', true], ['NO', false]]);
+    if (!ok || S.run !== run) return;
+    newRun(true);
   }
   function syncShopToggle() { $('btn-shop-toggle').textContent = $('shop').classList.contains('collapsed') ? 'SHOW' : 'HIDE'; }
   function loop(now) {
@@ -8627,6 +8714,7 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
     $('btn-about').onclick = openAbout;
     $('btn-glossary').onclick = () => { GF.Audio.unlock(); openGlossary(); };
     $('set-menu').onclick = confirmMainMenu;
+    $('set-newrun').onclick = confirmNewRun;
     document.querySelectorAll('.panel-modal').forEach((m) => {
       m.querySelector('.panel-close').onclick = closePanels;
       m.addEventListener('pointerdown', (e) => { if (e.target === m) closePanels(); });
