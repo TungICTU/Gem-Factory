@@ -357,7 +357,9 @@ canvas#board.rw { animation: rwBoard 1.1s steps(8); }
 .tabs.sub button { font-size: 7px; padding: 4px 6px; border-width: 2px; }
 .tabs.sub button.on { background: var(--ink); border-color: var(--ink); }
 .tabs .tab-n { margin-left: 4px; opacity: .75; } /* v4.2 glossary entry counts */
-body.mobile #gl-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 100%; } body.mobile #gl-tabs button { font-size: 7px; padding: 6px 2px; white-space: nowrap; }
+body.mobile #gl-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 100%; } body.mobile #gl-tabs button { font-size: 7px; padding: 5px 1px; white-space: nowrap; line-height: 1.5; }
+/* v4.3: 7 tabs in 2 rows of 4; the count goes under the name */
+body.mobile #gl-tabs .tab-n { display: block; margin: 1px 0 0; font-size: 6px; }
 body.mobile #gl-tabs .tab-n, body.mobile #gl-sub .tab-n { margin-left: 2px; }
 .bars-x .x .pct { color: var(--ink); font-size: 6px; }
 .bars-x .x.gone .pct { color: var(--muted); }
@@ -541,6 +543,57 @@ body.mobile #stuck-bar { font-size: 7px; top: -22px; }
 .intro-ghost canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 .intro-skip { position: fixed; right: 14px; bottom: 12px; font-size: 7px; color: var(--muted); text-shadow: 2px 2px 0 #000; opacity: .8; pointer-events: none; }
 body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
+/* ---------- v4.3 UI ---------- */
+/* Blazing Speed meter (ui.js drawBlaze): flame, a chunky pixel bar in 8 chunks (one per match), "xM". --f: fill 0..1,
+   --heat: 0 at x1 .. 1 at x6 (glow); the fill gradient and label colour come from JS (blazeLook) */
+.blaze-meter { --f: 0; --heat: 0; display: flex; align-items: center; gap: 6px; margin-top: 8px; height: 22px; }
+.bz-icon { flex: none; width: 22px; height: 22px; background: center / contain no-repeat; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 #000); }
+.blaze-meter.hot .bz-icon { animation: bzFlicker .36s steps(2) infinite; }
+@keyframes bzFlicker { 50% { transform: translateY(-1px) scaleY(1.12); filter: drop-shadow(2px 2px 0 #000) brightness(1.3); } }
+.bz-bar { position: relative; flex: 1; height: 18px; border: 3px solid var(--ink); background: #160a06; box-shadow: 3px 3px 0 #000; overflow: hidden; }
+.blaze-meter.lit .bz-bar { border-color: #ffb36b; box-shadow: 3px 3px 0 #000, 0 0 calc(4px + var(--heat) * 12px) calc(var(--heat) * 3px) rgba(255, 110, 40, calc(.35 + var(--heat) * .5)); }
+.bz-fill { position: absolute; left: 2px; top: 2px; bottom: 2px; width: calc((100% - 4px) * var(--f)); background: #ff6a1f;
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, .35), inset 0 -3px 0 rgba(0, 0, 0, .3); }
+.bz-ticks { position: absolute; inset: 2px; pointer-events: none; background: repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 2px), rgba(0, 0, 0, .6) calc(12.5% - 2px) 12.5%); }
+.bz-m { flex: none; min-width: 40px; font-size: 13px; text-align: left; color: #ff9a4a; text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; }
+.blaze-meter.up .bz-bar { animation: bzFlash .5s ease-out; }
+.blaze-meter.up .bz-m { animation: bzBounce .5s ease-out; }
+.blaze-meter.up { animation: bzHop .4s ease-out; }
+.blaze-meter.down .bz-bar { animation: bzDown .35s steps(3); }
+@keyframes bzFlash { 0% { filter: brightness(3) saturate(.3); } 40% { filter: brightness(1.8); } 100% { filter: none; } }
+@keyframes bzBounce { 0% { transform: scale(1); } 30% { transform: scale(1.7) rotate(-6deg); } 55% { transform: scale(.9); } 75% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes bzHop { 30% { transform: translateY(-4px); } 60% { transform: translateY(1px); } }
+@keyframes bzDown { 33% { transform: translateX(-3px); } 66% { transform: translateX(3px); } }
+#shop > .blaze-meter { margin: 0 0 10px; }
+body.mobile .blaze-meter { height: 18px; margin-top: 6px; }
+body.mobile .bz-bar { height: 16px; }
+body.mobile .bz-icon { width: 18px; height: 18px; }
+body.mobile .bz-m { font-size: 10px; min-width: 32px; }
+.float.blaze { color: #ffb347; font-size: 16px; z-index: 24; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 0 10px #ff5a1f; animation: matchPop .9s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) { .blaze-meter.up, .blaze-meter.up .bz-m, .blaze-meter.hot .bz-icon, .blaze-meter.down .bz-bar { animation: none; } }
+/* shop transitions (ui.js shopIn / shopOut): no input while the panel moves */
+#shop.anim-lock { pointer-events: none; }
+body.mobile #shop { transform-origin: 50% 100%; }
+/* Martyr "+X" flying from its card to the score */
+.martyr-fly { position: absolute; z-index: 40; pointer-events: none; white-space: nowrap; font-size: 16px; color: var(--accent); text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 0 10px rgba(255, 107, 214, .8); transform: translate(-50%, -50%); }
+#hud-score.bump { animation: bumpn .3s; display: inline-block; }
+/* Survival FULL CLEAR!: the round popup's look in gold, with a sparkle burst */
+#board-banner.fullclear { font-size: 32px; color: #fff8d6; padding: 12px 18px 10px; background: linear-gradient(#ffe27a, #e0a100 55%, #a86d00); border: 4px solid #fff1b8;
+  box-shadow: 0 0 0 4px #000, 6px 6px 0 4px #000, 0 0 34px 10px rgba(255, 210, 63, .8); text-shadow: 3px 3px 0 #000, -2px -2px 0 #6b4200, 2px -2px 0 #6b4200, -2px 2px 0 #6b4200; letter-spacing: 1px; }
+#board-banner.fullclear.on { animation: hurrahPop 1.5s ease-out; }
+body.mobile #board-banner.fullclear { font-size: 22px; }
+.sparkburst { position: absolute; left: 50%; top: calc(var(--board-h, 400px) / 2); width: 0; height: 0; z-index: 32; pointer-events: none; }
+.sparkburst i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; background: #ffd23f; box-shadow: 0 0 0 2px #000; opacity: 0; animation: sparkOut .9s ease-out forwards; }
+.sparkburst i.w { background: #fff8d6; width: 6px; height: 6px; } .sparkburst i.o { background: #ff8c42; }
+@keyframes sparkOut { 0% { opacity: 1; transform: translate(0, 0) scale(.4) rotate(0); } 60% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(180deg); } }
+@media (prefers-reduced-motion: reduce) { #board-banner.fullclear.on { animation: pop 1.2s; } .sparkburst { display: none; } }
+/* special polish: current level line in tooltips; About special chart levels; glossary GEMS values */
+#tip .pol-lv { display: block; margin-top: 4px; color: var(--muted); }
+#tip .pol-lv i { font-style: normal; }
+.bars-x .x .plv { font-size: 6px; color: var(--muted); }
+.gl-txt .gl-val { color: var(--accent); margin-top: 4px; }
+.gl-icon canvas.gemcv.spin { width: 40px; height: 40px; image-rendering: pixelated; }
+#tip canvas.gemcv.spin { width: 40px; height: 40px; image-rendering: pixelated; }
 </style>
 <div id="app">
   <section id="screen-title" class="screen">
@@ -594,11 +647,13 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
         <div id="stuck-bar" class="hidden">NO MOVES LEFT &mdash; USE A RESCUE</div>
         <div id="timer-bar" class="hidden"><div id="timer-fill"></div><span id="timer-text">TIMER 5.0s</span></div>
         <div id="moves-bar"><div id="moves-cells"></div><span id="moves-label"><span id="moves-text">MOVES LEFT: 20</span></span></div>
+        <div class="blaze-meter hidden" id="blaze-board" aria-label="Blazing Speed"><i class="bz-icon"></i><div class="bz-bar"><div class="bz-fill"></div><div class="bz-ticks"></div></div><span class="bz-m">x1</span></div>
         <div id="ability-row" class="hidden"></div>
       </div>
     </main>
     <aside id="shop" class="hidden">
       <h2>SHOP <button id="btn-shop-toggle">HIDE</button></h2>
+      <div class="blaze-meter hidden" id="blaze-shop" aria-label="Blazing Speed"><i class="bz-icon"></i><div class="bz-bar"><div class="bz-fill"></div><div class="bz-ticks"></div></div><span class="bz-m">x1</span></div>
       <h3>PERKS</h3><div id="shop-items" class="slots fan"></div>
       <button id="btn-reroll" class="wide">REROLL $2</button>
       <div class="shop-pair">
@@ -639,7 +694,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   </div></div>
   <div id="glossary-modal" class="panel-modal full hidden" role="dialog" aria-modal="true" aria-labelledby="glossary-title"><div class="box">
     <h2 id="glossary-title">GLOSSARY</h2>
-    <div id="gl-tabs" class="tabs" role="tablist"><button role="tab" data-tab="perks">PERKS</button><button role="tab" data-tab="upgrades">UPGRADES</button><button role="tab" data-tab="enhance">ENHANCE</button><button role="tab" data-tab="polish">POLISH</button><button role="tab" data-tab="tiles">TILES</button><button role="tab" data-tab="boards">BOARDS</button></div>
+    <div id="gl-tabs" class="tabs" role="tablist"><button role="tab" data-tab="perks">PERKS</button><button role="tab" data-tab="upgrades">UPGRADES</button><button role="tab" data-tab="enhance">ENHANCE</button><button role="tab" data-tab="polish">POLISH</button><button role="tab" data-tab="tiles">TILES</button><button role="tab" data-tab="gems">GEMS</button><button role="tab" data-tab="boards">BOARDS</button></div>
     <div id="gl-sub" class="tabs sub" role="tablist"><button role="tab" data-tab="all">ALL</button><button role="tab" data-tab="common">COMMON</button><button role="tab" data-tab="uncommon">UNCOMMON</button><button role="tab" data-tab="rare">RARE</button></div>
     <div id="gl-grid" role="tabpanel"></div>
     <div class="panel-btns"><button class="panel-close">CLOSE</button></div>
@@ -678,7 +733,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     SHOP_ITEMS: 3,
     REROLL_BASE: 2,
     UPGRADE_PRICE: { moves: 8, slot: 15, polish: 3 },
-    POLISH_BONUS: 5,
+    POLISH_MUL: 0.5, // v4.3: each colour polish level adds +50% to that colour's base gem value
     SAVE_KEY: 'gemfactory.save.v1',
   };
   C.base = function (round) { return 10 + 5 * (round - 1); };
@@ -734,15 +789,36 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   };
   C.PACK_TYPES = ['upgrade', 'tile', 'jewel', 'enhance'];
   C.ITEM_WEIGHTS = { perk: 70, card: 12, tile: 9, upgrade: 9 };
-  C.UPGRADE_CARD = { polish1: { price: 3, weight: 85 }, polish2: { price: 5, weight: 12 }, brilliance: { price: 8, weight: 3 } };
+  // v4.3: Polish +2 is gone; special polish cards (no colour) raise run.polishSpecial[key] by 1 level each.
+  C.POLISH_SPECIAL = {
+    bomb: { card: 'polish_bomb', k: 0.25, name: 'Bomb Polish', desc: '+25% points for gems destroyed by Bombs' },
+    star: { card: 'polish_star', k: 0.25, name: 'Star Polish', desc: '+25% points for gems destroyed by Stars' },
+    prism: { card: 'polish_prism', k: 0.25, name: 'Prism Polish', desc: '+25% points for gems destroyed by Prisms' },
+    supernova: { card: 'polish_nova', k: 0.5, name: 'Nova Polish', desc: '+50% points for gems destroyed by Supernovas' },
+    coal: { card: 'polish_coal', k: 0.5, name: 'Coal Polish', desc: '+50% geode value' },
+    wild: { card: 'polish_wild', k: 1, name: 'Wild Polish', desc: '+100% points for matches holding a Wild' },
+  };
+  C.POLISH_SPECIAL_CARD = {}; // card id -> polishSpecial key
+  Object.keys(C.POLISH_SPECIAL).forEach((key) => { C.POLISH_SPECIAL_CARD[C.POLISH_SPECIAL[key].card] = key; });
+  C.newPolishSpecial = function () { const o = {}; Object.keys(C.POLISH_SPECIAL).forEach((k) => { o[k] = 0; }); return o; };
+  // L levels of a special polish: x(1 + k * L) (run.polishSpecial may be missing: x1)
+  C.polishSpecialMul = function (run, key) {
+    const L = (run && run.polishSpecial && run.polishSpecial[key]) || 0;
+    return L ? 1 + C.POLISH_SPECIAL[key].k * L : 1;
+  };
+  C.UPGRADE_CARD = { polish1: { price: 3, weight: 70 } };
+  Object.keys(C.POLISH_SPECIAL).forEach((key) => { C.UPGRADE_CARD[C.POLISH_SPECIAL[key].card] = { price: 4, weight: 3, special: key }; });
+  C.UPGRADE_CARD.brilliance = { price: 8, weight: 3 };
   // v3.6 Jewel Hunter: shop gem items (a modifier costs GEM_MOD_PRICE more; coloured bombs/stars carry one MOD_CHANCE of the time)
-  C.GEM_PRICE = { bomb: 4, star: 4, gold: 3, shiny: 4, wild: 4, prism: 6, coal: 2 };
+  C.GEM_PRICE = { normal: 2, bomb: 4, star: 4, supernova: 6, wild: 4, prism: 6, coal: 2 };
   C.GEM_MOD_PRICE = 2;
   C.GEM_MOD_CHANCE = 0.3;
   C.GEM_ITEM_WEIGHT = 9;
   C.MERCY_MOVES = 5;
   C.SAVE_VER = 4; // 2: v3.6 vouchers/cards, 3: v3.11 Equity state, 4: v4.1 difficulty I-VI (older saves are migrated)
-  C.JEWEL_WEIGHTS = { bomb: 20, star: 20, gold: 15, shiny: 15, wild: 12, prism: 8, coal: 10 };
+  // v4.3: jewel items are real gems only (a plain 'normal' gem always carries Gold or Shiny; coloured specials carry
+  // one GEM_MOD_CHANCE of the time); no modifier-only items
+  C.JEWEL_WEIGHTS = { normal: 30, bomb: 20, star: 20, supernova: 4, wild: 12, prism: 8, coal: 6 };
   C.COLORLESS = { prism: 1, wild: 1, coal: 1 };
   // v3.10: a broken coal bursts into GEODE_MIN..GEODE_MAX geodes; geode k (1-based) is worth (GEODE_FIRST - 1 + k) x base
   // (3 geodes: 5b + 6b + 7b). No cascade, polish or modifiers.
@@ -756,6 +832,26 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   C.REMOVED_PERKS = { hungry: 'common', pawn_shop: 'common', clearance_sale: 'common', coupon: 'common', overworked: 'common',
     polished_shine: 'uncommon', renovation: 'uncommon', golden_ticket: 'uncommon', whetstone: 'uncommon',
     overcharge: 'rare', compound: 'rare' };
+  // v4.3 Blazing Speed (run.blaze = {m, fill}; Run.blazeFill / blazeTick): each match adds BLAZE_FILL; a full bar
+  // gives m + 1 and resets to BLAZE_RESET. The bar drains BLAZE_DRAIN x m per second (real time); empty at m > 1:
+  // m - 1 and the bar refills to BLAZE_DROP_FILL; at m = 1 it rests at 0.
+  C.BLAZE_FILL = 1 / 8; C.BLAZE_RESET = 0.15; C.BLAZE_DRAIN = 0.12; C.BLAZE_DROP_FILL = 0.7;
+  // v4.3 Survival: gems added to the refill pool at each round start after round 1, and on a full clear
+  C.SURVIVAL_ROUND_POOL = 64; C.SURVIVAL_FULL_CLEAR = 64;
+  // v4.3 Glossary GEMS tab data: every gem kind, the two modifiers and the locked state (UI renders the 3D gem)
+  C.GEM_INFO_ORDER = ['normal', 'bomb', 'star', 'supernova', 'prism', 'wild', 'coal', 'gold', 'shiny', 'locked'];
+  C.GEM_INFO = {
+    normal: { type: 'gem', name: 'Gem', desc: 'Match 3 or more of a colour. Each gem scores its base value (10, +5 per round) x its cascade level, +50% per Polish level of its colour.' },
+    bomb: { type: 'gem', name: 'Bomb', desc: 'Made by a match of 4. Explodes 3x3 when cleared (5x5 with C4).' },
+    star: { type: 'gem', name: 'Star', desc: 'Made by a T or L match. Clears its row and column when cleared.' },
+    supernova: { type: 'gem', name: 'Supernova', desc: 'Made by a match of 6+ or a Nova card. Clears 3 rows and 3 columns.' },
+    prism: { type: 'gem', name: 'Prism', desc: 'Made by a match of 5. Swap it with a gem to clear every gem of that colour. Two Prisms clear the board.' },
+    wild: { type: 'gem', name: 'Wild', desc: 'Matches any colour. Scores no colour polish.' },
+    coal: { type: 'gem', name: 'Coal', desc: 'Never matches. Blast it to break it into 3-5 geodes worth 5x, 6x, 7x... base value each.' },
+    gold: { type: 'mod', name: 'Gold', desc: 'Modifier: +$3 when the gem is cleared.' },
+    shiny: { type: 'mod', name: 'Shiny', desc: 'Modifier: x2 points for its match, and its blast is one ring bigger.' },
+    locked: { type: 'state', name: 'Locked', desc: 'Difficulty V+: chained in place. Cannot be swapped and does not fall. A match unlocks it; blasts break it.' },
+  };
   C.spinTransform = function (ms) {
     const theta = (ms / 900) * Math.PI * 2;
     const c = Math.cos(theta), s = Math.sin(theta);
@@ -829,8 +925,9 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   const COAL_CHANCE = 0.07, COAL_MAX = 20;
   // v4.0 balance pass (tools/simulate.js 40 runs, difficulty I, aiming at a median death round of 7-16 and at most
   // 25% wins): round targets x these. Mono's 4 colours cascade without end, so its multiplier also grows per round.
-  const TARGET_MUL = { haunted: 6, strange: 3.5, black: 0.7, survival: 0.65 };
-  const MONO_MUL = 2, MONO_MUL_GROWTH = 1.25;
+  // v4.3: Random x1.5 (median 17 and 30% wins at x1 over 80 runs; 15 at x1.5)
+  const TARGET_MUL = { haunted: 6, strange: 3.5, black: 0.7, survival: 0.65, random: 1.5 };
+  const MONO_MUL = 2, MONO_MUL_GROWTH = 1.25, MONO_COLORS = 5; // v4.3: 5 colours (was 4)
   const flatMul = (id) => (run, v) => v * TARGET_MUL[id];
 
   // Random board (v4.2): a weight per live colour, a whole percent drawn from 0-45, normalised to sum 1 while every
@@ -913,7 +1010,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     hooks: {
       onCreate: (run) => {
         const owned = new Set(run.perks.map((p) => p.id));
-        // Monochrome would take a colour from Mono's 4
+        // Monochrome would take a colour from Mono's 5
         const pool = GF.Perks.DEFS.filter((d) => d.rarity === 'rare' && !d.id.startsWith('t_') && !owned.has(d.id) &&
           !(d.id === 'monochrome' && has(run, 'mono')));
         if (!pool.length || run.perks.length >= run.perkSlots) return;
@@ -934,23 +1031,24 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     } });
   def({ id: 'strange', name: 'STRANGE', color: '#2ec4b6', desc: 'Every cell holds a Mystery tile. Targets x3.5.',
     hooks: { targetMul: flatMul('strange'), onCreate: (run) => { if (!has(run, 'haunted')) fillTiles(run, () => 'mystery'); } } });
-  def({ id: 'survival', name: 'SURVIVAL', color: '#8b5a2b', desc: 'No refills. Gems can move into empty cells. Missed swaps are free. REFILL: +32 gems to a refill pool, 3 per round. Targets x0.65.',
+  def({ id: 'survival', name: 'SURVIVAL', color: '#8b5a2b', desc: 'No refills. Gems can move into empty cells. Missed swaps are free. REFILL: +32 gems to a refill pool, 3 per round. Each new round adds 64 gems, and so does a FULL CLEAR. Targets x0.65.',
     hooks: {
       targetMul: flatMul('survival'),
       roundStart: (run) => { charge(run, 'refill'); },
       refillEnabled: () => false,
       freeNoMatchSwap: () => true,
     } });
-  def({ id: 'mono', name: 'MONO', color: '#c0c6cc', desc: 'Only 4 colours. Targets x2, and x1.25 more each round.',
+  def({ id: 'mono', name: 'MONO', color: '#c0c6cc', desc: 'Only 5 colours. Targets x2, and x1.25 more each round.',
     hooks: {
       targetMul: (run, v, n) => v * MONO_MUL * Math.pow(MONO_MUL_GROWTH, Math.max(0, (n || 1) - 1)),
       onCreate: (run) => {
-        const keep = run.rng.shuffle(ALL7.slice()).slice(0, 4);
+        const keep = run.rng.shuffle(ALL7.slice()).slice(0, MONO_COLORS);
         run.removedColors = ALL7.filter((k) => keep.indexOf(k) < 0);
       },
     } });
-  def({ id: 'random', name: 'RANDOM', color: '#ff7ad9', desc: 'Each colour spawns at a random rate (0-45%).',
+  def({ id: 'random', name: 'RANDOM', color: '#ff7ad9', desc: 'Each colour spawns at a random rate (0-45%). Targets x1.5.',
     hooks: {
+      targetMul: flatMul('random'),
       onCreate: (run) => { run.boardState.weights = randomWeights(run.rng, GF.Resolver.colorsOf(run)); },
       spawnWeights: (run, w) => {
         const rw = run.boardState && run.boardState.weights;
@@ -1442,19 +1540,19 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (board.cells[r][c] !== before[r][c]) changed.push([r, c]);
     return changed;
   }
-  // Descrambler (v3.11): every gem is re-laid left to right, top to bottom: normal gems sorted by colour (red,
-  // orange, yellow, green, blue, purple, white; stable), then every special kind (coloured or not) in reading
-  // order. Gems keep ids, kinds and modifiers.
+  // Descrambler (v3.11; v4.3): every gem is re-laid left to right, top to bottom, sorted by colour (red, orange,
+  // yellow, green, blue, purple, white; stable). A colour's block holds its coloured specials too (a red bomb sits in
+  // the red block); colourless gems (prism, wild, coal) come last. Gems keep ids, kinds and modifiers.
   const DESC_ORDER = [0, 6, 3, 2, 1, 4, 5];
   // Locked gems stay on their cells; the rest are laid around them, on the cells that held a gem (Survival's empty
   // cells stay empty).
   function descramble(board) {
     const all = [], slots = [];
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (board.cells[r][c] && !isLocked(board.cells[r][c])) { all.push(board.cells[r][c]); slots.push([r, c]); }
-    const normals = all.filter((g) => g.kind === 'normal' && g.color != null);
-    const rest = all.filter((g) => !(g.kind === 'normal' && g.color != null));
+    const coloured = all.filter((g) => g.color != null);
+    const rest = all.filter((g) => g.color == null);
     const rank = (g) => DESC_ORDER.indexOf(g.color);
-    const sorted = normals.map((g, i) => [g, i]).sort((p, q) => rank(p[0]) - rank(q[0]) || p[1] - q[1]).map((p) => p[0]).concat(rest);
+    const sorted = coloured.map((g, i) => [g, i]).sort((p, q) => rank(p[0]) - rank(q[0]) || p[1] - q[1]).map((p) => p[0]).concat(rest);
     slots.forEach(([r, c], i) => { board.cells[r][c] = sorted[i]; });
     return sorted.length;
   }
@@ -1632,14 +1730,17 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     return out;
   }
   // unlock: keys of locked gems a match reached (they unlock in place instead of clearing; Resolver.move)
-  function newClearState() { return { set: new Set(), order: [], activated: [], source: {}, unlock: new Set() }; }
+  // by (v4.3): per cleared cell key, the special kind whose blast / prism destroyed it (bomb, star, supernova, prism,
+  // shiny), for special polish
+  function newClearState() { return { set: new Set(), order: [], activated: [], source: {}, by: {}, unlock: new Set() }; }
   const SPECIAL_ACTIVE = { bomb: 1, star: 1, prism: 1, supernova: 1 };
   // Activations: special gems, plus a matched shiny normal gem, which bursts 3x3 (activated kind 'shiny').
   // Coal only breaks by blast, or by a coal match (coalMatch flag).
   // noChain (Prism + Prism board clear): every seed is cleared, coal included, and no special fires.
   function expandClear(board, seeds, flags, st, prismColors, colors, seedSource, noChain) {
     const queue = [];
-    const add = (r, c, src) => {
+    if (!st.by) st.by = {};
+    const add = (r, c, src, by) => {
       const g = board.cells[r][c];
       if (!g) return;
       if (!noChain && g.kind === 'coal' && src !== 'blast' && src !== 'coal' && src !== 'break' && !(src === 'match' && flags && flags.coalMatch)) return;
@@ -1651,10 +1752,13 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       st.set.add(k);
       st.order.push([r, c]);
       st.source[k] = src;
+      if (by) st.by[k] = by;
       if (noChain) return;
       if (SPECIAL_ACTIVE[g.kind] || (g.kind === 'normal' && g.mod === 'shiny' && src === 'match')) queue.push([r, c]);
     };
-    seeds.forEach(([r, c]) => add(r, c, seedSource || 'match'));
+    // Prism + Prism board clear (noChain, 'color'): every cell counts as destroyed by a Prism
+    const seedBy = noChain && seedSource === 'color' ? 'prism' : undefined;
+    seeds.forEach(([r, c]) => add(r, c, seedSource || 'match', seedBy));
     while (queue.length) {
       const [r, c] = queue.shift();
       const g = board.cells[r][c];
@@ -1666,20 +1770,20 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
           // Pressured into Diamonds: the prism fired on Coal clears every Coal (each breaks into geodes)
           area = [];
           for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (board.cells[y][x] && board.cells[y][x].kind === 'coal') area.push([y, x]);
-          area.forEach(([y, x]) => add(y, x, 'coal'));
+          area.forEach(([y, x]) => add(y, x, 'coal', 'prism'));
           st.activated.push({ r: r, c: c, kind: 'prism', mod: null, cells: area, source: st.source[key(r, c)], cleared: st.order.length - before, coal: true });
           continue;
         }
         const color = pc != null ? pc : mostCommonColor(board, colors, st.set);
         area = colorCells(board, color);
-        area.forEach(([y, x]) => add(y, x, 'color'));
+        area.forEach(([y, x]) => add(y, x, 'color', 'prism'));
       } else if (g.kind === 'normal') {
         kind = 'shiny';
         area = blastCells(r, c, 'bomb', null);
-        area.forEach(([y, x]) => add(y, x, 'blast'));
+        area.forEach(([y, x]) => add(y, x, 'blast', 'shiny'));
       } else {
         area = blastCells(r, c, g.kind, flags, g.mod);
-        area.forEach(([y, x]) => add(y, x, 'blast'));
+        area.forEach(([y, x]) => add(y, x, 'blast', g.kind));
       }
       st.activated.push({ r: r, c: c, kind: kind, mod: g.mod || null, cells: area, source: st.source[key(r, c)], cleared: st.order.length - before });
     }
@@ -1836,6 +1940,8 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       // free shop slots (Claw Machine), Echo Chamber copies (extra triggers per perk trigger)
       pressured: has('pressured_diamonds'), swapper: has('swapper'), claw: has('claw_machine'),
       echo: row.filter((p) => p.id === 'echo_chamber').length,
+      // v4.3 Blazing Speed owned: each match fills run.blaze (Resolver.move -> Run.blazeFill)
+      blazing: has('blazing_speed'),
       anySwap: !!B && B.hook(run, 'swapRule', 'adjacent') === 'any',
       // v4.0 Survival (refillEnabled false): nothing refills (Board.refill opts.noRefill)
       noRefill: !!B && B.hook(run, 'refillEnabled', true) === false,
@@ -2007,10 +2113,11 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   // v3.6: coal lines of 3+ match like a colour (flag coalMatch); each matched coal breaks into 3-5 geodes (v3.10);
   // a coal match never makes a special.
   def({ id: 'coal_miner', name: 'Coal Miner', desc: 'Coal can match and break into geodes', passive: true });
-  // v3.11: 1000D Dice (id kept); an Echo Chamber echo rolls again
+  // v3.11: 1000D Dice (id kept); an Echo Chamber echo rolls again. v4.3: renamed RNG, once per move (not free
+  // resolves), at move end
   const dice = (x) => ({ add: x.rng.int(1000) + 1 });
-  def({ id: 'dice_100', name: '1000D Dice', desc: '+1 to +1000 points per match',
-    on: { match: dice }, force: dice, echo: dice });
+  def({ id: 'dice_100', name: 'RNG', desc: '+1 to +1000 points once per move',
+    on: { moveEnd: (x) => (x.summary && x.summary.free ? null : dice(x)) }, force: dice, echo: dice });
   def({ id: 'hot_crushers', name: 'Hot Crushers', desc: '+15 per Red, Orange or Yellow gem cleared',
     on: { gemClear: (x) => (x.family(x.gem.color) === 'hot' ? { add: 15 } : null) }, force: add(15) });
   def({ id: 'cold_crushers', name: 'Cold Crushers', desc: '+15 per Green, Blue or Purple gem cleared',
@@ -2101,8 +2208,11 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   // ---------- Rare ----------
   def({ id: 'executer', rarity: 'rare', name: 'Mimic', desc: 'Copies the perk to its right', copy: 'right' });
   def({ id: 'imagination', rarity: 'rare', name: 'Replica', desc: 'Copies your leftmost perk', copy: 'leftmost' });
-  def({ id: 'chain_reaction', rarity: 'rare', name: 'Chain Reaction', desc: 'x2 points if 2+ special gems fire in one move',
-    on: { moveEnd: (x) => (x.summary.specialsActivated >= 2 ? { mul: 2 } : null) }, force: () => ({ mul: 2 }) });
+  // v4.3: a group multiplier (x1.5: +0.5x the group's points) on every match whose cascade index is CHAIN_LV+
+  const CHAIN_LV = 5;
+  def({ id: 'chain_reaction', rarity: 'rare', name: 'Chain Reaction', minLevel: CHAIN_LV, desc: 'x1.5 points for every match at cascade level 5 or higher',
+    on: { match: (x) => (x.group && x.group.casc >= CHAIN_LV && x.groupPoints ? { add: x.groupPoints * 0.5 } : null) },
+    force: (x) => (x.groupPoints ? { add: x.groupPoints * 0.5 } : null) });
   // v3.11: Mirror renamed Activator (id kept); once per cascade level
   def({ id: 'mirror', rarity: 'rare', name: 'Activator', desc: 'When the perk on its left triggers, the perk on its right triggers too (once per cascade level)', mirror: true });
   // v4.2: every copy (Showman, Printer, Gifter, Hell...) removes its own colour while more than MONO_MIN colours are
@@ -2217,9 +2327,10 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     on: { moveEnd: (x) => (x.summary.gemsCleared >= 20 ? { money: 1 } : null) }, force: () => ({ money: 1 }) });
   def({ id: 'loan_shark', rarity: 'uncommon', name: 'Loan Shark', desc: '+$15 now, -$3 each round end. Selling it repays the $15',
     noCopy: true, onBuy: (run) => { run.money += 15; }, onSell: (run) => { run.money -= 15; }, on: { roundEnd: () => ({ money: -3 }) } });
-  def({ id: 'martyr', rarity: 'rare', name: 'Martyr', desc: 'x3 points. Destroys itself after 5 rounds',
-    on: { moveEnd: mul(3), roundEnd: (x, i) => { i.state.rounds = (i.state.rounds || 0) + 1; return i.state.rounds >= 5 ? { destroySelf: true } : null; } },
-    force: mul(3) });
+  // v4.3: round start: +25% of the round target to the score at once (Resolver.roundStart scoreFrac)
+  def({ id: 'martyr', rarity: 'rare', name: 'Martyr', scoreFrac: 0.25, desc: 'Round start: +25% of the round target to your score',
+    on: { roundStart: () => ({ scoreFrac: 0.25 }) },
+    force: (x) => (x.event === 'roundStart' ? { scoreFrac: 0.25 } : null) });
   def({ id: 'insurance', rarity: 'uncommon', name: 'Lifebuoy', desc: 'Win the first round you would lose. Then it is gone', passive: true });
   def({ id: 'baseball_bat', rarity: 'rare', name: 'Baseball Bat', desc: 'Swaps don\'t need to make a match', passive: true });
   def({ id: 'pyromaniac', rarity: 'uncommon', name: 'Pyromaniac', desc: 'Exploding Bombs have a 50% chance to leave a new Bomb',
@@ -2288,10 +2399,10 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       moveEnd: (x, i) => { if (x.summary.maxLevel > 0) i.state.color = pickOther(x.rng, x.colors, i.state.color); return null; },
     },
     status: colorStatus });
-  // v3.11: 50 gems / 20%; fires mid-move at the end of the cascade level that reached 50 ('levelEnd', after the
+  // v3.11: 50 gems / 20% (v4.3: 100 gems); fires mid-move at the end of the cascade level that reached 50 ('levelEnd', after the
   // refill), then the cascade goes on with the new matches.
-  const GEN_GOAL = 50, GEN_SHARE = 0.2;
-  def({ id: 'generator', rarity: 'uncommon', name: 'Generator', desc: 'Every 50 gems cleared: 20% of other gems turn the most common color',
+  const GEN_GOAL = 100, GEN_SHARE = 0.2;
+  def({ id: 'generator', rarity: 'uncommon', name: 'Generator', goal: GEN_GOAL, desc: 'Every 100 gems cleared: 20% of other gems turn the most common color',
     on: {
       gemClear: (x, i) => { i.state.count = (i.state.count || 0) + 1; return null; },
       levelEnd: (x, i) => {
@@ -2410,18 +2521,40 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   def({ id: 'lootdrop', rarity: 'uncommon', name: 'Lootdrop', desc: 'New gems have a 5% chance to be a Bomb, Star or Prism', lootdrop: true });
 
   // ---------- Rare (6) ----------
-  def({ id: 'redanmancy', rarity: 'rare', name: 'Redanmancy', desc: 'Each match of the rarest color adds x0.1. A wrong-color swap resets it',
+  // v4.3 rework: starts at x1; a target colour (state.color, among colours in play) and count (state.need, 2-5).
+  // Each match of that colour (any source: swap, cascade, free resolve) counts (state.count); reaching the count adds
+  // +1.25x (state.mult), then a new colour (another one when possible) and count are picked.
+  const RED_ADD = 1.25, RED_MIN = 2, RED_MAX = 5;
+  const redMul = (i) => i.state.mult || 1;
+  const redPick = (rng, colors, i) => {
+    const pool = colors.length > 1 ? colors.filter((k) => k !== i.state.color) : colors;
+    i.state.color = rng.pick(pool);
+    i.state.need = RED_MIN + rng.int(RED_MAX - RED_MIN + 1);
+    i.state.count = 0;
+  };
+  const redEnsure = (x, i) => { if (i.state.color == null || !x.colors.includes(i.state.color) || !(i.state.need >= 1)) redPick(x.rng, x.colors, i); return null; };
+  const redEff = (x, i) => (redMul(i) > 1 ? { mul: redMul(i) } : null);
+  def({ id: 'redanmancy', rarity: 'rare', name: 'Redanmancy', redMul: redMul, add: RED_ADD,
+    desc: 'Starts at x1. Make 2-5 matches of its color: +1.25x, then a new color and count',
+    onBuy: (run, inst, rng) => { redPick(rng, GF.Run.colors(run), inst); },
     on: {
+      roundStart: redEnsure,
+      moveStart: redEnsure,
       match: (x, i) => {
-        const least = Bd().leastCommonColor(x.board, x.colors);
-        if (x.group.color != null && x.group.color === least) i.state.mult = Math.round(((i.state.mult || 1) + 0.1) * 10) / 10;
-        else if (x.fromSwap) i.state.mult = 1;
+        redEnsure(x, i);
+        if (x.group.color == null || x.group.color !== i.state.color) return null;
+        i.state.count = (i.state.count || 0) + 1;
+        if (i.state.count >= i.state.need) {
+          i.state.mult = Math.round((redMul(i) + RED_ADD) * 100) / 100;
+          redPick(x.rng, x.colors, i);
+        }
         return null;
       },
-      moveEnd: (x, i) => ((i.state.mult || 1) > 1 ? { mul: i.state.mult } : null),
+      moveEnd: redEff,
     },
-    force: (x, i) => ((i.state.mult || 1) > 1 ? { mul: i.state.mult } : null),
-    status: (i) => ({ mult: i.state.mult || 1, text: 'x' + (i.state.mult || 1).toFixed(1) }) });
+    force: redEff,
+    status: (i) => ({ mult: redMul(i), color: i.state.color == null ? null : i.state.color, count: i.state.count || 0, need: i.state.need || 0,
+      text: 'x' + redMul(i) + (i.state.color != null ? ' · ' + C.COLORS[i.state.color].toUpperCase() + ' ' + (i.state.count || 0) + '/' + i.state.need : '') }) });
   // Engine: Run.timerReady / timerStart / timerSwap / timerEnd / timerBatch (the UI drives the 5-second window).
   def({ id: 'timer', rarity: 'rare', name: 'Timer', passive: true,
     desc: 'Your first swap starts 5 seconds of free swaps. They resolve as one move costing 3 moves' });
@@ -2513,8 +2646,8 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     },
     status: (i) => ({ hand: (i.state.hand || []).slice(), last: i.state.last || null,
       text: (i.state.hand || []).length + '/5' + (i.state.last ? ' · last: ' + HANDS[i.state.last].name : '') }) });
-  const protector = (x) => ({ mul: Math.pow(1.1, maxCount(Bd().colorCounts(x.board), x.colors)) });
-  def({ id: 'protector', rarity: 'rare', name: 'Protector', desc: 'x1.1 per gem of the most common color',
+  const protector = (x) => ({ mul: Math.pow(1.01, maxCount(Bd().colorCounts(x.board), x.colors)) });
+  def({ id: 'protector', rarity: 'rare', name: 'Protector', desc: 'x1.01 per gem of the most common color',
     on: { moveEnd: protector }, force: protector });
   def({ id: 'printer', rarity: 'rare', name: 'Printer', noCopy: true,
     desc: 'After 2 rounds, sell it to copy the perk on its left',
@@ -2740,6 +2873,19 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
         text: (pat ? 'Pattern: ' + pat.name : 'No pattern') + (full ? ' · x3 ready' : '') };
     } });
 
+  // v4.3 Blazing Speed: a speed meter in the run (run.blaze = {m, fill}). The resolver fills it once per match
+  // (Run.blazeFill, flags.blazing); every match scores x m (a group multiplier: +(m - 1)x the group's points, using
+  // the level before that match's fill). The UI drains it in real time (Run.blazeTick). A fresh meter when the first
+  // copy is bought, and when the last one is sold.
+  const blazeM = (run) => (run && run.blaze && run.blaze.m > 1 ? run.blaze.m : 1);
+  const blaze = (x) => { const m = blazeM(x.run); return m > 1 && x.groupPoints ? { add: (m - 1) * x.groupPoints } : null; };
+  def({ id: 'blazing_speed', rarity: 'rare', name: 'Blazing Speed',
+    desc: 'Matches fill a speed meter; a full one adds +1x. Every match scores x the meter. It drains over time',
+    on: { match: blaze }, force: blaze,
+    onBuy: (run, inst) => { if (!run.perks.some((p) => p.id === 'blazing_speed' && p !== inst)) run.blaze = { m: 1, fill: 0 }; },
+    onSell: (run) => { if (!run.perks.some((p) => p.id === 'blazing_speed')) run.blaze = { m: 1, fill: 0 }; },
+    status: (i, run) => { const b = (run && run.blaze) || { m: 1, fill: 0 }; return { m: b.m, fill: b.fill, text: 'x' + b.m + ' · ' + Math.round(b.fill * 100) + '%' }; } });
+
   P.WIZARD_PATTERNS = PATTERNS;
   P.wizardFull = fullUnder;
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
@@ -2791,7 +2937,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   set('bomb_destroyer', add(90)); set('star_destroyer', add(120));
   set(['hot_crushers', 'cold_crushers'], add(15));
   set('trash_collector', (run) => ({ text: '+15', kind: 'add', color: run.board ? B().leastCommonColor(run.board, GF.Run.colors(run)) : undefined }));
-  set('dice_100', () => ({ text: '+1-1000', kind: 'add' }));
+  set('dice_100', () => ({ text: '+1-1000', kind: 'add', sub: '/MOVE' }));
   set('nova_lover', add(400)); set('demolition', add(25)); set('coal_furnace', add(250)); set('wild_card', add(40));
   set('chain_bomb', add(200)); set('prism_shard', add(10)); set('star_collector', add(60)); set('architect', add(100));
   set('tile_tycoon', add(30)); set('hot_floor', add(50)); set('arcane_study', add(80)); set('lucky_seven', add(777));
@@ -2805,16 +2951,22 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   // ---------- multipliers ----------
   set('chad', (run) => ({ text: 'x2', kind: 'mult', active: !play(run) || run.moveIndex === 0 }));
   set('last_hope', (run) => ({ text: 'x2', kind: 'mult', active: play(run) && run.movesLeft <= 1 }));
-  set('cascader', mul(1.5)); set('chain_reaction', mul(2)); set('big_bang', mul(3)); set('exponent', mul(2));
+  set('cascader', mul(1.5)); set('chain_reaction', () => ({ text: 'x1.5', kind: 'mult', sub: 'LV5+' })); set('big_bang', mul(3)); set('exponent', mul(2));
   set('glass_cannon', mul(3)); set('prism_power', mul(1.5)); set('rainbow_road', mul(2)); set('minimalist', mul(3));
   set(['wrong_turn', 'imbalanced', 'terrorist', 'shooting_star'], mul(2));
   set('feng_shui', (run) => { const n = tiles(run); return { text: xm(1 + 0.05 * n), kind: 'mult', active: n > 0 }; });
   set('crescendo', (run) => { const m = 1 + 0.05 * (play(run) ? run.moveIndex : 0); return { text: xm(m), kind: 'mult', active: m > 1 }; });
   set('momentum', (run, inst) => { const s = inst.state.streak || 0; return { text: xm(1 + 0.1 * s), kind: 'mult', active: s > 0 }; });
   set('maintainer', (run) => { const m = 1 + 0.1 * maxCount(run); return { text: xm(m), kind: 'mult', active: m > 1 }; });
-  set('protector', (run) => { const m = Math.pow(1.1, maxCount(run)); return { text: xm(m), kind: 'mult', active: m > 1 }; });
-  set('redanmancy', (run, inst) => { const m = inst.state.mult || 1; return { text: 'x' + m.toFixed(1), kind: 'mult', active: m > 1 }; });
-  set('martyr', (run, inst) => ({ text: 'x3', kind: 'mult', sub: Math.max(0, 5 - (inst.state.rounds || 0)) + ' LEFT' }));
+  set('protector', (run) => { const m = Math.pow(1.01, maxCount(run)); return { text: xm(m), kind: 'mult', active: m > 1 }; });
+  // v4.3 Redanmancy: the multiplier, its target colour (dot) and progress (count/need)
+  set('redanmancy', (run, inst) => {
+    const m = inst.state.mult || 1, k = inst.state.color;
+    return { text: xm(m), kind: 'mult', active: m > 1, color: k == null ? null : k, sub: k == null ? '' : (inst.state.count || 0) + '/' + (inst.state.need || 0) };
+  });
+  set('martyr', () => ({ text: '+25%', kind: 'add', sub: 'TARGET' }));
+  // v4.3 Blazing Speed: the meter level (fill 0-1: the bar, for the UI)
+  set('blazing_speed', (run) => { const b = run.blaze || { m: 1, fill: 0 }; return { text: xm(b.m), kind: 'mult', active: b.m > 1, fill: b.fill }; });
   set('gambler', () => ({ text: 'x2/x0.5', kind: 'mult' }));
   set('russian_roulette', () => ({ text: '1/6', kind: 'chance', sub: 'x0' }));
   set('color_picker', (run, inst) => ({ text: 'x2', kind: 'mult', color: inst.state.color == null ? null : inst.state.color }));
@@ -2849,7 +3001,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   set('lootdrop', chance('5%'));
 
   // ---------- counters & states ----------
-  set('generator', (run, inst) => ({ text: (inst.state.count || 0) + '/50', kind: 'count' }));
+  set('generator', (run, inst) => ({ text: (inst.state.count || 0) + '/' + P.byId.generator.goal, kind: 'count' }));
   set('printer', (run, inst) => { const n = inst.state.rounds || 0; return n >= 2 ? { text: 'READY', kind: 'status', active: true, ready: true } : { text: n + '/2', kind: 'count' }; });
   set('time_machine', (run, inst) => ((inst.state.snaps || []).length ? { text: 'SAVED', kind: 'status', ready: true } : null));
   set('timer', (run) => (GF.Run.timerReady(run) ? { text: 'READY', kind: 'status', ready: true } : { text: 'OFF', kind: 'status', active: false }));
@@ -3076,13 +3228,20 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
 
   // opts.mul: the cell's modifier multiplier (the resolver passes it: shiny group x SHINY_MUL, or a lone shiny gem's
   // own x SHINY_MUL). Without it, a shiny gem counts its own x SHINY_MUL (tooltips).
+  // v4.3: colour polish is multiplicative (x(1 + POLISH_MUL x level)). Special polish: opts.by (the special kind
+  // that destroyed the cell: bomb, star, prism, supernova) x(1 + k x level) of that special's polish; opts.wild (the
+  // cell is in a match holding a Wild) x Wild Polish.
+  const BY_POLISH = { bomb: 1, star: 1, prism: 1, supernova: 1 };
   function gemValue(run, g, level, opts) {
     opts = opts || {};
-    const polish = g.color != null ? run.polish[g.color] * C.POLISH_BONUS : 0;
+    const polish = g.color != null ? 1 + run.polish[g.color] * C.POLISH_MUL : 1;
     const mul = opts.mul != null ? opts.mul : g.mod === 'shiny' ? C.SHINY_MUL : 1;
     // opts.chainBoost: the Chain Reaction multiplier for level 3+ (true = x1.5, the tier I value)
     const chain = opts.chainBoost === true ? 1.5 : opts.chainBoost || 1;
-    return (C.base(run.round) + polish) * level * mul * (level >= 3 ? chain : 1);
+    let sp = 1;
+    if (opts.by && BY_POLISH[opts.by]) sp *= C.polishSpecialMul(run, opts.by);
+    if (opts.wild) sp *= C.polishSpecialMul(run, 'wild');
+    return C.base(run.round) * polish * level * mul * (level >= 3 ? chain : 1) * sp;
   }
 
   // One move. a == null: a free move resolving what rests on the board (no swap, no move spent).
@@ -3143,9 +3302,12 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     Object.defineProperty(x, 'points', { get: () => points });
     const chainBoost = GF.Vouchers ? GF.Vouchers.chainMul(run) : 1;
     const shinyMul = C.SHINY_MUL;
-    const vopts = (src, mul) => ({ mul: mul, source: src, chainBoost: chainBoost });
+    const vopts = (src, mul, by, wild) => ({ mul: mul, source: src, chainBoost: chainBoost, by: by, wild: wild });
+    // v4.3 Coal Polish: geodes x(1 + 0.5 x level)
+    const coalMul = C.polishSpecialMul(run, 'coal');
     // what a coal match group is guaranteed per coal (the fewest geodes); the geodes themselves roll in the coal step
-    const coalValue = () => C.geodeValues(C.GEODE_MIN, C.base(run.round)).reduce((a, b) => a + b, 0);
+    const coalValue = () => C.geodeValues(C.GEODE_MIN, C.base(run.round)).reduce((a, b) => a + b, 0) * coalMul;
+    const survival = !!(GF.Boards && GF.Boards.has(run, 'survival'));
 
     const apply = (eff, slot, meta) => {
       const step = { t: 'perk', slot: slot, level: x.level };
@@ -3279,7 +3441,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       if (prismPos && prismColor !== B.COAL) x.swapPrism = { r: prismPos.r, c: prismPos.c, color: prismColor };
     }
 
-    let cascade = 0, levels = 0;
+    let cascade = 0, levels = 0, blazeUp = 0;
     // Cascade levels until the board rests. first: the swap's own run (prism seed, specials made at the swap cells).
     // ghostFirst: the first level's matches are 'ghost' matches (free resolve, continue-resolve).
     // opts.seedSource: the seeds' clear source (default 'hurrah'; Red's BREAK: 'break', which also breaks coal and
@@ -3319,12 +3481,15 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
         const levelCasc = cascade;
         summary.maxLevel = cascade;
         // per matched cell: its cascade level and its modifier multiplier (a group holding a shiny gem: x shinyMul)
-        const cellCasc = new Map(), cellMul = new Map();
+        // v4.3 cellWild: cells of a match holding a Wild (Wild Polish)
+        const cellCasc = new Map(), cellMul = new Map(), cellWild = new Set();
         for (const g of groups) {
           const gm = g.cells.some(([r, c]) => board.cells[r][c].mod === 'shiny') ? shinyMul : 1;
           g.mul = gm;
+          g.wild = g.cells.some(([r, c]) => board.cells[r][c].kind === 'wild');
           for (const [r, c] of g.cells) {
             const k = B.key(r, c);
+            if (g.wild) cellWild.add(k);
             cellCasc.set(k, Math.max(cellCasc.get(k) || 0, g.casc));
             cellMul.set(k, Math.max(cellMul.get(k) || 0, gm));
           }
@@ -3355,11 +3520,15 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
         groups.forEach((g, gi) => {
           x.group = g;
           x.groupPoints = g.coal ? g.cells.length * coalValue()
-            : g.cells.reduce((s, [r, c]) => s + gemValue(run, board.cells[r][c], g.casc, vopts('match', g.mul)), 0);
+            : g.cells.reduce((s, [r, c]) => s + gemValue(run, board.cells[r][c], g.casc, vopts('match', g.mul, null, g.wild)), 0);
           mstep.groups[gi].points = x.groupPoints;
           emit('match');
+          // v4.3 Blazing Speed: each match fills the meter after its perks scored it (they use the level before)
+          if (flags.blazing) blazeUp += GF.Run.blazeFill(run);
         });
         x.group = null; x.groupPoints = 0;
+        if (flags.blazing && groups.length) tl.push({ t: 'blaze', m: run.blaze.m, fill: run.blaze.fill, up: blazeUp });
+        blazeUp = 0;
 
         const st = B.newClearState();
         const own = seeds.filter((p) => hurrah.indexOf(p) < 0);
@@ -3413,19 +3582,23 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
             const lvl = cellCasc.has(k) ? cellCasc.get(k) : levelCasc;
             const mul = cellMul.has(k) ? cellMul.get(k) : g.mod === 'shiny' ? shinyMul : 1;
             // broken coal is worth nothing here: its value comes later as a flat coal step
-            const v = g.kind === 'coal' ? 0 : gemValue(run, g, lvl, vopts(src, mul));
+            const by = st.by[k];
+            const v = g.kind === 'coal' ? 0 : gemValue(run, g, lvl, vopts(src, mul, by, cellWild.has(k)));
             if (g.kind === 'coal') coals.push([r, c]);
             values.set(k, v);
             points = Math.min(points + v, Number.MAX_VALUE);
             summary.gemsCleared++;
             if (g.color != null) summary.colorsCleared.add(g.color);
-            step.cells.push({ r: r, c: c, id: g.id, color: g.color, kind: g.kind, mod: g.mod || null, v: v, src: src, lvl: lvl, origin: originOf(k) });
+            const cl = { r: r, c: c, id: g.id, color: g.color, kind: g.kind, mod: g.mod || null, v: v, src: src, lvl: lvl, origin: originOf(k) };
+            if (by) cl.by = by; // v4.3: the special kind whose blast / prism destroyed it (bomb, star, supernova, prism, shiny)
+            if (cellWild.has(k)) cl.wild = true;
+            step.cells.push(cl);
           }
           for (const [r, c] of unlocks) {
             const g = board.cells[r][c], k = B.key(r, c);
             const lvl = cellCasc.has(k) ? cellCasc.get(k) : levelCasc;
             const mul = cellMul.has(k) ? cellMul.get(k) : g.mod === 'shiny' ? shinyMul : 1;
-            const v = g.kind === 'coal' ? 0 : gemValue(run, g, lvl, vopts('match', mul));
+            const v = g.kind === 'coal' ? 0 : gemValue(run, g, lvl, vopts('match', mul, null, cellWild.has(k)));
             points = Math.min(points + v, Number.MAX_VALUE);
             step.cells.push({ r: r, c: c, id: g.id, color: g.color, kind: g.kind, mod: g.mod || null, v: v, src: 'match', lvl: lvl, origin: originOf(k), unlock: true });
           }
@@ -3446,10 +3619,11 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
           }
           x.gem = null; x.cell = null; x.gemValue = 0;
           // coal geodes: each broken coal (blast or coal match) bursts into 3-5 geodes, each scored as it lands:
-          // 5x base, then +1x base per geode (no cascade, polish, mods). v = their sum, total = points after all of them.
+          // 5x base, then +1x base per geode (no cascade, colour polish, mods; v4.3: Coal Polish multiplies each).
+          // v = their sum, total = points after all of them.
           coals.forEach(([r, c], i) => {
             const n = C.GEODE_MIN + run.rng.int(C.GEODE_MAX - C.GEODE_MIN + 1);
-            const geodes = C.geodeValues(n, C.base(run.round)), v = geodes.reduce((a, b) => a + b, 0);
+            const geodes = C.geodeValues(n, C.base(run.round)).map((v) => v * coalMul), v = geodes.reduce((a, b) => a + b, 0);
             points = Math.min(points + v, Number.MAX_VALUE);
             tl.push({ t: 'coal', r: r, c: c, geodes: geodes, v: v, i: i, total: points });
           });
@@ -3489,6 +3663,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
         const moves = B.gravity(board);
         const fresh = B.refill(board, run.rng, colors, flags);
         tl.push({ t: 'fall', moves: moves, spawns: fresh });
+        if (survival && B.emptyCount(board) === C.SIZE * C.SIZE) fullClear();
         emit('levelEnd');
         flushEdits();
         snapDisp();
@@ -3507,6 +3682,17 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
         if (!pending.deferred.length) return;
         pending.edits.unshift(pending.deferred.shift());
       }
+    };
+    // v4.3 Survival: the board was cleared completely: a FULL CLEAR! banner, SURVIVAL_FULL_CLEAR gems join the
+    // refill pool and drop into the empty board at once (match-avoiding, like REFILL): a banner step, then a fall step
+    const fullClear = () => {
+      const st = run.boardState || (run.boardState = {});
+      st.refillPool = (st.refillPool || 0) + C.SURVIVAL_FULL_CLEAR;
+      tl.push({ t: 'banner', text: 'FULL CLEAR!', kind: 'fullClear' });
+      const sp = B.refillUpTo(board, run.rng, colors, flags, st.refillPool);
+      st.refillPool -= sp.length;
+      tl.push({ t: 'fall', moves: [], spawns: sp, refill: true });
+      summary.fullClears = (summary.fullClears || 0) + 1;
     };
     const endPhase = () => { x.level = levels + 1; x.mirrorUsed = new Map(); x.fromSwap = false; };
 
@@ -3548,7 +3734,6 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     // The round's last move loses anyway (no move left to play after the rescue).
     let noMovesLoss = false, stuck = false;
     // Survival never shuffles here (no new gems): Run.survivalEnd decides (REFILL, or the round ends)
-    const survival = !!(GF.Boards && GF.Boards.has(run, 'survival'));
     if (!survival && !B.hasMoves(board, flags, colors)) {
       // a move that reaches the target just shuffles as before (the round is won anyway)
       const wins = GF.Run && run.score + points >= GF.Run.targetFor(run, run.round);
@@ -3608,7 +3793,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   // What one gem is worth right now in a plain first-cascade match (polish, round, its own shiny x2 included);
   // coal: what its first geode is worth (5x base; each further geode +1x base). Used by the gem tooltip.
   function gemPoints(run, g) {
-    if (g.kind === 'coal') return C.GEODE_FIRST * C.base(run.round);
+    if (g.kind === 'coal') return C.GEODE_FIRST * C.base(run.round) * C.polishSpecialMul(run, 'coal');
     return gemValue(run, g, 1, { source: 'match' });
   }
 
@@ -3644,6 +3829,14 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       }
       if (eff.moves) run.movesLeft += eff.moves;
       if (eff.blueprint) blueprint = true;
+      // v4.3 Martyr: +scoreFrac of the round target to the score now (events.score: the total; events.martyr:
+      // [{slot, uid, add}] for the display)
+      if (eff.scoreFrac) {
+        const add = Math.ceil(GF.Run.targetFor(run, run.round) * eff.scoreFrac);
+        run.score = Math.min((run.score || 0) + add, Number.MAX_VALUE);
+        events.score = (events.score || 0) + add;
+        (events.martyr = events.martyr || []).push({ slot: slot, uid: run.perks[slot].uid, add: add });
+      }
     });
     for (const ev of GF.Tiles.applyPhase(run.board, 'roundStart', x.colors, { speed: x.flags.tileSpeed, rng: run.rng, flags: x.flags })) events.push(ev);
     if (blueprint) for (const ev of GF.Tiles.applyPhase(run.board, 'roundStart', x.colors, { forceAll: true, rng: run.rng, flags: x.flags })) events.push(ev);
@@ -3703,6 +3896,8 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       timer: null, saveVer: C.SAVE_VER,
       boardType: GF.Boards.normalize(opts.board || 'default', opts.subs), boardState: {}, difficulty: GF.Difficulty.clamp(opts.difficulty || 1),
       abilities: {},
+      polishSpecial: C.newPolishSpecial(), // v4.3 special polish levels (C.POLISH_SPECIAL keys)
+      blaze: { m: 1, fill: 0 }, // v4.3 Blazing Speed meter (blazeFill / blazeTick)
     };
     GF.Boards.hook(run, 'onCreate');
     GF.Board.newRound(run.board, run.rng, colors(run), GF.Perks.flags(run.perks, run));
@@ -3786,11 +3981,21 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     for (const p of run.perks) if (p.id === 'last_hurrah') p.state.used = false;
     const flags = GF.Perks.flags(run.perks, run), cols = colors(run);
     GF.Board.carryOver(run.board, run.rng, cols, flags, true); // keep frozen matches (jewel placements, cards)
+    // v4.3 Survival: each round start after round 1 adds SURVIVAL_ROUND_POOL gems to the refill pool; they drop into
+    // the free cells at once (match-avoiding, like REFILL), the rest wait in the pool (events.survivalFill: spawns)
+    let survivalFill = null;
+    if (GF.Boards.has(run, 'survival') && run.round > 1) {
+      const st = run.boardState || (run.boardState = {});
+      st.refillPool = (st.refillPool || 0) + C.SURVIVAL_ROUND_POOL;
+      survivalFill = GF.Board.refillUpTo(run.board, run.rng, cols, flags, st.refillPool);
+      st.refillPool -= survivalFill.length;
+    }
     run.movesLeft = roundMoves(run, true);
     run.moveIndex = 0;
     run.score = 0;
     run.stats.bestMoveRound = 0;
-    const events = GF.Resolver.roundStart(run, true);
+    const events = GF.Resolver.roundStart(run, true); // Martyr adds to run.score here (events.score)
+    if (survivalFill) events.survivalFill = survivalFill;
     run.movesLeft = Math.max(1, run.movesLeft);
     run.phase = 'play';
     // Resting matches (after round-start perks and tiles) resolve as a free move: no move spent, perks fire,
@@ -3798,13 +4003,13 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     if (GF.Board.findGroups(run.board, flags, cols).length) {
       events.before = run.board.cells.map((row) => row.map(GF.Board.clone));
       const res = GF.Resolver.move(run, null, null);
-      run.score = Math.min(res.points, Number.MAX_VALUE);
+      run.score = Math.min(run.score + res.points, Number.MAX_VALUE);
       recordMove(run, res, true);
       run.stats.bestMove = Math.max(run.stats.bestMove, res.points);
       run.stats.bestMoveRound = Math.max(run.stats.bestMoveRound || 0, res.points);
       events.free = res;
-      if (run.score >= targetFor(run, run.round)) run.phase = 'won';
     }
+    if (run.score >= targetFor(run, run.round)) run.phase = 'won';
     // no resting matches and at least one move; a change here must reach the display through the timeline
     const snap = JSON.stringify(run.board.cells);
     GF.Board.settle(run.board, run.rng, cols, flags);
@@ -4040,6 +4245,40 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     return res;
   }
 
+  // ---- v4.3 Blazing Speed meter (run.blaze = {m, fill}; perk blazing_speed) ----
+  function blazeState(run) {
+    const b = run.blaze;
+    if (!b || typeof b !== 'object' || !(b.m >= 1) || !(b.fill >= 0)) run.blaze = { m: 1, fill: 0 };
+    return run.blaze;
+  }
+  const hasBlaze = (run) => (run.perks || []).some((p) => p.id === 'blazing_speed');
+  // One match: +BLAZE_FILL; a full bar gives m + 1 and resets to BLAZE_RESET. Returns the levels gained (0/1).
+  function blazeFill(run) {
+    const b = blazeState(run);
+    b.fill += C.BLAZE_FILL;
+    if (b.fill < 1 - 1e-9) return 0;
+    b.m++;
+    b.fill = C.BLAZE_RESET;
+    return 1;
+  }
+  // Real-time drain (the UI calls it every frame, in play and in the shop): BLAZE_DRAIN x m of the bar per second.
+  // An empty bar at m > 1 drops a level and refills to BLAZE_DROP_FILL (the rest of dt drains on at the new level);
+  // at m = 1 it rests at 0. Returns null without the perk, else {m, fill, down: levels lost}.
+  function blazeTick(run, dtMs) {
+    if (!run || !hasBlaze(run)) return null;
+    const b = blazeState(run);
+    let t = Math.max(0, +dtMs || 0) / 1000, down = 0;
+    for (let guard = 0; guard < 1000 && t > 0; guard++) {
+      const rate = C.BLAZE_DRAIN * b.m;
+      if (b.fill <= 0 && b.m <= 1) { b.fill = 0; break; }
+      const need = b.fill / rate;
+      if (t < need) { b.fill -= rate * t; break; }
+      t -= need;
+      if (b.m > 1) { b.m--; b.fill = C.BLAZE_DROP_FILL; down++; } else { b.fill = 0; break; }
+    }
+    return { m: b.m, fill: b.fill, down: down };
+  }
+
   // ---- v4.0 board abilities (GF.Boards.ABILITIES; charges in run.abilities[id] = {left, max}) ----
   // abilities(run) -> [{id, left, max, phase}] for the active boards, in button order.
   function abilities(run) {
@@ -4153,6 +4392,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     o.pendingPlace = o.pendingPlace || []; o.vouchers = o.vouchers || [];
     if (o.timer === undefined) o.timer = null;
     migrate(o);
+    migrateV43(o); // before the tray is filtered (Polish +2 entries become Polish +1)
     if ((o.saveVer || 1) < 2) migrateV36(o);
     // v3.11 (SAVE_VER 3): Equity became a per-round counter (ids of renamed perks are kept)
     if ((o.saveVer || 1) < 3) o.perks.forEach((p) => { if (p.id === 'equity') p.state = { hot: 0, cold: 0 }; });
@@ -4227,6 +4467,24 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     if (o.shop && Array.isArray(o.shop.items)) o.shop.items.forEach((it) => { if (it && it.kind === 'card') it.id = card(it.id); });
     if (o.openPack && Array.isArray(o.openPack.choices)) o.openPack.choices.forEach((ch) => { if (ch.kind === 'card') ch.id = card(ch.id); });
   }
+  // v4.3: Polish +2 is gone (tray, shop and open-pack cards become Polish +1 of the same colour); modifier-only jewel
+  // items (Gold / Shiny, colourless) become a plain gem of a random colour carrying that modifier; special polish
+  // levels and the Blazing Speed meter are filled in.
+  function migrateV43(o) {
+    const fixUp = (it) => { if (it && it.kind === 'upgrade' && it.id === 'polish2') it.id = 'polish1'; return it; };
+    const fixGem = (it) => {
+      if (it && it.kind === 'gem' && C.MODS[it.id]) { it.mod = it.id; it.id = 'normal'; if (!(it.color >= 0)) it.color = o.rng.pick(colors(o)); }
+      return it;
+    };
+    o.consumables.forEach(fixUp);
+    if (o.shop && Array.isArray(o.shop.items)) o.shop.items.forEach((it) => { fixUp(it); fixGem(it); });
+    if (o.openPack && Array.isArray(o.openPack.choices)) o.openPack.choices.forEach((it) => { fixUp(it); fixGem(it); });
+    o.pendingPlace.forEach(fixGem);
+    const ps = C.newPolishSpecial();
+    if (o.polishSpecial && typeof o.polishSpecial === 'object') for (const k in ps) ps[k] = Math.max(0, Math.floor(+o.polishSpecial[k] || 0));
+    o.polishSpecial = ps;
+    blazeState(o);
+  }
   function save(run) {
     try { localStorage.setItem(C.SAVE_KEY, serialize(run)); return true; } catch (e) { return false; }
   }
@@ -4238,7 +4496,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   function hasSave() { try { return !!localStorage.getItem(C.SAVE_KEY); } catch (e) { return false; } }
 
   GF.Run = { KINDS, newStats, fillStats, stats, bump, earn, recordMove, create, target, targetFor, colors, roundMoves, moneyFloor, startRound, swapKind, doMove, finishRound, continueEndless, freeResolve, rescues, stuckEnd, RESCUE_BANNER,
-    abilities, canUseAbility, useAbility, survivalEnd,
+    abilities, canUseAbility, useAbility, survivalEnd, blazeFill, blazeTick,
     timerReady, timerStart, timerSwap, timerEnd, timerBatch,
     serialize, deserialize, save, load, clearSave, hasSave };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
@@ -4418,7 +4676,8 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     return i < plain.length ? plain[i] : rng.pick(codes);
   }
   // ---- tray entries (v3.7): an Enhance card is its id (string); tiles and polish cards are objects
-  // {kind: 'tile', id} / {kind: 'upgrade', id: 'polish1'|'polish2'|'brilliance', color?}. defOf(entry) gives every
+  // {kind: 'tile', id} / {kind: 'upgrade', id: 'polish1'|'brilliance'|special polish (v4.3: 'polish_bomb'...), color?
+  // (polish1 only)}. defOf(entry) gives every
   // kind the card shape (name, desc, target, picks, apply): a tile is a one-pick 'cell' card that places it.
   const TILE_DEFS = {}, POLISH_DEFS = {};
   function tileDef(id) {
@@ -4430,17 +4689,25 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     }
     return TILE_DEFS[id];
   }
+  // v4.3: colour polish is +50% per level; special polish cards (C.POLISH_SPECIAL, no colour) raise
+  // run.polishSpecial[special] by 1.
   function polishDef(id, color) {
     if (!C.UPGRADE_CARD[id]) return null;
-    const bril = id === 'brilliance';
-    if (!bril && !(color >= 0 && color < C.COLORS.length)) return null;
-    const key = bril ? id : id + ':' + color;
+    const bril = id === 'brilliance', spec = C.UPGRADE_CARD[id].special || null;
+    if (!bril && !spec && !(color >= 0 && color < C.COLORS.length)) return null;
+    const key = bril || spec ? id : id + ':' + color;
     if (!POLISH_DEFS[key]) {
-      const col = bril ? null : C.COLORS[color], n = id === 'polish2' ? 2 : 1;
-      POLISH_DEFS[key] = { id: 'upgrade:' + key, kind: 'polish', polish: id, color: bril ? null : color, price: C.UPGRADE_CARD[id].price, playOnly: false, target: null, picks: 0, upTo: false, adjacent: false,
-        name: bril ? 'Brilliance' : 'Polish ' + col.charAt(0).toUpperCase() + col.slice(1) + ' +' + n,
-        desc: bril ? '+1 Polish to every color' : '+' + n * 5 + ' points per ' + col.charAt(0).toUpperCase() + col.slice(1) + ' gem',
-        apply: (run) => { if (bril) for (let k = 0; k < 7; k++) run.polish[k]++; else run.polish[color] += n; return []; } };
+      const col = bril || spec ? null : C.COLORS[color], Col = col && col.charAt(0).toUpperCase() + col.slice(1);
+      const sd = spec ? C.POLISH_SPECIAL[spec] : null;
+      POLISH_DEFS[key] = { id: 'upgrade:' + key, kind: 'polish', polish: id, special: spec, color: col ? color : null, price: C.UPGRADE_CARD[id].price, playOnly: false, target: null, picks: 0, upTo: false, adjacent: false,
+        name: bril ? 'Brilliance' : sd ? sd.name : 'Polish ' + Col + ' +1',
+        desc: bril ? '+1 Polish to every color' : sd ? sd.desc : '+50% points per ' + Col + ' gem',
+        apply: (run) => {
+          if (bril) for (let k = 0; k < 7; k++) run.polish[k]++;
+          else if (spec) { run.polishSpecial = run.polishSpecial || C.newPolishSpecial(); run.polishSpecial[spec] = (run.polishSpecial[spec] || 0) + 1; }
+          else run.polish[color]++;
+          return [];
+        } };
     }
     return POLISH_DEFS[key];
   }
@@ -4458,7 +4725,11 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     if (!it) return null;
     if (it.kind === 'card') return DEFS[it.id] ? it.id : null;
     if (it.kind === 'tile') return tileDef(it.id) ? { kind: 'tile', id: it.id } : null;
-    if (it.kind === 'upgrade') { const e = it.id === 'brilliance' ? { kind: 'upgrade', id: it.id } : { kind: 'upgrade', id: it.id, color: it.color }; return polishDef(e.id, e.color) ? e : null; }
+    if (it.kind === 'upgrade') {
+      const plain = it.id === 'brilliance' || !!(C.UPGRADE_CARD[it.id] && C.UPGRADE_CARD[it.id].special);
+      const e = plain ? { kind: 'upgrade', id: it.id } : { kind: 'upgrade', id: it.id, color: it.color };
+      return polishDef(e.id, e.color) ? e : null;
+    }
     return null;
   }
   const valid = (entry) => !!defOf(entry);
@@ -4667,25 +4938,28 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     const allowDup = (type === 'upgrade' || type === 'enhance') && GF.Perks.flags(run.perks, run).showman;
     for (let tries = 0; tries < 30; tries++) {
       let c;
-      if (type === 'upgrade') {
-        const w = {}; for (const k of Object.keys(C.UPGRADE_CARD)) w[k] = C.UPGRADE_CARD[k].weight;
-        const id = run.rng.weighted(w);
-        c = id === 'brilliance' ? { kind: 'upgrade', id: id } : { kind: 'upgrade', id: id, color: run.rng.pick(GF.Resolver.colorsOf(run)) };
-      } else if (type === 'tile') c = { kind: 'tile', id: run.rng.pick(GF.Tiles.IDS) };
+      if (type === 'upgrade') c = rollUpgrade(run);
+      else if (type === 'tile') c = { kind: 'tile', id: run.rng.pick(GF.Tiles.IDS) };
       else if (type === 'jewel') c = rollJewel(run, false);
       else c = { kind: 'card', id: GF.Cards.roll(run.rng, null, run) };
       if (allowDup || !exclude.has(keyOf(c))) { exclude.add(keyOf(c)); return c; }
     }
     return null;
   }
-  // A jewel item {kind: 'gem', id, color, mod?}. gold/shiny items are modifiers for the gem they are dropped on
-  // (colourless). withMods (Jewel Hunter shop items): a coloured Bomb/Star carries Gold or Shiny GEM_MOD_CHANCE
-  // of the time ("Shiny Red Bomb").
-  function rollJewel(run, withMods) {
+  // An upgrade card (v4.3 weights, C.UPGRADE_CARD): Polish +1 of a colour in play, a special polish or Brilliance.
+  function rollUpgrade(run) {
+    const w = {}; for (const k of Object.keys(C.UPGRADE_CARD)) w[k] = C.UPGRADE_CARD[k].weight;
+    const id = run.rng.weighted(w);
+    return id === 'polish1' ? { kind: 'upgrade', id: id, color: run.rng.pick(GF.Resolver.colorsOf(run)) } : { kind: 'upgrade', id: id };
+  }
+  // A jewel item {kind: 'gem', id, color, mod?} (v4.3: real gems only, packs and Jewel Hunter shop items alike):
+  // a plain 'normal' gem always carries Gold or Shiny; a coloured special carries one GEM_MOD_CHANCE of the time
+  // ("Shiny Red Bomb"); prism, wild and coal are colourless and never carry one. withMods is kept for callers.
+  function rollJewel(run) {
     const id = run.rng.weighted(C.JEWEL_WEIGHTS);
-    const plain = C.COLORLESS[id] || C.MODS[id];
+    const plain = !!C.COLORLESS[id];
     const c = { kind: 'gem', id: id, color: plain ? null : run.rng.pick(GF.Resolver.colorsOf(run)) };
-    if (withMods && !plain && run.rng.chance(C.GEM_MOD_CHANCE)) c.mod = run.rng.pick(['gold', 'shiny']);
+    if (id === 'normal' || (!plain && run.rng.chance(C.GEM_MOD_CHANCE))) c.mod = run.rng.pick(['gold', 'shiny']);
     return c;
   }
   function open(run, pack) {
@@ -4695,8 +4969,9 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   }
   function grant(run, c) {
     if (c.kind === 'upgrade') {
-      if (c.id === 'brilliance') for (let k = 0; k < 7; k++) run.polish[k]++;
-      else run.polish[c.color] += c.id === 'polish2' ? 2 : 1;
+      const d = GF.Cards.def(GF.Cards.entryOf(c));
+      if (!d) return { ok: false, reason: 'none' };
+      d.apply(run, [], d);
       return { ok: true };
     }
     if (c.kind === 'card') {
@@ -4726,8 +5001,8 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     if (!p || !GF.Board.inB(r, c)) return false;
     if (p.kind === 'tile') return true;
     if (GF.Board.isLocked(run.board.cells[r][c])) return false; // v4.0: jewels never replace or edit a locked gem
-    if (C.MODS[p.id]) return C.modable(run.board.cells[r][c]); // gold/shiny jewel: a gem that can carry it
-    return !!run.board.cells[r][c]; // a jewel replaces any gem
+    if (C.MODS[p.id]) return C.modable(run.board.cells[r][c]); // legacy gold/shiny item (old saves are migrated)
+    return true; // a jewel replaces any gem, or (v4.3, Survival) fills an empty cell
   }
   function place(run, r, c) {
     const p = run.pendingPlace[0];
@@ -4739,16 +5014,24 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       // a fresh gem of the item's colour and kind; matches it makes stay frozen until the next round start.
       // Old saves queued jewels without a colour: they take the target gem's colour.
       const g = run.board.cells[r][c];
-      const color = p.color !== undefined ? p.color : g.color != null ? g.color : run.rng.pick(GF.Resolver.colorsOf(run));
-      run.board.cells[r][c] = C.gem(p.id, color, p.mod);
-      GF.Board.noteSpawn(run.board, run.board.cells[r][c].color);
+      const color = p.color !== undefined && p.color !== null ? p.color : g && g.color != null ? g.color : run.rng.pick(GF.Resolver.colorsOf(run));
+      const ng = (run.board.cells[r][c] = C.gem(p.id, color, p.mod));
+      GF.Board.noteSpawn(run.board, ng.color);
+      // v4.3: a gem dropped on an empty cell falls into place (res.cell: where it landed, res.moves: the fall)
+      if (!g) {
+        const moves = GF.Board.gravity(run.board);
+        run.pendingPlace.shift();
+        let cell = { r: r, c: c };
+        for (let y = 0; y < C.SIZE; y++) for (let x = 0; x < C.SIZE; x++) if (run.board.cells[y][x] === ng) cell = { r: y, c: x };
+        return { ok: true, placed: p, cell: cell, moves: moves };
+      }
     }
     run.pendingPlace.shift();
-    return { ok: true, placed: p };
+    return { ok: true, placed: p, cell: { r: r, c: c } };
   }
   function discardPending(run) { run.pendingPlace.shift(); }
 
-  GF.Packs = { KIND, rollSize, roll, rollJewel, rollChoice, open, grant, pick, skip, canPlace, place, discardPending };
+  GF.Packs = { KIND, rollSize, roll, rollJewel, rollUpgrade, rollChoice, open, grant, pick, skip, canPlace, place, discardPending };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- shop.js
@@ -4773,6 +5056,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     if (it.kind === 'card') return GF.Cards.DEFS[it.id].price;
     if (it.kind === 'tile') return GF.Tiles.DEFS[it.id].price;
     if (it.kind === 'gem') return (C.GEM_PRICE[it.id] || 4) + (it.mod ? C.GEM_MOD_PRICE : 0);
+    if (!C.UPGRADE_CARD[it.id]) return 3;
     return C.UPGRADE_CARD[it.id].price;
   }
   // it.free: a Claw Machine prize, $0
@@ -4825,11 +5109,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       } else if (kind === 'card') it = { kind: 'card', id: GF.Cards.roll(run.rng, null, run) };
       else if (kind === 'tile') it = { kind: 'tile', id: run.rng.pick(GF.Tiles.IDS) };
       else if (kind === 'gem') it = GF.Packs.rollJewel(run, true);
-      else {
-        const w = {}; for (const k of Object.keys(C.UPGRADE_CARD)) w[k] = C.UPGRADE_CARD[k].weight;
-        const id = run.rng.weighted(w);
-        it = id === 'brilliance' ? { kind: 'upgrade', id: id } : { kind: 'upgrade', id: id, color: run.rng.pick(GF.Resolver.colorsOf(run)) };
-      }
+      else it = GF.Packs.rollUpgrade(run);
       if (!exclude.has(keyOf(it))) { exclude.add(keyOf(it)); return it; }
     }
     return null;
@@ -6710,23 +6990,23 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       '.....kmmk.......',
       '......kk........',
     ],
-    polish2: [
-      '..k.........k...',
-      '.kwk.......kwk..',
-      'kwwwk.....kwwwk.',
-      '.kwk.......kwk..',
-      '..kkkkkkkkkkk...',
-      '..klllllllllk...',
-      '.klwllllllllmk..',
-      'klllllllllllmmk.',
-      'kmmmmmmmmmmmmmk.',
-      '.klmmmmmmmmmmk..',
-      '..klmmmmmmmmk...',
-      '...klmmmmmmk....',
-      '....klmmmmk.....',
-      '.....klmmk......',
-      '......kmk.......',
-      '.......k........',
+    blaze: [
+      '..........k.....',
+      '.........kmk....',
+      '.........kmmk...',
+      '........kmmmk...',
+      '.......kmmmmmk..',
+      'kkkk..kmmmmmmk..',
+      '......kmmmymmmk.',
+      '.kkkkkmmmyymmmk.',
+      '.....kmmmyyymmmk',
+      '..kkkkmmyywyymmk',
+      '.....kmmyywwymmk',
+      'kkkk.kmmyywwymmk',
+      '......kmmyyyymk.',
+      '.......kmmmmmk..',
+      '........kkkkk...',
+      '................',
     ],
     brilliance: [
       '.......k........',
@@ -8014,11 +8294,13 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     last_hurrah: P('bombs3', 'gold'), claw_machine: P('claw', 'pink'), rookie_witch: P('wizard_hat', 'green'),
     swapper: P('direction', 'pink'), pressured_diamonds: P('coal', 'cyan'), eleventh_hour: P('hourglass', 0),
     descrambler: P('sort', 'grey'), wizard: P('wizard_hat', 4),
+    blazing_speed: P('blaze', 6), // v4.3
   };
 
   const GEM = {
     bomb: P('bomb', 'grey'), star: P('star', 'gold'), prism: P('prism', 'cyan'), supernova: P('supernova', 4),
     gold: P('coin', 'gold'), shiny: P('shiny', 'cyan'), wild: P('wild', 'pink'), coal: P('coal', 'grey'),
+    normal: P('gem', 5), // v4.3 jewel items: a plain gem (always Gold or Shiny)
   };
   const TILE = {
     gold: GEM.gold, shiny: GEM.shiny, bomb: GEM.bomb, star: GEM.star, prism: GEM.prism, wild: GEM.wild,
@@ -8042,7 +8324,13 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     jewel_hunter: P('magnifier_gem', 'pink'), enchanter: P('wizard_hat', 4), gemsmith: P('smith_hammer', 'cyan'), constructor: P('hardhat', 'gold'),
     stock_rising_1: P('stock_up', 'green'), stock_rising_2: P('stock_up', 'gold'),
   };
-  const UPGRADE = { polish1: P('polish', 'gold'), polish2: P('polish2', 'gold'), brilliance: P('brilliance', 'pink') };
+  // v4.3: Polish +2 is gone; special polish cards show their gem's glyph with a polish sparkle in the top right
+  const SPARK = ['..k..', '.kwk.', 'kwwwk', '.kwk.', '..k..'];
+  const UPGRADE = { polish1: P('polish', 'gold'), brilliance: P('brilliance', 'pink') };
+  [['bomb', 'bomb', 'grey'], ['star', 'star', 'gold'], ['prism', 'prism', 'cyan'], ['nova', 'supernova', 4], ['coal', 'coal', 'grey'], ['wild', 'wild', 'pink']].forEach(([id, glyph, tint]) => {
+    GLYPHS['polish_' + id] = GLYPHS[glyph].map((row, y) => (y < SPARK.length ? row.slice(0, 16 - SPARK[y].length) + SPARK[y] : row));
+    UPGRADE['polish_' + id] = P('polish_' + id, tint);
+  });
   // v4.0 board abilities (Run ability ids)
   const ABILITY = { break: P('ab_break', 0), scramble: P('ab_scramble', 6), shopSwap: P('ab_swap', 1), refill: P('ab_refill', 'brown') };
   // v4.0 board types (GF.Boards.DEFS[id].icon = 'board_' + id)
@@ -8162,6 +8450,8 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     ching() { tone(1568, 0.08, 'square', 0.04); tone(2093, 0.15, 'square', 0.04, null, 0.06); },
     tick(i) { tone(660 + (i || 0) * 60, 0.05, 'square', 0.035); },
     mult() { tone(220, 0.3, 'sawtooth', 0.07, 880); },
+    // v4.3 Blazing Speed level-up: a rising whoosh, higher with each level
+    blaze(m) { const f = 330 * Math.pow(2, Math.min(8, (m || 2) - 2) / 6); tone(f, 0.22, 'sawtooth', 0.05, f * 3); noise(0.12, 0.08); tone(f * 2, 0.12, 'square', 0.03, null, 0.1); },
     bad() { tone(160, 0.15, 'square', 0.05, 100); },
     // v4.0 locked gems: chains slamming shut (a heavy metal clank) and snapping open (a bright rattle)
     clank() { noise(0.08, 0.12); tone(196, 0.16, 'square', 0.06, 150); tone(1175, 0.1, 'triangle', 0.03, 880, 0.02); },
@@ -9259,9 +9549,31 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     if (!ANIMATED[kind]) return '<img class="' + (cls || 'icon') + '" alt="" src="' + gemIconURL(color, kind, mod) + '">';
     return '<canvas class="' + (cls || 'icon') + ' gemcv" width="24" height="24" data-kind="' + kind + '"></canvas>';
   }
+  // v4.3 glossary GEMS: a live canvas that keeps turning the gem (the board's spin frames) with its modifier mark and,
+  // for the locked state, its chains. color 'cycle': a normal gem stepping through the colours, one per turn.
+  function gemSpinHTML(color, kind, cls, mod, lock) {
+    return '<canvas class="' + (cls || 'icon') + ' gemcv spin" width="48" height="48" data-kind="' + (kind || 'normal') + '" data-color="' + (color == null ? '' : color) + '"'
+      + (mod ? ' data-mod="' + mod + '"' : '') + (lock ? ' data-lock="1"' : '') + '></canvas>';
+  }
+  function drawSpinIcon(el, time) {
+    const d = el.dataset, ph = el._ph != null ? el._ph : (el._ph = Math.floor(Math.random() * SPIN_MS));
+    const t = time + ph;
+    const color = d.color === 'cycle' ? Math.floor(t / SPIN_MS) % C.COLORS.length : d.color === '' ? null : +d.color;
+    const gem = { id: 0, kind: d.kind, color: color, mod: d.mod || null };
+    const fr = spinFrame(gem, t, time), img = gem.mod === 'shiny' ? shineImg(fr.img, time, 0) : fr.img;
+    if (!gem.mod && !d.lock && el._img === img) return;
+    el._img = img;
+    const x = el.getContext('2d'), W = el.width, s = W * 0.84;
+    x.imageSmoothingEnabled = false;
+    x.clearRect(0, 0, W, W);
+    x.drawImage(img, Math.round((W - s) / 2), Math.round((W - s) / 2), Math.round(s), Math.round(s));
+    if (gem.mod) { const g0 = g; g = x; try { modOverlay(gem, W / 2, W / 2, s, time); } finally { g = g0; } }
+    if (d.lock) x.drawImage(chainCanvas('locked'), 0, 0, W, W);
+  }
   const liveIcons = typeof document !== 'undefined' ? document.getElementsByClassName('gemcv') : [];
   function drawIcons(time) {
     for (let i = 0; i < liveIcons.length; i++) {
+      if (liveIcons[i].classList.contains('spin')) { drawSpinIcon(liveIcons[i], time); continue; }
       const el = liveIcons[i], img = getSprite({ kind: el.dataset.kind, color: null }, time);
       if (el._img === img) continue;
       el._img = img;
@@ -9277,7 +9589,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
 
   // spin frame f of a gem selected at time t (t: the still sprite's clock, for wild)
   function dbgSpin(gem, f, t) { return spinFrame(gem, ((f + 0.5) / SPIN_FRAMES) * SPIN_MS, (t || 0) + ((f + 0.5) / SPIN_FRAMES) * SPIN_MS).img; }
-  GF.Render = { init, resize, checker, drawChecker, setBoardType, cellPx, cellAt, cellCenter, cellRect, shake, burst, chains, fireworks, crystalize, grind, geodes, geodeLand, clearFx, flashCells, boardWave, pulseTile, hauntPulse, colorHex, gemIconURL, gemIconHTML, drawIcons, frame, spinTransform: GF.C.spinTransform, PAL, TILE_COL,
+  GF.Render = { init, resize, checker, drawChecker, setBoardType, cellPx, cellAt, cellCenter, cellRect, shake, burst, chains, fireworks, crystalize, grind, geodes, geodeLand, clearFx, flashCells, boardWave, pulseTile, hauntPulse, colorHex, gemIconURL, gemIconHTML, gemSpinHTML, drawIcons, frame, spinTransform: GF.C.spinTransform, PAL, TILE_COL,
     _debug: { jewelArea: jewelArea, JR: JR, prismFrameData: (f) => prismFrame(f).toDataURL(), SPIN_FRAMES: SPIN_FRAMES,
       spinFrameData: (gem, f, t) => dbgSpin(gem, f, t).toDataURL(), spinFrame: dbgSpin, sprite: (gem, t) => getSprite(gem, t || 0), wildFrameData: (ph, f) => wildFrame(ph, f || 0).toDataURL(), WILD_FRAMES: WILD_FRAMES, WILD_MS: WILD_MS, fxCount: () => fx.length, prismClockFrame: prismClockFrame, prismFrame: (f) => prismFrame(f), geodeCount: () => fx.filter((p) => p.type === 'geode').length, overlays: () => Object.assign({}, drawn), chainData: (kind) => chainCanvas(kind).toDataURL(), beamCount: () => beams.length, waveCount: () => waves.length } };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
@@ -9576,6 +9888,8 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       case 'perkGone': if (H.perkGone) H.perkGone(s.uids); break;
       // v4.2 live perk value boxes: the boxes whose value changed at this point of the move
       case 'pdisp': if (H.perkDisplays) H.perkDisplays(s.list); break;
+      // v4.3 Blazing Speed: the meter as it stood after this cascade level's matches (up: levels gained there)
+      case 'blaze': if (H.blaze) H.blaze(s); break;
       case 'clear': {
         GF.Audio.pop(s.level);
         const ps = [], grouped = new Set(), groups = lastGroups.get(H);
@@ -9656,12 +9970,20 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
           D[m.to[0]][m.to[1]] = sp;
           ps.push(tween(sp, { y: m.to[0] }, 80 + 45 * (m.to[0] - m.from[0]), 'in'));
         }
+        // optional (v4.3 Survival round start): n.delay (ms) holds a spawn above its segment first (column stagger),
+        // s.bounce: each spawn hops up a little after landing
+        const drop = async (sp, n) => {
+          if (n.delay) await wait(n.delay);
+          await tween(sp, { y: n.r }, 80 + 45 * n.drop, 'in');
+          if (sp.clipTop != null) delete sp.clipTop;
+          if (s.bounce) { await tween(sp, { y: n.r - s.bounce }, 70); await tween(sp, { y: n.r }, 70, 'in'); }
+        };
         for (const n of s.spawns) {
           const sp = sprite(n.gem, n.c, n.r - n.drop);
           D[n.r][n.c] = sp;
           // under a locked gem: drawn only below its lower edge, so the new gem slides out from under the lock
-          if (n.top) { sp.clipTop = n.top; ps.push(tween(sp, { y: n.r }, 80 + 45 * n.drop, 'in').then(() => { delete sp.clipTop; })); }
-          else ps.push(tween(sp, { y: n.r }, 80 + 45 * n.drop, 'in'));
+          if (n.top) sp.clipTop = n.top;
+          ps.push(drop(sp, n));
         }
         await Promise.all(ps);
         break;
@@ -9701,7 +10023,8 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       case 'banner': {
         if (H.bigBanner) H.bigBanner(s.text, s.kind); else H.banner(s.text);
         GF.Audio.chord();
-        await wait(s.kind === 'lastHurrah' ? 1100 : 700); // the popup lands before the specials fire
+        // the popup lands before the specials fire (FULL CLEAR!: before the refill falls)
+        await wait(s.kind === 'lastHurrah' ? 1100 : s.kind === 'fullClear' ? 1000 : 700);
         break;
       }
       case 'shuffle': {
@@ -9771,7 +10094,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     shiny: 'Shiny: x2 match points, bigger blast',
   };
   const TIMER_MS = 5000; // Timer perk: the free-swap window (real time, not scaled by the animation speed)
-  const S = { timer: null, overlay: { zones: [], wanted: [], patterns: [] }, movesHold: null, wrongTurns: 0, run: null, locked: false, live: [], tick: 0, mpFly: 0, desyncs: 0, selected: null, selectedAt: 0, targeting: null, dragging: false, picks: [], targetCells: null, roundMoves: 0, lastLeft: null, shownScore: 0, cp: null, speedIdx: 2, crt: true, frozen: null, hint: null };
+  const S = { timer: null, overlay: { zones: [], wanted: [], patterns: [] }, movesHold: null, wrongTurns: 0, run: null, locked: false, live: [], tick: 0, mpFly: 0, desyncs: 0, selected: null, selectedAt: 0, targeting: null, dragging: false, picks: [], targetCells: null, roundMoves: 0, lastLeft: null, shownScore: 0, cp: null, speedIdx: 2, crt: true, frozen: null, hint: null, bz: null, shopAnim: null, martyrPending: 0, martyrTok: 0 };
   const iconImg = (kind, id) => '<img class="icon" alt="" src="' + GF.Icons.url(kind, id) + '">';
 
   const fmt = (n) => GF.C.fmt(n);
@@ -9820,7 +10143,26 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     const el = $('board-banner');
     el.textContent = t; el.classList.toggle('long', !!long);
     el.classList.toggle('hurrah', kind === 'lastHurrah'); el.classList.toggle('descr', kind === 'descramble');
+    el.classList.toggle('fullclear', kind === 'fullClear');
     restart(el, 'on');
+    if (kind === 'fullClear') fullClearBurst();
+  }
+  // v4.3 Survival FULL CLEAR!: golden sparkles burst out of the banner, fireworks over the empty board, a fanfare
+  function fullClearBurst() {
+    const col = $('board-col'), box = document.createElement('div'), n = 20;
+    box.className = 'sparkburst';
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + (i % 2) * 0.15, d = 90 + (i % 3) * 38;
+      const sp = document.createElement('i');
+      sp.style.setProperty('--dx', (Math.cos(a) * d).toFixed(1) + 'px'); sp.style.setProperty('--dy', (Math.sin(a) * d * 0.75).toFixed(1) + 'px');
+      sp.style.animationDelay = ((i % 4) * 40) + 'ms';
+      if (i % 3 === 1) sp.className = 'w'; else if (i % 3 === 2) sp.className = 'o';
+      box.appendChild(sp);
+    }
+    col.appendChild(box);
+    setTimeout(() => box.remove(), 1400);
+    [[3, 1], [2, 4], [4, 6]].forEach(([r, c], k) => setTimeout(() => GF.Render.fireworks(r, c, 10), k * 160));
+    GF.Audio.win();
   }
 
   // Animation state. Logic is sequential (Run.doMove applies at once); the display replays timelines, several at a time.
@@ -9874,6 +10216,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     banner(t) { toast(t); },
     bigBanner(t, kind) { roundBanner(t, t.length > 14, kind); },
     shuffleBanner() { roundBanner('NO MOVES LEFT, SHUFFLING', true); },
+    blaze(s) { blazeStep(s, performance.now()); },
     // v4.2 live value boxes ({t: 'pdisp'} steps): replace just the boxes of these perk cards, in play order (the
     // last write wins when timelines overlap; the idle renderPerks stays authoritative)
     perkDisplays(list) {
@@ -9913,7 +10256,9 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   // Per-move hooks: each timeline keeps its own running total and cascade panel numbers;
   // the shared widgets show whichever live move updated last.
   function makeHooks(ctx) {
+    const t0 = performance.now(); // the logic move was computed just now: 'blaze' snapshots drain from here
     return Object.assign({}, hooks, {
+      blaze(s) { blazeStep(s, t0); },
       // base: a Last Hurrah resolve keeps counting on top of its move's own points
       setMovePoints(total, level) { ctx.total = (ctx.base || 0) + total; if (level) ctx.level = level; ctx.t = ++S.tick; showMovePoints(); },
       cascade(level) { ctx.cp.cascades = Math.max(ctx.cp.cascades, level); ctx.t = ++S.tick; S.cp = ctx.cp; renderCascadePanel(); },
@@ -9990,7 +10335,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     const playing = animating() || run.phase === 'play' || run.phase === 'won' || run.phase === 'over';
     const round = fz ? fz.round : run.phase === 'victory' ? C.ROUNDS : run.round;
     const target = GF.Run.targetFor(run, round);
-    const score = fz ? fz.score : animating() || S.freeing ? S.shownScore : playing ? run.score : 0;
+    const score = fz ? fz.score : animating() || S.freeing || S.martyrPending > 0 ? S.shownScore : playing ? run.score : 0;
     $('hud-round').textContent = round + (run.endless ? '' : '/' + C.ROUNDS);
     $('hud-target').textContent = fmt(target);
     $('hud-score').textContent = fmt(score);
@@ -10002,6 +10347,63 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     $('btn-hint').disabled = !canHint();
     updateStuck();
     updateAbilities();
+  }
+  // ---------- v4.3 Blazing Speed meter (under the moves bar; a copy in the shop panel) ----------
+  // S.bz is the meter as shown. At idle it is the run's own (run.blaze, drained by Run.blazeTick every frame). While
+  // moves animate it keeps what the player has seen so far and drains on by the same rule; each 'blaze' timeline step
+  // (the logic meter right after that cascade level's matches) sets it to that snapshot drained by the real time since
+  // the move was computed, so the bar fills in step with the matches and meets the logic exactly at the last one.
+  const BZ_PERKS = [{ id: 'blazing_speed' }];
+  function bzDrain(b, ms) { const o = { perks: BZ_PERKS, blaze: { m: b.m, fill: b.fill } }; GF.Run.blazeTick(o, ms); return { m: o.blaze.m, fill: o.blaze.fill }; }
+  function blazeOwned(run) { return !!run && (run.perks || []).some((p) => p.id === 'blazing_speed'); }
+  function blazeStep(s, t0) {
+    if (!blazeOwned(S.run)) return;
+    S.bz = bzDrain({ m: s.m, fill: s.fill }, Math.max(0, performance.now() - t0));
+    if (s.up > 0) blazeLevelUp(S.bz.m);
+  }
+  // level up: the meters flash and bounce, "xM" pops over the board's meter, a rising whoosh
+  function blazeLevelUp(m) {
+    document.querySelectorAll('.blaze-meter').forEach((el) => restart(el, 'up'));
+    GF.Audio.blaze(m);
+    const el = $('blaze-board');
+    if (el && !el.classList.contains('hidden')) {
+      const r = el.querySelector('.bz-m').getBoundingClientRect(), a = $('app').getBoundingClientRect();
+      if (r.width) spawnFloat($('app'), r.left - a.left + r.width / 2, r.top - a.top - 4, 'x' + m, 'blaze');
+    }
+  }
+  const lerpHex = (a, b, t) => { const x = parseInt(a.slice(1), 16), y = parseInt(b.slice(1), 16); return '#' + [16, 8, 0].map((sh) => { const u = (x >> sh) & 255, v = (y >> sh) & 255; return Math.round(u + (v - u) * t).toString(16).padStart(2, '0'); }).join(''); };
+  // red-orange, hotter (brighter, yellower, glowing) with each level; x6+ is white-hot
+  function blazeLook(m) {
+    const h = Math.max(0, Math.min(1, (m - 1) / 5));
+    return { h: h, grad: 'linear-gradient(90deg,' + lerpHex('#d93a1a', '#ff2414', h) + ',' + lerpHex('#ff7a22', '#ffae2a', h) + ' 65%,' + lerpHex('#ffb050', '#fff6cc', h) + ')',
+      label: lerpHex('#ff8a3a', '#fff1b8', h) };
+  }
+  function drawBlaze(dt) {
+    const run = S.run, on = blazeOwned(run), els = document.querySelectorAll('.blaze-meter');
+    const wasOn = S.bzOn;
+    S.bzOn = on;
+    els.forEach((el) => el.classList.toggle('hidden', !on));
+    if (on !== !!wasOn && run && !$('screen-game').classList.contains('hidden')) layout(); // the board gives the meter room
+    if (!on) { S.bz = null; return; }
+    const L = run.blaze || { m: 1, fill: 0 };
+    const prev = S.bz;
+    S.bz = !prev || (!animating() && !S.freeing) ? { m: L.m, fill: L.fill } : bzDrain(prev, dt);
+    const b = S.bz, sig = b.m + ':' + Math.round(b.fill * 400);
+    if (prev && b.m < prev.m) els.forEach((el) => restart(el, 'down'));
+    if (sig === S.bzSig) return;
+    S.bzSig = sig;
+    // the Blazing Speed card's value box follows the meter as shown (not the logic, which runs ahead while moves animate)
+    if (!prev || prev.m !== b.m) hooks.perkDisplays(run.perks.filter((p) => p.id === 'blazing_speed').map((p) => ({ uid: p.uid, v: { text: 'x' + b.m, kind: 'mult', active: b.m > 1, fill: b.fill } })));
+    const look = blazeLook(b.m);
+    els.forEach((el) => {
+      el.style.setProperty('--f', Math.max(0, Math.min(1, b.fill)).toFixed(4));
+      el.style.setProperty('--heat', look.h.toFixed(3));
+      el.classList.toggle('hot', b.m >= 3);
+      el.classList.toggle('lit', b.m > 1);
+      const fill = el.querySelector('.bz-fill'), lab = el.querySelector('.bz-m');
+      if (fill.dataset.m !== String(b.m)) { fill.dataset.m = String(b.m); fill.style.background = look.grad; lab.style.color = look.label; }
+      lab.textContent = 'x' + b.m;
+    });
   }
   // v4.1: the HUD no longer shows the board (ABOUT THIS RUN names the board and difficulty)
   function boardIcon(id, cls) { return '<img class="' + (cls || 'icon') + '" alt="" src="' + GF.Icons.url('board', id) + '">'; }
@@ -10321,19 +10723,26 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   // gold/shiny items are bare modifiers; other jewels may carry one ({mod})
   function jewelName(it) {
     if (C.MODS[it.id]) return it.id.toUpperCase();
-    return (it.mod ? it.mod.toUpperCase() + ' ' : '') + (it.color != null ? C.COLORS[it.color].toUpperCase() + ' ' : '') + it.id.toUpperCase();
+    return (it.mod ? it.mod.toUpperCase() + ' ' : '') + (it.color != null ? C.COLORS[it.color].toUpperCase() + ' ' : '') + (it.id === 'normal' ? 'GEM' : it.id.toUpperCase());
   }
   function itemInfo(it) {
     if (it.kind === 'perk') { const d = GF.Perks.byId[it.id]; return { icon: iconImg('perk', it.id), name: d.name, desc: d.desc, cls: d.rarity, rar: d.rarity }; }
     if (it.kind === 'card') { const d = GF.Cards.DEFS[it.id]; return { icon: iconImg('card', it.id), name: d.name, desc: d.desc, cls: 'enh' }; }
     if (it.kind === 'tile') { const d = GF.Tiles.DEFS[it.id]; return { icon: iconImg('tile', it.id), name: d.name, desc: d.desc, cls: 'tile' }; }
     if (it.kind === 'gem') return { icon: GF.Render.gemIconHTML(it.color, it.id, null, it.mod), name: jewelName(it), desc: GEM_INFO[it.id] + (it.mod ? '. ' + MOD_INFO[it.mod] : ''), cls: 'tile' };
-    const col = it.color != null ? C.COLORS[it.color] : null;
-    const name = it.id === 'brilliance' ? 'BRILLIANCE' : 'POLISH ' + col.toUpperCase() + (it.id === 'polish2' ? ' +2' : ' +1');
-    const desc = it.id === 'brilliance' ? '+1 Polish to every color' : '+' + (it.id === 'polish2' ? 10 : 5) + ' points per ' + col.charAt(0).toUpperCase() + col.slice(1) + ' gem';
-    const polish = (it.id === 'polish1' || it.id === 'polish2') && it.color != null;
+    // v4.3: polish +1 per colour, special polish cards and Brilliance (names / descriptions from Cards.def)
+    const d = GF.Cards.def(GF.Cards.entryOf(it)) || { name: String(it.id), desc: '' };
+    const name = d.name.toUpperCase();
+    let desc = d.desc;
+    // v4.3 special polish cards: the run's current level and what one more gives (levels add: x(1 + k * L))
+    const spec = C.UPGRADE_CARD[it.id] && C.UPGRADE_CARD[it.id].special;
+    if (spec) {
+      const L = (S.run && S.run.polishSpecial && S.run.polishSpecial[spec]) || 0, k = C.POLISH_SPECIAL[spec].k, x = (v) => 'x' + (Math.round(v * 100) / 100);
+      desc += ' per level.' + (S.run ? '<span class="pol-lv">Now <i style="color:' + (C.levelColor(L + 1) || 'var(--ink)') + '">Lv ' + (L + 1) + '</i> (' + x(1 + k * L) + ') &gt; <i style="color:' + C.levelColor(L + 2) + '">Lv ' + (L + 2) + '</i> (' + x(1 + k * (L + 1)) + ')</span>' : '');
+    }
+    const polish = it.id === 'polish1' && it.color != null;
     const icon = polish
-      ? '<span class="iconwrap"><img class="icon" alt="" src="' + GF.Render.gemIconURL(it.color) + '"><span class="plus">' + (it.id === 'polish2' ? '+2' : '+1') + '</span></span>'
+      ? '<span class="iconwrap"><img class="icon" alt="" src="' + GF.Render.gemIconURL(it.color) + '"><span class="plus">+1</span></span>'
       : iconImg('upgrade', it.id);
     return { icon: icon, name: name, desc: desc, cls: 'upgrade', rar: 'upg' };
   }
@@ -10404,7 +10813,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     const pend = run.pendingPlace[0];
     $('pending').classList.toggle('hidden', !pend);
     if (pend) $('pending-label').textContent = 'PLACE: ' + (pend.kind === 'tile' ? GF.Tiles.DEFS[pend.id].name : jewelName(pend)) + (run.pendingPlace.length > 1 ? ' (+' + (run.pendingPlace.length - 1) + ' more)' : '');
-    $('shop-hint').textContent = pend ? (pend.kind === 'tile' ? 'Tap any board cell to place the tile.' : C.MODS[pend.id] ? 'Tap a gem (not Prism, Wild or Coal) to make it ' + pend.id + '.' : 'Tap a gem to replace it with a ' + jewelName(pend).toLowerCase() + '. Matches resolve free at round start.') : 'Tap a perk to see or sell it. Drag perks and cards to reorder.'
+    $('shop-hint').textContent = pend ? (pend.kind === 'tile' ? 'Tap any board cell to place the tile.' : C.MODS[pend.id] ? 'Tap a gem (not Prism, Wild or Coal) to make it ' + pend.id + '.' : 'Tap a gem to replace it with a ' + jewelName(pend).toLowerCase() + (GF.Board.emptyCount(run.board) ? ', or an empty cell' : '') + '. Matches resolve free at round start.') : 'Tap a perk to see or sell it. Drag perks and cards to reorder.'
       + (run.abilities && run.abilities.shopSwap ? ' SHOP SWAP: swap 2 adjacent gems right on the board (' + run.abilities.shopSwap.left + ' left' + (document.body.classList.contains('mobile') ? '; HIDE the shop to see it' : '') + ').' : '');
   }
   function choiceInfo(c) { return itemInfo(c); }
@@ -10733,7 +11142,8 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     const r = GF.Packs.place(run, cell.r, cell.c);
     if (!r.ok) { GF.Audio.bad(); toast(p.kind === 'gem' ? 'PICK A GEM' : 'CANNOT PLACE HERE'); return; }
     if (p.kind === 'gem') GF.Audio.created(p.mod && !C.MODS[p.id] ? p.mod : p.id); else GF.Audio.ching();
-    GF.Render.pulseTile(cell.r, cell.c);
+    const at = r.cell || cell; // v4.3: a gem dropped on an empty cell falls (r.cell: where it landed)
+    GF.Render.pulseTile(at.r, at.c);
     GF.Anim.sync(run.board); GF.Run.save(run); refresh();
   }
   function bindBoard() {
@@ -10742,7 +11152,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     const clearLp = () => { if (lp) { clearTimeout(lp); lp = null; } };
     cv.addEventListener('pointerdown', (e) => {
       const run = S.run;
-      if (!run || S.locked) return;
+      if (!run || S.locked || S.shopAnim) return;
       const cell = GF.Render.cellAt(e.clientX, e.clientY);
       if (!cell) return;
       e.preventDefault();
@@ -10808,14 +11218,15 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     const top = $('board').getBoundingClientRect().top - $('app').getBoundingClientRect().top;
     // v4.0: the ability row under the moves bar takes 50px more
     const abH = S.run && S.run.abilities && Object.keys(S.run.abilities).length ? 50 : 0;
-    const availH = (top > 0 ? h - top - 48 : (mobile ? h - 360 : h - 190)) - abH;
+    const bzH = blazeOwned(S.run) ? 30 : 0; // v4.3 Blazing Speed meter under the moves bar
+    const availH = (top > 0 ? h - top - 48 : (mobile ? h - 360 : h - 190)) - abH - bzH;
     GF.Render.resize(Math.max(28, Math.min(72, Math.floor(Math.min(availW, availH) / 8))));
     $('board-col').style.setProperty('--board-h', ($('board').offsetHeight || 0) + 'px');
     fanAll();
   }
   function toTitle() {
     recordRun(); // quitting (MAIN MENU, after a game over / victory) keeps the run's progress
-    endIntro('cancel');
+    endIntro('cancel'); endShopAnim(); dropMartyr();
     GF.Anim.cancelAll(); S.live = []; S.locked = false; S.freeing = false; closeTimer();
     if (GF.Render.clearFx) GF.Render.clearFx();
     S.run = null; cancelTargeting(); S.selected = null; S.hint = null; S.frozen = null; S.movesHold = null; S.dragging = false; S.cp = null;
@@ -10830,7 +11241,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   // intro (v4.1): 'card' zooms the SELECT BOARD card onto the board, 'light' only staggers the UI in and drops the
   // gems; skipped (as before v4.1) under reduced motion or GF.UI.skipIntro.
   function newRun(fresh, o, intro) {
-    endIntro('cancel');
+    endIntro('cancel'); endShopAnim(); dropMartyr();
     const txt = o && o.seed != null && o.seed !== '' ? String(o.seed).trim() : fresh ? '' : $('seed-input').value.trim();
     const seed = txt ? (/^\d+$/.test(txt) ? +txt : GF.RNG.hash(txt)) : undefined;
     GF.Anim.cancelAll(); S.live = []; S.locked = false; S.freeing = false; closeTimer();
@@ -10858,7 +11269,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     roundBanner('ROUND 1');
   }
   function resume(run) {
-    endIntro('cancel');
+    endIntro('cancel'); endShopAnim(); dropMartyr();
     GF.Anim.cancelAll(); S.live = []; S.locked = false; S.freeing = false; closeTimer();
     S.run = run; S.cp = null; renderCascadePanel();
     GF.Render.setBoardType(run.boardType);
@@ -10885,23 +11296,36 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     $('toast').classList.remove('on'); clearMulPops(); $('board-banner').classList.remove('on');
     GF.Run.save(run);
     layout(); refresh();
+    shopIn();
     if (run.openPack) openPackModal();
   }
+  // NEXT ROUND: the shop bounces and slides away (shopOut), then the round starts (beginRound: ROUND n pops)
   function startRound() {
-    if (animating() || !S.run || S.run.phase !== 'shop') return;
+    if (animating() || !S.run || S.run.phase !== 'shop' || S.shopAnim) return;
     const run = S.run;
     hideTip();
+    if (run.openPack || run.pendingPlace.length) { toast('FINISH YOUR PACK FIRST'); return; }
+    shopOut(run, () => beginRound(run));
+  }
+  function beginRound(run) {
     const events = GF.Run.startRound(run);
-    if (!events) { toast('FINISH YOUR PACK FIRST'); return; }
+    if (!events) { $('shop').classList.remove('hidden'); toast('FINISH YOUR PACK FIRST'); return; }
     cancelTargeting(); S.hint = null; S.selected = null; S.locked = false; S.roundMoves = run.movesLeft; S.lastLeft = null;
     $('shop').classList.add('hidden');
     const free = events.free;
     // with a free resolve, show the board as it was before it and replay its timeline
     if (free) GF.Anim.syncCells(events.before); else GF.Anim.sync(run.board);
-    S.shownScore = 0;
+    // v4.3 Survival (round 2+): the gems dropped into the free cells fall in first (with the ROUND popup), column by
+    // column with a small bounce; input stays locked until they land and any free resolve waits for them
+    const t0 = performance.now(), fall = survivalFall(run, events, free ? events.before : run.board.cells);
+    // v4.3 Martyr: the round starts with a share of the target; each Martyr's "+X" flies from its card to the score
+    const martyr = events.martyr || [], tok = ++S.martyrTok;
+    S.martyrPending = martyr.reduce((t, e) => t + e.add, 0);
+    S.shownScore = (events.score || 0) - S.martyrPending;
     GF.Run.save(run);
     layout(); refresh();
     roundBanner('ROUND ' + run.round);
+    const flyEnd = martyr.reduce((end, e, i) => Math.max(end, martyrFly(run, e, tok, 380 + i * 260)), 0);
     events.forEach((e, i) => setTimeout(() => {
       // tile/perk events: a kind change, an added modifier (modded), or a Direction swap
       const what = e.swap ? 'SWAP' : e.modded ? e.gem.mod : e.gem.kind;
@@ -10909,7 +11333,129 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       GF.Audio.created(what);
       GF.Render.pulseTile(e.r, e.c);
     }, 300 + i * 150));
-    if (free) playFreeResolve(run, free, 300 + events.length * 150 + 200);
+    const freeAt = 300 + events.length * 150 + 200, wonAt = Math.max(900, flyEnd + 250);
+    if (!fall) {
+      if (free) playFreeResolve(run, free, freeAt);
+      else if (run.phase === 'won') setTimeout(() => endRound(run, {}), wonAt); // v4.3: Martyr alone met the target
+      return;
+    }
+    // after the fall: the free resolve locks at once (no idle gap), then starts when its usual delay is up
+    const left = (ms) => Math.max(0, ms / GF.Anim.speed - (performance.now() - t0));
+    fall.then(() => {
+      if (S.run !== run) return;
+      if (free) playFreeResolve(run, free, left(freeAt) * GF.Anim.speed);
+      else if (run.phase === 'won') setTimeout(() => endRound(run, {}), left(wonAt));
+    });
+  }
+  // The Survival round-start fill as a synthetic fall timeline: the shown board loses those cells, then they drop in
+  // (each holds the gem the shown board has there, so display == target afterwards). A promise resolving when it is
+  // done; null without a fill.
+  function survivalFall(run, events, target) {
+    const fill = (events.survivalFill || []).filter((sp) => target[sp.r][sp.c]);
+    if (!fill.length) return null;
+    const pre = target.map((row) => row.slice());
+    const spawns = fill.map((sp) => { pre[sp.r][sp.c] = null; const n = { r: sp.r, c: sp.c, drop: sp.drop, gem: GF.Board.clone(target[sp.r][sp.c]), delay: 140 + sp.c * 45 }; if (sp.top) n.top = sp.top; return n; });
+    GF.Anim.syncCells(pre);
+    S.locked = true;
+    return GF.Anim.run([{ t: 'fall', moves: [], spawns: spawns, bounce: 0.12 }], hooks).then(() => {
+      if (S.run !== run) return;
+      if (!events.free && run.phase === 'play') { S.locked = false; settleIfIdle(); }
+    });
+  }
+  // One Martyr's "+X": the card shakes, the number pops over it and arcs to the HUD score, which takes it on arrival.
+  // Returns when it lands (ms from now). Reduced motion: a short straight glide.
+  function martyrFly(run, e, tok, delay) {
+    const reduced = reducedMotion(), dur = reduced ? 260 : 760;
+    setTimeout(() => {
+      if (S.martyrTok !== tok || S.run !== run) return;
+      const app = $('app').getBoundingClientRect(), card = $('perk-row').querySelector('.perk[data-uid="' + e.uid + '"]');
+      const src = card ? card.getBoundingClientRect() : $('board').getBoundingClientRect(), dst = $('hud-score').getBoundingClientRect();
+      const fx = src.left - app.left + src.width / 2, fy = src.top - app.top + (card ? src.height / 2 : src.height / 2);
+      const dx = dst.left - app.left + Math.min(dst.width, 60) / 2 - fx, dy = dst.top - app.top + dst.height / 2 - fy;
+      if (card) { const inner = card.querySelector('.inner'); if (inner) restart(inner, 'shake'); }
+      GF.Audio.chord();
+      const el = document.createElement('div');
+      el.className = 'martyr-fly'; el.textContent = '+' + fmt(e.add);
+      el.style.left = fx + 'px'; el.style.top = fy + 'px';
+      $('app').appendChild(el);
+      const T = (x, y, k) => 'translate(-50%, -50%) translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) scale(' + k + ')';
+      if (el.animate) el.animate(reduced ? [{ transform: T(0, 0, 1), opacity: 0 }, { transform: T(0, 0, 1), opacity: 1, offset: 0.2 }, { transform: T(dx, dy, 0.8), opacity: 1 }]
+        : [{ transform: T(0, 0, 0.3), opacity: 0 }, { transform: T(0, -26, 1.5), opacity: 1, offset: 0.22 }, { transform: T(0, -20, 1.25), offset: 0.34 },
+          { transform: T(dx * 0.55, dy * 0.55 - 46, 1.1), offset: 0.68 }, { transform: T(dx, dy, 0.7), opacity: 1 }], { duration: dur, easing: 'ease-in-out', fill: 'forwards' });
+      setTimeout(() => {
+        el.remove();
+        if (S.martyrTok !== tok || S.run !== run) return;
+        S.martyrPending = Math.max(0, S.martyrPending - e.add);
+        S.shownScore += e.add;
+        refreshHud(); restart($('hud-score'), 'bump'); GF.Audio.ching();
+      }, dur);
+    }, delay);
+    return delay + dur;
+  }
+  function dropMartyr() { S.martyrTok++; S.martyrPending = 0; document.querySelectorAll('.martyr-fly').forEach((el) => el.remove()); }
+
+  // ---------- v4.3 shop transitions ----------
+  // In (enterShop): the panel slides in from the right (mobile: up from the bottom) with a bounce while its parts pop in
+  // one after another. Out (NEXT ROUND): a small bounce, the panel slides away, then the round starts. Reduced motion:
+  // a short fade. GF.UI.skipIntro (tools): no transition. While the panel moves, S.shopAnim is set: the shop and the
+  // board take no input (state().busy says so). GF.UI.introScale slows it down for screenshots.
+  const SHOP_MS = { slide: 460, pop: 240, stagger: 420, bounce: 170, out: 300, fade: 140 };
+  let SA = null;
+  function shopMotion() { return GF.UI && GF.UI.skipIntro ? 'none' : reducedMotion() ? 'fade' : 'full'; }
+  function endShopAnim() {
+    const a = SA;
+    if (!a) return;
+    SA = null; clearTimeout(a.timer);
+    a.anims.forEach((x) => { try { x.cancel(); } catch (e) { /* gone */ } });
+    S.shopAnim = null; $('shop').classList.remove('anim-lock');
+  }
+  function shopParts() {
+    return Array.from(document.querySelectorAll('#shop > h2, #shop > .blaze-meter:not(.hidden), #shop > h3, #shop-items > *, #btn-reroll, #shop .shop-box > h3, #shop-voucher > *, #shop-packs > *, #pending:not(.hidden), #btn-next, #shop-hint'));
+  }
+  const shopOff = () => (document.body.classList.contains('mobile') ? (d) => 'translateY(' + (d == null ? '105%' : d + 'px') + ')' : (d) => 'translateX(' + (d == null ? 'calc(100% + 48px)' : -d + 'px') + ')');
+  function shopIn() {
+    endShopAnim();
+    const mode = shopMotion(), sh = $('shop'), k = islow();
+    if (mode === 'none') return;
+    const a = SA = { anims: [], timer: 0 };
+    let total;
+    if (mode === 'fade') {
+      total = SHOP_MS.fade * k;
+      a.anims.push(sh.animate([{ opacity: 0 }, { opacity: 1 }], { duration: total, easing: 'ease-out' }));
+    } else {
+      const off = shopOff(), parts = shopParts(), step = Math.min(45, SHOP_MS.stagger / Math.max(1, parts.length)) * k, d0 = SHOP_MS.slide * 0.4 * k;
+      S.shopAnim = 'in'; sh.classList.add('anim-lock');
+      a.anims.push(sh.animate([{ transform: off(), easing: 'cubic-bezier(.25,.8,.4,1)' }, { transform: off(-16), offset: 0.62, easing: 'ease-in-out' }, { transform: off(5), offset: 0.84, easing: 'ease-in-out' }, { transform: 'none' }],
+        { duration: SHOP_MS.slide * k, fill: 'backwards' }));
+      parts.forEach((el, i) => a.anims.push(el.animate([{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1.15)', offset: 0.6 }, { opacity: 1, transform: 'scale(1)' }],
+        { duration: SHOP_MS.pop * k, delay: d0 + i * step, easing: 'ease-out', fill: 'backwards' })));
+      total = Math.max(SHOP_MS.slide * k, d0 + Math.max(0, parts.length - 1) * step + SHOP_MS.pop * k);
+    }
+    a.timer = setTimeout(() => { if (SA !== a) return; SA = null; S.shopAnim = null; sh.classList.remove('anim-lock'); }, total);
+  }
+  function shopOut(run, then) {
+    endShopAnim();
+    const mode = shopMotion(), sh = $('shop'), k = islow();
+    if (mode === 'none') { then(); return; }
+    const a = SA = { anims: [], timer: 0 };
+    S.shopAnim = 'out'; S.locked = true; sh.classList.add('anim-lock');
+    let total;
+    if (mode === 'fade') {
+      total = SHOP_MS.fade * k;
+      a.anims.push(sh.animate([{ opacity: 1 }, { opacity: 0 }], { duration: total, fill: 'forwards' }));
+    } else {
+      const off = shopOff(), b = SHOP_MS.bounce / (SHOP_MS.bounce + SHOP_MS.out);
+      total = (SHOP_MS.bounce + SHOP_MS.out) * k;
+      a.anims.push(sh.animate([{ transform: 'none', easing: 'ease-out' }, { transform: 'scale(1.045)', offset: b * 0.4, easing: 'ease-in-out' }, { transform: 'scale(.97)', offset: b * 0.75, easing: 'ease-out' },
+        { transform: 'scale(1)', offset: b, easing: 'ease-out' }, { transform: off(-10), offset: b + (1 - b) * 0.25, easing: 'cubic-bezier(.55,0,.9,.45)' }, { transform: off(), opacity: 1 }],
+        { duration: total, fill: 'forwards' }));
+    }
+    a.timer = setTimeout(() => {
+      if (SA !== a) return;
+      SA = null; S.shopAnim = null; S.locked = false; sh.classList.remove('anim-lock');
+      if (S.run === run && run.phase === 'shop') then();
+      a.anims.forEach((x) => { try { x.cancel(); } catch (e) { /* gone */ } }); // the panel is hidden by now
+    }, total);
   }
   // Round-start free move (frozen jewel/card matches): input locked until it finishes; points go to the HUD score.
   function playFreeResolve(run, res, delay) {
@@ -11250,7 +11796,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     S.movesHold = null;
     checkDisplay();
     GF.Anim.sync(run.board);
-    S.shownScore = run.score;
+    S.shownScore = run.score - (S.martyrPending || 0); // a Martyr "+X" still flying lands on top
     refresh();
     checkStuck();
   }
@@ -11259,6 +11805,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     checkDisplay();
     if (res.insured) toast('LIFEBUOY!');
     S.movesHold = null;
+    if (S.martyrPending) { S.martyrTok++; S.martyrPending = 0; }
     GF.Anim.sync(run.board);
     S.shownScore = run.score;
     refresh();
@@ -11361,6 +11908,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
       return '<div class="b' + (it.n ? '' : ' zero') + (it.gone ? ' gone' : '') + '" title="' + it.title + ': ' + it.n + '"><span class="n">' + fmt(it.n) + '</span><div class="col"><div class="fill" style="height:' + hgt + 'px;background:' + it.col + '"></div></div></div>';
     }).join('');
     const xs = items.map((it) => '<div class="x' + (it.gone ? ' gone' : '') + '">' + it.icon + '<span class="lv"' + (it.labelCol ? ' style="color:' + it.labelCol + '"' : '') + '>' + it.label + '</span>'
+      + (it.lvl != null ? '<span class="plv"' + (it.lvlCol ? ' style="color:' + it.lvlCol + '"' : '') + '>Lv ' + it.lvl + '</span>' : '')
       + (it.pct != null ? '<span class="pct" data-pct="' + it.pct + '">' + fmtPct(it.pct) + '</span>' : '')
       + (it.now != null ? '<span class="now" data-now="' + it.now + '" title="On the board now">' + fmt(it.now) + '</span>' : '') + '</div>').join('');
     return '<div class="bars">' + bars + '</div><div class="bars-x">' + xs + '</div>';
@@ -11401,7 +11949,12 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     const st = GF.Run.stats(run), rates = spawnRates(run), now = boardCounts(run.board);
     const colors = C.COLORS.map((name, k) => ({ n: st.gems[k] || 0, col: GF.Render.colorHex(k), icon: '<img alt="" src="' + GF.Render.gemIconURL(k) + '">', label: 'Lv ' + (run.polish[k] + 1), labelCol: C.levelColor(run.polish[k] + 1),
       pct: rates[k], now: now.colors[k], title: name.toUpperCase() + ' (Polish Lv ' + (run.polish[k] + 1) + ', ' + fmtPct(rates[k]) + ' of new gems, ' + now.colors[k] + ' on the board now)', gone: run.removedColors.indexOf(k) >= 0 }));
-    const kinds = GF.Run.KINDS.map((k) => ({ n: st.kinds[k] || 0, col: k === 'coal' ? '#6a6577' : 'var(--accent)', icon: kindIcon(k), label: KIND_LABEL[k], now: now.kinds[k], title: KIND_LABEL[k] + ' (' + now.kinds[k] + ' on the board now)' }));
+    // v4.3: the specials with a polish show its level under their label, coloured like the colour levels
+    const kinds = GF.Run.KINDS.map((k) => {
+      const key = C.POLISH_SPECIAL[k] ? k : null, lv = key ? ((run.polishSpecial && run.polishSpecial[key]) || 0) + 1 : null;
+      return { n: st.kinds[k] || 0, col: k === 'coal' ? '#6a6577' : 'var(--accent)', icon: kindIcon(k), label: KIND_LABEL[k], now: now.kinds[k], lvl: lv, lvlCol: lv ? C.levelColor(lv) : null,
+        title: KIND_LABEL[k] + (lv ? ' (' + C.POLISH_SPECIAL[key].name + ' Lv ' + lv + ')' : '') + ' (' + now.kinds[k] + ' on the board now)' };
+    });
     $('about-colors').innerHTML = barsHtml(colors);
     $('about-kinds').innerHTML = barsHtml(kinds);
     const rows = [
@@ -11903,9 +12456,10 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     el.className = 'gl-item'; el.style.setProperty('--c', rarityColor(o.rar, 'var(--accent)'));
     if (o.kind) el.dataset.kind = o.kind;
     const price = o.price != null ? ' · <i>$' + o.price + '</i>' : '';
-    el.innerHTML = '<div class="gl-icon">' + o.icon + '</div><div class="gl-txt"><b>' + o.name + '</b><span class="gl-meta">' + o.tag + price + '</span><p>' + o.desc + '</p></div>';
+    const extra = o.extra ? '<p class="gl-val">' + o.extra + '</p>' : '';
+    el.innerHTML = '<div class="gl-icon">' + o.icon + '</div><div class="gl-txt"><b>' + o.name + '</b><span class="gl-meta">' + o.tag + price + '</span><p>' + o.desc + '</p>' + extra + '</div>';
     bindHover(el, o.name, o.rar);
-    el.onclick = () => showTip(el.getBoundingClientRect(), o.icon + '<b style="color:' + rarityColor(o.rar, 'var(--accent)') + '">' + o.name + '</b><small>' + o.tag + (o.price != null ? ' · $' + o.price : '') + '</small><p>' + o.desc + '</p>', [], o.rar);
+    el.onclick = () => showTip(el.getBoundingClientRect(), (o.tipIcon || o.icon) + '<b style="color:' + rarityColor(o.rar, 'var(--accent)') + '">' + o.name + '</b><small>' + o.tag + (o.price != null ? ' · $' + o.price : '') + '</small><p>' + o.desc + '</p>' + extra, [], o.rar);
     return el;
   }
   function glossaryItems(tab, sub) {
@@ -11918,12 +12472,32 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     if (tab === 'tiles') return GF.Tiles.IDS.map((id) => { const d = GF.Tiles.DEFS[id]; return { icon: iconImg('tile', id), name: d.name, rar: 'tilec', price: d.price, tag: 'TILE', desc: d.desc }; });
     if (tab === 'polish') {
       const out = [];
-      ['polish1', 'polish2'].forEach((p) => C.COLORS.forEach((_, k) => out.push({ kind: 'upgrade', id: p, color: k })));
+      C.COLORS.forEach((_, k) => out.push({ kind: 'upgrade', id: 'polish1', color: k }));
+      Object.keys(C.POLISH_SPECIAL).forEach((key) => out.push({ kind: 'upgrade', id: C.POLISH_SPECIAL[key].card }));
       out.push({ kind: 'upgrade', id: 'brilliance' });
       return out.map((it) => { const info = itemInfo(it); return { icon: info.icon, name: info.name, rar: 'upg', price: C.UPGRADE_CARD[it.id].price, tag: 'UPGRADE CARD', desc: info.desc }; });
     }
     if (tab === 'boards') return boardGlossary();
+    if (tab === 'gems') return gemGlossary();
     return null; // upgrades: grouped, see renderGlossary
+  }
+  // v4.3 GEMS tab (C.GEM_INFO): every gem kind, the two modifiers and the locked state, each turning as a live 3D gem
+  // (GF.Render.gemSpinHTML); specials name the polish card that raises them (C.POLISH_SPECIAL, per level)
+  const GL_GEM = { normal: ['cycle'], bomb: [0], star: [3], supernova: [4], prism: [null], wild: [null], coal: [null], gold: [4, 'normal', 'gold'], shiny: [1, 'normal', 'shiny'], locked: [5, 'normal', null, true] };
+  const GL_GEM_COL = { normal: '#ff6bd6', prism: '#7fe7ff', wild: '#ff6bd6', coal: '#a9a3b8', gold: '#ffd23f', shiny: '#e8f6ff', locked: '#9aa5b9' };
+  function gemGlossary() {
+    return C.GEM_INFO_ORDER.map((k) => {
+      const d = C.GEM_INFO[k], g = GL_GEM[k] || [null], kind = g[1] || k, color = g[0];
+      const ps = C.POLISH_SPECIAL[k];
+      const vals = [];
+      if (k === 'normal') vals.push('POLISH +1 (of its colour): +50% value per level.');
+      if (ps) vals.push(ps.name.toUpperCase() + ': ' + ps.desc + ' per level.');
+      if (C.GEM_PRICE[k] != null) vals.push('Jewel pack / shop gem: $' + C.GEM_PRICE[k] + (k === 'normal' ? ' (always Gold or Shiny)' : ''));
+      if (C.MODS[k]) vals.push('Comes on gems from Jewel packs, cards and perks (+$' + C.GEM_MOD_PRICE + ' on a shop gem).');
+      return { kind: 'gem', id: k, icon: GF.Render.gemSpinHTML(color, kind, 'icon', g[2], g[3]), tipIcon: GF.Render.gemSpinHTML(color, kind, 'icon', g[2], g[3]),
+        name: d.name, rar: color != null && color !== 'cycle' && !g[2] && !g[3] ? GF.Render.colorHex(color) : GL_GEM_COL[k] || 'var(--accent)',
+        tag: d.type === 'gem' ? 'GEM' : d.type === 'mod' ? 'MODIFIER' : 'STATE', desc: d.desc, extra: vals.join('<br>') };
+    });
   }
   // v4.0 BOARDS tab: the 15 boards, then the 6 difficulty levels (cumulative; v4.1)
   const DIFF_COL = ['', '#e8e8e8', '#3ddc84', '#7fe7ff', '#ffd23f', '#ff8c42', '#ff4d6d'];
@@ -11972,7 +12546,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     const perks = (r) => GF.Perks.DEFS.filter((d) => r === 'all' || d.rarity === r).length;
     return {
       tabs: { perks: perks('all'), upgrades: GF.Vouchers.IDS.length, enhance: GF.Cards.IDS.length, polish: glossaryItems('polish').length,
-        tiles: GF.Tiles.IDS.length, boards: GF.Boards.DISPLAY.length },
+        tiles: GF.Tiles.IDS.length, gems: C.GEM_INFO_ORDER.length, boards: GF.Boards.DISPLAY.length },
       subs: { all: perks('all'), common: perks('common'), uncommon: perks('uncommon'), rare: perks('rare') },
     };
   }
@@ -12026,10 +12600,16 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   function syncShopToggle() { $('btn-shop-toggle').textContent = $('shop').classList.contains('collapsed') ? 'SHOW' : 'HIDE'; }
   function loop(now) {
     GF.Anim.update(now);
+    // v4.3 Blazing Speed: the meter drains in real time (play and shop); a long pause (hidden tab) counts as 250 ms
+    const bzDt = S.blazeAt != null ? Math.min(250, now - S.blazeAt) : 0;
+    if (S.run && S.blazeAt != null) GF.Run.blazeTick(S.run, bzDt);
+    S.blazeAt = now;
+    drawBlaze(bzDt);
     if (S.selected && S.run && animating() && !settled(S.selected)) S.selected = null; // a selected gem that becomes busy loses selection
     if (S.timer) { if (now >= S.timer.until) endTimer(); else drawTimerBar(now); }
     if (S.run) updateAbilities();
     const ov = S.run && (S.run.phase === 'play' || animating()) && S.targeting == null ? S.overlay : null;
+    if (!S.run) GF.Render.drawIcons(now); // the glossary's live gems (title screen: no board frame draws them)
     if (S.run) GF.Render.frame({ zones: ov ? ov.zones : null, wanted: ov ? ov.wanted : null, patterns: ov ? ov.patterns : null, display: GF.Anim.display, board: S.run.board, selected: S.selected, selectedAt: S.selectedAt, busy: S.locked, hint: S.hint, hover: S.hover, placing: !!(S.run.pendingPlace && S.run.pendingPlace.length), targets: S.targeting != null ? S.targetCells : null, picked: S.targeting != null ? S.picks : null, tilePeriod: S.tilePeriod, denseTiles: S.denseTiles, time: now });
     requestAnimationFrame(loop);
   }
@@ -12061,7 +12641,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
     const hint = !!S.hint && performance.now() < S.hint.until;
     const anims = GF.Anim.active();
     const tm = S.timer ? { left: Math.max(0, S.timer.until - performance.now()), swaps: S.timer.swaps } : null;
-    return r ? { phase: r.phase, busy: anims > 0 || !!I, intro: !!I, anims: anims, locked: S.locked, desyncs: S.desyncs, movesLeft: r.movesLeft, score: r.score, round: r.round, money: r.money, hint: hint,
+    return r ? { phase: r.phase, busy: anims > 0 || !!I || !!S.shopAnim, intro: !!I, shopAnim: S.shopAnim || null, blaze: S.bz ? { m: S.bz.m, fill: S.bz.fill } : null, martyrPending: S.martyrPending || 0, anims: anims, locked: S.locked, desyncs: S.desyncs, movesLeft: r.movesLeft, score: r.score, round: r.round, money: r.money, hint: hint,
       timer: tm, timerReady: GF.Run.timerReady(r), wrongTurns: S.wrongTurns, zones: S.overlay.zones.length, wanted: S.overlay.wanted.length, patterns: (S.overlay.patterns || []).length,
       selected: S.selected ? { r: S.selected.r, c: S.selected.c } : null,
       abilities: GF.Run.abilities(r), targeting: S.targeting == null ? null : S.targeting.ability || 'card' }
@@ -12076,6 +12656,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
   }
   function init() {
     GF.Render.init($('board'));
+    document.querySelectorAll('.bz-icon').forEach((el) => { el.style.backgroundImage = 'url(' + GF.Icons.url('perk', 'blazing_speed') + ')'; });
     S.crt = prefGet('crt') !== '0';
     S.speedIdx = loadSpeedIdx();
     GF.Anim.speed = SPEEDS[S.speedIdx];
