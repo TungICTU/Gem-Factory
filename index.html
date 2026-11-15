@@ -653,6 +653,131 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   #victory, .vic-box, .vic-rays, .vic-title span, .vic-stat, .vic-perk, .vic-pol, .vic-kick, .vic-btns .big-btn { animation: none !important; }
   .vic-title span { background-position: 0 0; background-image: linear-gradient(#fff6cc, #ffd23f 55%, #ffa000); }
 }
+/* ---------- v4.5 records (difficulty badge in BEST RUN), About seed, title SETTINGS ---------- */
+.bs-rec-run { display: inline-flex; align-items: center; gap: 4px; }
+.bs-rec .diff-badge.rec { font-size: 6px; min-width: 16px; padding: 2px 3px 1px; box-shadow: none; border-width: 1px; font-style: normal; }
+#about-run .ar-seed { margin: 6px 0 0; font-size: 7px; color: var(--muted); }
+#about-run .ar-seed b { color: var(--ink); letter-spacing: 1px; font-weight: normal; }
+#seed-input { text-transform: uppercase; letter-spacing: 2px; width: 150px; }
+/* ---------- v4.5 SKIP >> (ui.js skipMoves): top-right over the board once a move has animated 5 s ---------- */
+#btn-skip { position: absolute; right: 0; top: 0; z-index: 8; font-size: 9px; padding: 4px 8px; color: #000; background: var(--accent); border: 3px solid #000; box-shadow: 3px 3px 0 #000;
+  animation: skipIn .25s steps(3) both, skipNudge 1s steps(2) .25s infinite; }
+#btn-skip:hover { background: #ffe27a; }
+@keyframes skipIn { from { opacity: 0; transform: translateX(14px); } }
+@keyframes skipNudge { 50% { transform: translateX(3px); } }
+body.mobile #btn-skip { font-size: 8px; padding: 4px 6px; }
+/* ---------- v4.5 GAME OVER screen (ui.js showGameOver): glitch + crack title, falling grey shards, dim red rays ---------- */
+#gameover { position: fixed; inset: 0; z-index: 36; display: flex; align-items: center; justify-content: center; padding: 16px; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 30%, rgba(70, 12, 24, .82), rgba(6, 3, 10, .95) 72%); animation: goBg .6s ease-out; }
+@keyframes goBg { from { opacity: 0; } }
+#go-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: pixelated; opacity: .85; }
+.go-vignette { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 120px 30px rgba(0, 0, 0, .85); animation: goPulse 3.6s ease-in-out infinite; }
+@keyframes goPulse { 50% { box-shadow: inset 0 0 150px 50px rgba(60, 0, 10, .9); } }
+.go-box { position: relative; width: min(560px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; overflow-x: hidden; text-align: center; padding: 22px 20px 18px;
+  background: linear-gradient(#1b1420, #0e0a12); border: 4px solid #7a2632; box-shadow: 0 0 0 4px #000, 8px 8px 0 4px #000, 0 0 40px 4px rgba(160, 20, 40, .3);
+  animation: goIn .8s cubic-bezier(.3, 1.3, .5, 1) both; }
+@keyframes goIn { 0% { opacity: 0; transform: translateY(-50px) rotate(-2deg) scale(.9); } 60% { opacity: 1; transform: translateY(6px) rotate(.6deg); } 100% { transform: none; } }
+.go-rays { position: absolute; left: 50%; top: 64px; width: 900px; height: 900px; margin: -450px 0 0 -450px; pointer-events: none; opacity: .13; z-index: 0;
+  background: repeating-conic-gradient(from 0deg, #b0182e 0 6deg, transparent 6deg 22deg); -webkit-mask: radial-gradient(circle, #000 0 16%, transparent 50%); mask: radial-gradient(circle, #000 0 16%, transparent 50%);
+  animation: vicSpin 46s linear infinite reverse; }
+.go-box > *:not(.go-rays) { position: relative; z-index: 1; }
+.go-kick { margin: 0; font-size: 8px; color: #c4485a; letter-spacing: 2px; text-shadow: 2px 2px 0 #000; animation: goFade .4s ease-out .1s backwards, blink 1.1s steps(2) .9s 3; }
+.go-title { position: relative; display: inline-block; margin: 8px 0 12px; font-size: clamp(28px, 8.5vw, 50px); line-height: 1.15; white-space: nowrap; color: #d9d4e0; font-weight: normal;
+  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 3px 3px 0 #000, 5px 5px 0 #8e1a2c, 7px 7px 0 #000; }
+.go-word { position: relative; display: inline-block; }
+.go-word > span { display: inline-block; animation: goSlam .5s cubic-bezier(.5, 0, .7, 1.4) calc(.2s + var(--i) * .045s) backwards, goSag 4s ease-in-out calc(1.2s + var(--i) * .2s) infinite; }
+.go-word > span:nth-child(odd) { color: #bdb6c6; } .go-word > span:nth-child(3n) { color: #ece7f2; } .go-word > span:nth-child(4n) { color: #a39cae; }
+@keyframes goSlam { 0% { opacity: 0; transform: translateY(-80px) scale(1.6); } 70% { opacity: 1; transform: translateY(4px) scale(1, .85); } 100% { transform: none; } }
+@keyframes goSag { 0%, 86%, 100% { transform: none; } 90% { transform: translate(1px, 2px) rotate(2deg); } 94% { transform: translate(-1px, 1px) rotate(-1deg); } }
+/* glitch: red / cyan copies of the word flick out in slices every few seconds */
+.go-word::before, .go-word::after { content: attr(data-text); position: absolute; left: 0; top: 0; width: 100%; pointer-events: none; opacity: 0; text-shadow: none; white-space: nowrap; }
+.go-word::before { color: #ff2a4a; animation: goGlitchA 3.2s steps(1) 1.1s infinite; }
+.go-word::after { color: #3ce6ff; animation: goGlitchB 3.2s steps(1) 1.15s infinite; }
+@keyframes goGlitchA { 0%, 100% { opacity: 0; } 2% { opacity: .85; transform: translate(-4px, 0); clip-path: inset(10% 0 55% 0); } 5% { opacity: .85; transform: translate(3px, 0); clip-path: inset(60% 0 8% 0); } 8% { opacity: 0; }
+  52% { opacity: .7; transform: translate(-3px, 1px); clip-path: inset(35% 0 40% 0); } 54% { opacity: 0; } }
+@keyframes goGlitchB { 0%, 100% { opacity: 0; } 3% { opacity: .8; transform: translate(4px, 0); clip-path: inset(48% 0 20% 0); } 6% { opacity: .8; transform: translate(-2px, 0); clip-path: inset(5% 0 70% 0); } 9% { opacity: 0; }
+  53% { opacity: .6; transform: translate(3px, -1px); clip-path: inset(62% 0 12% 0); } 55% { opacity: 0; } }
+.go-crack { position: absolute; left: -2%; top: 8%; width: 104%; height: 84%; pointer-events: none; overflow: visible; }
+.go-crack polyline { fill: none; stroke: #050307; stroke-width: 2.4; stroke-linejoin: miter; vector-effect: non-scaling-stroke; stroke-dasharray: 400; stroke-dashoffset: 400; animation: goCrack .45s steps(9) .78s forwards; }
+.go-crack polyline.hi { stroke: rgba(255, 90, 110, .55); stroke-width: 1; transform: translateY(1.5px); }
+@keyframes goCrack { to { stroke-dashoffset: 0; } }
+.go-sub { margin: 0 0 12px; font-size: 9px; color: var(--bad); letter-spacing: 1px; text-shadow: 2px 2px 0 #000; animation: goFade .4s ease-out 1s backwards; }
+@keyframes goFade { from { opacity: 0; transform: translateY(6px); } }
+.go-board { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; font-size: 11px; animation: goFade .4s ease-out 1.1s backwards; }
+.go-board img { margin: 0; width: 28px; height: 28px; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 #000) grayscale(.35); }
+.go-score { background: #0b0710; border: 3px solid #3a2a40; box-shadow: 3px 3px 0 #000; padding: 8px 10px 10px; margin: 0 0 10px; animation: goFade .4s ease-out 1.2s backwards; }
+.go-score-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 7px; }
+.go-score-top label { font-size: 7px; color: var(--muted); }
+.go-score-top span { font-size: 9px; color: var(--muted); white-space: nowrap; }
+.go-score-top b { font-size: 13px; color: var(--ink); font-weight: normal; }
+.go-score-top i { font-style: normal; color: #c4485a; }
+.go-bar { position: relative; height: 16px; background: #000; border: 2px solid #5a4660; }
+#go-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--p, 0) * 100%); background: repeating-linear-gradient(90deg, #c4485a 0 6px, #8e2a3a 6px 12px); animation: goBar 1.1s steps(12) 1.3s backwards; }
+@keyframes goBar { from { width: 0; } }
+#go-pct { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 7px; color: #fff; text-shadow: 1px 1px 0 #000; }
+.go-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 12px; }
+.go-stat { background: #0b0710; border: 3px solid #2e2236; box-shadow: 3px 3px 0 #000; padding: 8px 4px 7px; min-width: 0; animation: vicPop .4s ease-out calc(1.4s + var(--i) * .09s) backwards; }
+.go-stat label { display: block; font-size: 6px; color: var(--muted); margin-bottom: 7px; line-height: 1.4; }
+.go-stat b { display: block; font-size: 12px; color: var(--ink); font-weight: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.go-stat b.gold { color: var(--accent); } .go-stat b.good { color: var(--good); } .go-stat b.pink { color: var(--rare); } .go-stat b.bad { color: var(--bad); }
+.go-stat small { display: block; font-size: 6px; color: var(--muted); margin-top: 5px; }
+.go-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 12px; animation: goFade .4s ease-out 1.7s backwards; }
+.go-perks-wrap { min-width: 0; }
+.go-label { display: block; font-size: 7px; color: var(--muted); margin-bottom: 7px; }
+.go-cards .vic-perks { min-height: 40px; filter: saturate(.55); }
+.go-cards .vic-perk, .go-cards .vic-pol { animation-delay: calc(1.8s + var(--i) * .06s); }
+.go-seed { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 14px; animation: goFade .4s ease-out 1.9s backwards; }
+.go-seed .go-label { margin: 0; }
+.go-seed b { font-size: 12px; letter-spacing: 2px; color: var(--ink); font-weight: normal; background: #000; border: 2px solid #3a2a40; padding: 5px 7px 4px; }
+.go-seed button { font-size: 8px; padding: 5px 8px; }
+.go-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; animation: goFade .4s ease-out 2s backwards; }
+.go-btns .big-btn { background: #d9d4e0; font-size: 12px; padding: 11px 18px; }
+.go-btns .big-btn:hover:not(:disabled) { background: #fff; }
+body.mobile .go-box { padding: 16px 12px 14px; }
+body.mobile .go-stats { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+body.mobile .go-stat b { font-size: 10px; }
+body.mobile .go-cards { grid-template-columns: 1fr; gap: 8px; }
+body.mobile .go-board { font-size: 9px; }
+body.mobile .go-btns button { font-size: 9px; padding: 9px 10px; }
+body.mobile .go-btns .big-btn { font-size: 11px; padding: 10px 14px; flex-basis: 100%; }
+#gameover.reduced *, #gameover.reduced, #gameover.reduced .go-word::before, #gameover.reduced .go-word::after { animation: none !important; }
+#gameover.reduced .go-crack polyline { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: reduce) {
+  #gameover, #gameover *, .go-word::before, .go-word::after { animation: none !important; }
+  .go-crack polyline { stroke-dashoffset: 0; }
+  #btn-skip { animation: none; }
+}
+/* ---------- v4.5 DEV MODE (dev.js; secret: type "gemdev") ---------- */
+#dev-tag { position: fixed; left: 6px; top: 6px; z-index: 46; font-size: 8px; color: #000; background: #3ce6ff; border: 2px solid #000; box-shadow: 2px 2px 0 #000; padding: 3px 5px 2px; pointer-events: none; letter-spacing: 1px; }
+#dev-panel { position: fixed; right: 8px; top: 8px; z-index: 33; /* under the modals: they stay clickable */ width: min(310px, calc(100vw - 16px)); max-height: min(78vh, calc(100dvh - 16px)); display: flex; flex-direction: column;
+  background: #0b1220; border: 3px solid #3ce6ff; box-shadow: 4px 4px 0 #000; font-size: 7px; color: var(--ink); user-select: none; }
+#dev-panel.collapsed { max-height: none; }
+#dev-panel.collapsed .dv-body { display: none; }
+.dv-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 5px 6px; background: #12324a; border-bottom: 3px solid #3ce6ff; cursor: move; touch-action: none; }
+.dv-head b { font-size: 8px; color: #3ce6ff; font-weight: normal; letter-spacing: 1px; }
+.dv-hbtns { display: flex; gap: 4px; }
+#dev-panel button { font-size: 7px; padding: 4px 5px; border-width: 2px; box-shadow: 2px 2px 0 #000; }
+#dev-panel button.on { background: #3ce6ff; color: #000; }
+.dv-body { overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 6px; }
+.dv-body section { border: 2px solid #1f3a55; padding: 5px; }
+.dv-body h4 { margin: 0 0 5px; font-size: 7px; color: #3ce6ff; font-weight: normal; }
+.dv-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 3px 0; }
+.dv-row label { display: inline-flex; align-items: center; gap: 4px; }
+#dev-panel input, #dev-panel select, #dev-panel textarea { font: inherit; font-size: 7px; background: #000; color: var(--ink); border: 2px solid #3a5a7a; padding: 3px; width: auto; }
+#dev-panel input[type=checkbox] { width: 12px; height: 12px; padding: 0; }
+#dv-pfilter, #dv-plist, #dv-save { display: block; width: 100% !important; box-sizing: border-box; margin: 0 0 4px; }
+#dv-plist option.common { color: var(--common); } #dv-plist option.uncommon { color: var(--uncommon); } #dv-plist option.rare { color: var(--rare); }
+#dv-tray { max-width: 200px; }
+#dv-info { margin: 0; font: inherit; font-size: 7px; line-height: 1.6; white-space: pre-wrap; color: #bfe9ff; }
+#dv-owned { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+#dv-owned i { font-style: normal; color: var(--muted); }
+.dv-chip { display: inline-flex; align-items: center; gap: 3px; background: #1a2a40; border: 1px solid #3a5a7a; padding: 1px 1px 1px 4px; }
+#dev-panel .dv-chip button { padding: 1px 3px; box-shadow: none; }
+body.dev-picking canvas#board { cursor: crosshair; outline: 3px dashed #3ce6ff; outline-offset: 3px; }
+#dev-sync { position: absolute; inset: 0; pointer-events: none; z-index: 9; }
+#dev-sync .dv-badge { position: absolute; left: 4px; top: 4px; font-size: 7px; padding: 2px 4px; border: 2px solid #000; color: #000; background: #3ddc84; }
+#dev-sync .dv-badge.anim { background: #ffd23f; } #dev-sync .dv-badge.bad { background: #ff4d6d; color: #fff; }
+#dev-sync .dv-cells i { position: absolute; border: 3px solid #ff2a4a; box-shadow: inset 0 0 0 2px #000; background: rgba(255, 42, 74, .25); }
 </style>
 <div id="app">
   <section id="screen-title" class="screen">
@@ -660,7 +785,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     <p class="sub">A MATCH-3 ROGUELIKE</p>
     <button id="btn-play" class="big-btn">PLAY</button>
     <button id="btn-glossary">GLOSSARY</button>
-    <div class="toggles"><button id="btn-mute-t">SOUND: ON</button><button id="btn-crt-t">CRT: ON</button></div>
+    <button id="btn-settings-t">SETTINGS</button>
   </section>
   <section id="screen-select" class="screen hidden" aria-labelledby="bs-title">
     <h2 id="bs-title">SELECT BOARD</h2>
@@ -672,7 +797,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     <div id="bs-subs" class="bs-panel hidden"><div class="bs-label">MAGIC: PICK 1-3 BOARDS <span id="bs-sub-count">0/3</span></div><div id="bs-sub-list"></div></div>
     <div id="bs-diff" class="bs-panel"><div class="bs-label">DIFFICULTY</div><div id="bs-diff-row" role="radiogroup" aria-label="Difficulty"></div><div id="bs-diff-desc"></div></div>
     <div class="bs-foot">
-      <label class="seed">SEED <input id="seed-input" maxlength="16" placeholder="random"></label>
+      <label class="seed">SEED <input id="seed-input" placeholder="RANDOM" autocomplete="off" spellcheck="false" autocapitalize="characters" aria-label="Seed: 8 letters or digits"></label>
       <div class="bs-btns">
         <button id="btn-back">BACK</button>
         <button id="btn-continue" class="hidden">CONTINUE<small id="continue-info"></small></button>
@@ -701,6 +826,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     </div>
     <main id="board-wrap">
       <div id="move-points"></div>
+      <button id="btn-skip" class="hidden" aria-label="Skip the animation (Space)">SKIP &gt;&gt;</button>
       <div id="target-bar" class="hidden"><span id="target-label"></span><span id="target-count"></span><button id="btn-target-ok" class="hidden">CONFIRM</button><button id="btn-target-cancel">CANCEL</button></div>
       <div id="board-col"><canvas id="board"></canvas><div id="fx"></div><div id="board-banner"></div>
         <div id="stuck-bar" class="hidden">NO MOVES LEFT &mdash; USE A RESCUE</div>
@@ -743,11 +869,34 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       <div class="vic-btns"><button id="vic-endless" class="big-btn">ENDLESS &gt;</button><button id="vic-new">NEW RUN</button><button id="vic-menu">MAIN MENU</button></div>
     </div>
   </div>
+  <div id="gameover" class="hidden" role="dialog" aria-modal="true" aria-labelledby="go-title">
+    <canvas id="go-fx" aria-hidden="true"></canvas>
+    <div class="go-vignette" aria-hidden="true"></div>
+    <div class="go-box">
+      <div class="go-rays" aria-hidden="true"></div>
+      <p class="go-kick">&#9888; FACTORY SHUT DOWN &#9888;</p>
+      <h2 id="go-title" class="go-title" aria-label="GAME OVER"></h2>
+      <p id="go-sub" class="go-sub"></p>
+      <div id="go-board" class="go-board"></div>
+      <div class="go-score">
+        <div class="go-score-top"><label>FINAL SCORE</label><span><b id="go-score-v">0</b> / <i id="go-target-v">0</i></span></div>
+        <div class="go-bar"><div id="go-bar-fill"></div><span id="go-pct">0%</span></div>
+      </div>
+      <div id="go-stats" class="go-stats"></div>
+      <div class="go-cards">
+        <div class="go-perks-wrap"><span class="go-label">PERKS</span><div id="go-perks" class="vic-perks"></div></div>
+        <div class="go-perks-wrap"><span class="go-label">UPGRADES</span><div id="go-ups" class="vic-perks"></div></div>
+      </div>
+      <div class="go-seed"><span class="go-label">SEED</span><b id="go-seed"></b><button id="go-copy">COPY</button></div>
+      <div class="go-btns"><button id="go-retry" class="big-btn">RETRY SAME SEED</button><button id="go-new">NEW RUN</button><button id="go-menu">MAIN MENU</button></div>
+    </div>
+  </div>
   <div id="modal" class="hidden"><div class="box"><h2 id="modal-title"></h2><div id="modal-body"></div><div id="modal-btns"></div></div></div>
   <div id="settings-modal" class="panel-modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title"><div class="box">
     <h2 id="settings-title">SETTINGS</h2>
     <div class="set-row"><span>CRT EFFECT</span><button id="set-crt">ON</button></div>
     <div class="set-row"><span>SOUND</span><button id="set-sound">ON</button></div>
+    <div class="set-row"><span>ANIM SPEED</span><button id="set-speed">1x</button></div>
     <div class="set-row vol"><label for="set-volume">VOLUME</label><input id="set-volume" type="range" min="0" max="100" step="5" value="100"><span id="set-volume-v">100</span></div>
     <div class="set-row menu"><button id="set-newrun">NEW RUN</button><button id="set-menu">MAIN MENU</button></div>
     <div class="panel-btns"><button class="panel-close">CLOSE</button></div>
@@ -829,20 +978,21 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   C.canMod = function (g) { return C.modable(g) && !g.mod; };           // can take a new one now
   C.setNextId = function (n) { nextId = Math.max(nextId, n); };
   C.peekNextId = function () { return nextId; };
-  C.SUFFIXES = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+  // v4.5: K and M only; from a billion on, e-notation (1.23e9, 1.23e12...), 3 significant digits throughout
+  C.SUFFIXES = ['', 'K', 'M'];
   C.fmt = function (n) {
     if (!isFinite(n)) return n < 0 ? '-∞' : '∞';
     const sign = n < 0 ? '-' : '';
     const a = Math.abs(n);
     if (a < 1000) return sign + Math.floor(a).toLocaleString('en-US');
-    if (a < 1e36) {
+    if (a < 1e9) {
       let tier = Math.floor(Math.log10(a) / 3);
       while (tier > 1 && a < Math.pow(1000, tier)) tier--;
       while (a >= Math.pow(1000, tier + 1)) tier++;
       let v = a / Math.pow(1000, tier);
       let s = v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2);
       if (Number(s) >= 1000) { tier++; v = a / Math.pow(1000, tier); s = v.toFixed(2); }
-      if (tier < C.SUFFIXES.length) return sign + s + C.SUFFIXES[tier];
+      if (tier < C.SUFFIXES.length) return sign + s + C.SUFFIXES[tier]; // 999.95M rounds up: falls through to 1.00e9
     }
     let e = Math.floor(Math.log10(a));
     let m = a / Math.pow(10, e);
@@ -968,6 +1118,28 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
     return h >>> 0;
   };
+  // v4.5 seeds: 8 characters A-Z 0-9 (case-insensitive, shown uppercase). seedFrom turns a seed text into the RNG's
+  // 32-bit seed, deterministically: all digits (old numeric seeds, typed or saved) -> that number, as before v4.5;
+  // anything else -> FNV hash of the uppercase text. randomSeed: a fresh 8-character text (Math.random).
+  RNG.SEED_LEN = 8;
+  RNG.SEED_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  // input cleanup: uppercase letters and digits only; text with a letter keeps 8 chars, an all-digit (old numeric)
+  // seed keeps up to 10 so every 32-bit number can still be typed in
+  RNG.cleanSeed = function (txt) {
+    const s = String(txt == null ? '' : txt).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return /^\d+$/.test(s) ? s.slice(0, 10) : s.slice(0, RNG.SEED_LEN);
+  };
+  RNG.seedFrom = function (txt) {
+    const s = RNG.cleanSeed(txt);
+    if (!s) return 1;
+    return /^\d+$/.test(s) ? Number(s) >>> 0 : RNG.hash(s);
+  };
+  RNG.randomSeed = function (rand) {
+    rand = rand || Math.random;
+    let s = '';
+    for (let i = 0; i < RNG.SEED_LEN; i++) s += RNG.SEED_CHARS.charAt(Math.floor(rand() * RNG.SEED_CHARS.length));
+    return s;
+  };
   GF.RNG = RNG;
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
@@ -1069,22 +1241,23 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     }
   }
 
-  def({ id: 'default', name: 'DEFAULT', color: '#e8e8e8', desc: 'The classic game.' });
-  def({ id: 'red', name: 'RED', color: '#ff4d4d', desc: 'BREAK: smash any gem, 3 per round. No move spent.',
+  // v4.5: board descriptions are a few words each, no explanations (the glossary / tooltips explain abilities)
+  def({ id: 'default', name: 'DEFAULT', color: '#e8e8e8', desc: 'Classic rules' });
+  def({ id: 'red', name: 'RED', color: '#ff4d4d', desc: 'BREAK: smash 3 gems per round',
     hooks: { roundStart: (run) => { charge(run, 'break'); } } });
-  def({ id: 'blue', name: 'BLUE', color: '#4f9dff', desc: 'SHOP SWAP: in the shop, swap 2 adjacent gems on the board, 10 per shop.',
+  def({ id: 'blue', name: 'BLUE', color: '#4f9dff', desc: 'SHOP SWAP: 10 swaps per shop',
     hooks: { onCreate: (run) => { charge(run, 'shopSwap'); }, shopOpen: (run) => { charge(run, 'shopSwap'); } } });
-  def({ id: 'yellow', name: 'YELLOW', color: '#ffd23f', desc: 'Start with $20.',
+  def({ id: 'yellow', name: 'YELLOW', color: '#ffd23f', desc: 'Start with $20',
     hooks: { onCreate: (run) => { run.money += 10; } } });
-  def({ id: 'orange', name: 'ORANGE', color: '#ff8c42', desc: 'SCRAMBLE: shuffle the board for free, 2 per round.',
+  def({ id: 'orange', name: 'ORANGE', color: '#ff8c42', desc: 'SCRAMBLE: 2 free shuffles per round',
     hooks: { roundStart: (run) => { charge(run, 'scramble'); } } });
-  def({ id: 'purple', name: 'PURPLE', color: '#b57bff', desc: 'Swap any 2 gems anywhere, as long as it makes a match.',
+  def({ id: 'purple', name: 'PURPLE', color: '#b57bff', desc: 'Swap any 2 gems that match',
     hooks: { swapRule: () => 'any' } });
-  def({ id: 'black', name: 'BLACK', color: '#5a5a66', desc: 'Falling gems have a 7% chance to be Coal (max 20 Coal). Targets x0.7.',
+  def({ id: 'black', name: 'BLACK', color: '#5a5a66', desc: '7% Coal spawns. Targets x0.7',
     hooks: { targetMul: flatMul('black'), spawnGem: (run, gem, board) => (GF.Board.coalCount(board) < COAL_MAX && run.rng.chance(COAL_CHANCE) ? C.gem('coal') : gem) } });
-  def({ id: 'green', name: 'GREEN', color: '#3ddc84', desc: 'Everything in the shop is 50% off. Rerolls cost x4.',
+  def({ id: 'green', name: 'GREEN', color: '#3ddc84', desc: 'Shop 50% off. Rerolls x4',
     hooks: { price: (run, p) => p * 0.5, rerollPrice: (run, p) => p * 4 } });
-  def({ id: 'hell', name: 'HELL', color: '#a3162b', desc: 'Start with a random rare perk. Only 15 base moves.',
+  def({ id: 'hell', name: 'HELL', color: '#a3162b', desc: 'Start with a rare perk. 15 moves',
     hooks: {
       onCreate: (run) => {
         const owned = new Set(run.perks.map((p) => p.id));
@@ -1098,7 +1271,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       },
       baseMoves: (run, v) => v - 5,
     } });
-  def({ id: 'haunted', name: 'HAUNTED', color: '#8a7fa8', desc: 'Every cell holds a Direction tile that fires after every move. Targets x6.',
+  def({ id: 'haunted', name: 'HAUNTED', color: '#8a7fa8', desc: 'Direction tile on every cell. Targets x6',
     hooks: {
       targetMul: flatMul('haunted'),
       onCreate: (run) => {
@@ -1107,16 +1280,16 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       },
       tilePeriod: (run, p, id) => (id === 'direction' ? 1 : p),
     } });
-  def({ id: 'strange', name: 'STRANGE', color: '#2ec4b6', desc: 'Every cell holds a Mystery tile. Targets x3.5.',
+  def({ id: 'strange', name: 'STRANGE', color: '#2ec4b6', desc: 'Mystery tile on every cell. Targets x3.5',
     hooks: { targetMul: flatMul('strange'), onCreate: (run) => { if (!has(run, 'haunted')) fillTiles(run, () => 'mystery'); } } });
-  def({ id: 'survival', name: 'SURVIVAL', color: '#8b5a2b', desc: 'No refills. Gems can move into empty cells. Missed swaps are free. REFILL: +32 gems to a refill pool, 3 per round. Each new round adds 64 gems, and so does a FULL CLEAR. Targets x0.65.',
+  def({ id: 'survival', name: 'SURVIVAL', color: '#8b5a2b', desc: 'No refills. REFILL: +32 gems. Targets x0.65',
     hooks: {
       targetMul: flatMul('survival'),
       roundStart: (run) => { charge(run, 'refill'); },
       refillEnabled: () => false,
       freeNoMatchSwap: () => true,
     } });
-  def({ id: 'mono', name: 'MONO', color: '#c0c6cc', desc: 'Only 5 colours. Targets x2, and x1.25 more each round.',
+  def({ id: 'mono', name: 'MONO', color: '#c0c6cc', desc: 'Only 5 colours. Targets x2, +25%/round',
     hooks: {
       targetMul: (run, v, n) => v * MONO_MUL * Math.pow(MONO_MUL_GROWTH, Math.max(0, (n || 1) - 1)),
       onCreate: (run) => {
@@ -1124,7 +1297,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
         run.removedColors = ALL7.filter((k) => keep.indexOf(k) < 0);
       },
     } });
-  def({ id: 'random', name: 'RANDOM', color: '#ff7ad9', desc: 'Each colour spawns at a random rate (0-45%). Targets x1.5.',
+  def({ id: 'random', name: 'RANDOM', color: '#ff7ad9', desc: 'Random colour rates 0-45%. Targets x1.5',
     hooks: {
       targetMul: flatMul('random'),
       onCreate: (run) => { run.boardState.weights = randomWeights(run.rng, GF.Resolver.colorsOf(run)); },
@@ -1134,7 +1307,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
         return ALL7.map((k) => rw[k] * (w ? w[k] : 1));
       },
     } });
-  def({ id: 'magic', name: 'MAGIC', color: '#e040fb', desc: 'Pick 1-3 boards and play them all at once.' });
+  def({ id: 'magic', name: 'MAGIC', color: '#e040fb', desc: 'Play 1-3 boards at once' });
 
   // v4.2 display order (SELECT BOARD strip, glossary, Magic picker, labels): Default, the 6 colours in rainbow order,
   // then the rest. ORDER stays the definition order, which is also the order board hooks chain in (and so the order
@@ -1213,14 +1386,16 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   function clamp(d) { d = Math.floor(+d); return d >= 1 && d <= MAX ? d : d > MAX ? MAX : 1; }
   function targetMul(run) { const d = lv(run); return d >= 6 ? 1.5 : d >= 3 ? 1.1 : 1; }
   function priceMul(run) { return lv(run) >= 4 ? 1.25 : 1; }
-  function noMovesLoses(run) { return lv(run) >= 2 && !run.legacy; }
-  function locks(run) { return lv(run) >= 5; }
+  // v4.5 DEV MODE overrides (GF.Difficulty.dev.locks / .noMoves: null = the level's rule, true / false = forced)
+  const dev = { locks: null, noMoves: null };
+  function noMovesLoses(run) { return dev.noMoves != null ? !!dev.noMoves : lv(run) >= 2 && !run.legacy; }
+  function locks(run) { return dev.locks != null ? !!dev.locks : lv(run) >= 5; }
   // Locked gems (V-VI): each move (not free resolves) has LOCK_CHANCE of warning 1..LOCK_PICK gems, which lock on
   // the next move; at most LOCK_MAX gems are warned or locked at once (Resolver.lockEvent).
   const LOCK_CHANCE = 0.10, LOCK_MAX = 15, LOCK_PICK = 3;
   function roman(run) { return LEVELS[lv(run)].name; }
 
-  GF.Difficulty = { LEVELS, MAX, rules, LOCK_CHANCE, LOCK_MAX, LOCK_PICK, clamp, targetMul, priceMul, noMovesLoses, locks, roman };
+  GF.Difficulty = { dev, LEVELS, MAX, rules, LOCK_CHANCE, LOCK_MAX, LOCK_PICK, clamp, targetMul, priceMul, noMovesLoses, locks, roman };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- board.js
@@ -3963,11 +4138,17 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   const C = GF.C;
 
   // opts (v4.0): {board: board id (default 'default'), subs: Magic sub-board ids, difficulty: 1..6 (default 1; v4.1)}.
+  // v4.5 seed: a number (as before: tests, tools, old numeric seeds) or a seed text (GF.RNG.seedFrom: 8 chars A-Z 0-9);
+  // none -> a random 8-character text. run.seed is the 32-bit RNG seed, run.seedText what the player sees / types.
   function create(seed, opts) {
     opts = opts || {};
-    if (seed == null) seed = (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0;
+    let text;
+    if (seed == null || seed === '') text = GF.RNG.randomSeed();
+    else if (typeof seed === 'string') text = GF.RNG.cleanSeed(seed) || GF.RNG.randomSeed();
+    if (text != null) seed = GF.RNG.seedFrom(text);
+    else text = String(seed >>> 0);
     const run = {
-      seed: seed >>> 0, rng: new GF.RNG(seed), round: 1, money: C.START_MONEY, perkSlots: C.START_SLOTS,
+      seed: seed >>> 0, seedText: text, rng: new GF.RNG(seed), round: 1, money: C.START_MONEY, perkSlots: C.START_SLOTS,
       perks: [], polish: [0, 0, 0, 0, 0, 0, 0], removedColors: [], extraMoves: 0, movesLeft: 0, moveIndex: 0,
       score: 0, phase: 'shop', endless: false,
       cardSlots: C.CARD_SLOTS, consumables: [], openPack: null, pendingPlace: [], vouchers: [], voucherBlock: null, voucherOffer: null, shop: null, stats: newStats(), board: GF.Board.create(),
@@ -4457,6 +4638,8 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     return { base: C.BASE_INCOME, leftover: leftover, leftoverIncome: leftoverIncome, perkIncome: perkIncome, perkMoney: perkMoney, interest: interest, interestCap: interestCap, income: income, total: income + perkMoney, steps: steps };
   }
   function continueEndless(run) { run.endless = true; run.phase = 'shop'; }
+  // v4.5: the seed as shown (old saves without seedText: their number)
+  function seedLabel(run) { return run && run.seedText ? String(run.seedText) : String(run ? run.seed >>> 0 : ''); }
 
   // The whole run, mid-round included (board, tiles and counters, score, movesLeft, moveIndex, perk states, cards,
   // shop). nextId: the gem id counter, so gems made after a resume never reuse an id held in a perk state or snapshot.
@@ -4590,7 +4773,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   function clearSave() { try { localStorage.removeItem(C.SAVE_KEY); } catch (e) { /* storage unavailable */ } }
   function hasSave() { try { return !!localStorage.getItem(C.SAVE_KEY); } catch (e) { return false; } }
 
-  GF.Run = { KINDS, newStats, fillStats, stats, bump, earn, recordMove, create, target, targetFor, colors, roundMoves, moneyFloor, startRound, swapKind, doMove, finishRound, continueEndless, freeResolve, rescues, stuckEnd, RESCUE_BANNER,
+  GF.Run = { KINDS, newStats, fillStats, stats, bump, earn, recordMove, create, target, targetFor, colors, roundMoves, moneyFloor, startRound, swapKind, doMove, finishRound, continueEndless, seedLabel, freeResolve, rescues, stuckEnd, RESCUE_BANNER,
     abilities, canUseAbility, useAbility, survivalEnd, blazeFill, blazeTick, blazeDrains, blazeDrain,
     timerReady, timerStart, timerSwap, timerEnd, timerBatch,
     serialize, deserialize, save, load, clearSave, hasSave };
@@ -4601,11 +4784,14 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   'use strict';
   const C = GF.C;
   // v4.2 per-board records (SELECT BOARD shows them under each card): the best run on each board, keyed by board id
-  // (Magic as a whole is 'magic', whatever its sub-boards). A record is {round, bestMove}: round is the highest round
-  // reached (a won run counts as round 20; endless counts its round number), bestMove that run's best move.
-  // A run beats a record by reaching a higher round, or the same round with a higher best move. The UI records the
-  // live run whenever it reaches a new round and when it ends or is left, so quitting mid-run keeps its progress.
+  // (Magic as a whole is 'magic', whatever its sub-boards). A record is {round, bestMove, diff}: round is the highest
+  // round reached (a won run counts as round 20; endless counts its round number), bestMove that run's best move,
+  // diff its difficulty (v4.5; 1-6, records saved before v4.5 have none and count as I).
+  // v4.5 ranking: higher difficulty first, then higher round (at the same round a victory beats a loss), then higher
+  // best move. The UI records the live run whenever it reaches a new round and when it ends or is left, so quitting
+  // mid-run keeps its progress. Dev runs (run.dev, DEV MODE) never write a record.
   const KEY = 'gemfactory.records.v1';
+  const MAXD = () => (GF.Difficulty && GF.Difficulty.MAX) || 6;
   // The round a run has reached: finishRound already moved round on past the final round when it won
   function reached(run) {
     if (!run) return 0;
@@ -4614,8 +4800,9 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   }
   // v4.4: a run that cleared round 20 (the victory screen, or endless after it) is recorded as a victory (won: true)
   function won(run) { return !!run && ((run.phase === 'victory' && run.round > C.ROUNDS) || !!run.endless); }
+  const diffOf = (r) => { const d = Math.floor(+(r && r.diff)); return d >= 1 && d <= MAXD() ? d : 1; };
   function entry(run) {
-    const e = { round: reached(run), bestMove: Math.max(0, Math.floor((run && run.stats && run.stats.bestMove) || 0)) };
+    const e = { round: reached(run), bestMove: Math.max(0, Math.floor((run && run.stats && run.stats.bestMove) || 0)), diff: diffOf({ diff: run && run.difficulty }) };
     if (won(run)) e.won = true;
     return e;
   }
@@ -4624,6 +4811,8 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   function better(a, b) {
     if (!valid(a)) return false;
     if (!valid(b)) return true;
+    const da = diffOf(a), db = diffOf(b);
+    if (da !== db) return da > db;
     if (a.round !== b.round) return a.round > b.round;
     if (!!a.won !== !!b.won) return !!a.won; // v4.4: at the same round a victory beats a loss
     return a.bestMove > b.bestMove;
@@ -4635,18 +4824,26 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
     } catch (e) { return {}; }
   }
-  function get(id) { const r = all()[id]; if (!valid(r)) return null; const o = { round: r.round, bestMove: r.bestMove }; if (r.won) o.won = true; return o; }
+  // a stored record in the current shape (v4.5 migration: no difficulty -> I)
+  function norm(r) { if (!valid(r)) return null; const o = { round: r.round, bestMove: r.bestMove, diff: diffOf(r) }; if (r.won) o.won = true; return o; }
+  function get(id) { return norm(all()[id]); }
   // Records the run if it beats its board's record. Returns true when the record changed.
   function update(run) {
-    if (!run) return false;
+    if (!run || run.dev) return false;
     const id = keyOf(run), rec = all(), e = entry(run);
     if (!better(e, rec[id])) return false;
     rec[id] = e;
     try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e2) { return false; }
     return true;
   }
+  // v4.5 SELECT BOARD lines: {run: 'ROUND 32' | 'VICTORY' | 'VICTORY R24', diff, move: number} or null
+  function describe(r) {
+    r = norm(r);
+    if (!r) return null;
+    return { run: r.won ? (r.round > C.ROUNDS ? 'VICTORY R' + r.round : 'VICTORY') : 'ROUND ' + r.round, diff: r.diff, move: r.bestMove, won: !!r.won };
+  }
 
-  GF.Records = { KEY, reached, won, entry, better, keyOf, all, get, update };
+  GF.Records = { KEY, reached, won, entry, better, keyOf, all, get, update, norm, describe };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- cards.js
@@ -9711,6 +9908,15 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   const lastGroups = new WeakMap(); // hooks object -> match groups waiting for their clear step
   const display = { cells: Array.from({ length: N }, () => Array(N).fill(null)) };
   const Anim = { speed: 1, display: display };
+  // v4.5 SKIP: while skipping, every tween lands at once, every wait resolves at once, and the cosmetic calls
+  // (render effects, sounds) go to a no-op, so the queued timelines run through all their steps (and hooks: score,
+  // money, perk boxes) within a few microtasks. Cleared when the queue drains (or cancelAll).
+  let skipping = false;
+  const noop = () => {};
+  const NOFX = typeof Proxy !== 'undefined' ? new Proxy({}, { get: () => noop }) : {};
+  const Rx = () => (skipping ? NOFX : GF.Render);
+  const Ax = () => (skipping ? NOFX : GF.Audio);
+  const waits = new Set();
 
   // gem.lock (v4.0 locked gems: 'warn' | 'locked') rides on the sprite; render draws the chains from it
   function sprite(gem, x, y) {
@@ -9719,6 +9925,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     return { gem: sg, x: x, y: y, s: 1, a: 1 };
   }
   function tween(obj, to, ms, ease) {
+    if (skipping) { for (const k in to) obj[k] = to[k]; return Promise.resolve(); }
     return new Promise((res) => {
       const from = {};
       for (const k in to) from[k] = obj[k];
@@ -9735,7 +9942,19 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       if (p >= 1) { tweens.splice(i, 1); tw.res(); }
     }
   }
-  function wait(ms) { return new Promise((r) => setTimeout(r, ms / Anim.speed)); }
+  function wait(ms) {
+    if (skipping) return Promise.resolve();
+    return new Promise((r) => {
+      const w = { res: r, id: 0 };
+      w.id = setTimeout(() => { waits.delete(w); r(); }, ms / Anim.speed);
+      waits.add(w);
+    });
+  }
+  // lands every running tween and resolves every pending wait now
+  function flush() {
+    while (tweens.length) { const tw = tweens.pop(); for (const k in tw.to) tw.obj[k] = tw.to[k]; tw.res(); }
+    for (const w of Array.from(waits)) { clearTimeout(w.id); waits.delete(w); w.res(); }
+  }
   function syncCells(cells) {
     while (tweens.length) tweens.pop().res();
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) display.cells[r][c] = cells[r][c] ? sprite(cells[r][c], c, r) : null;
@@ -9855,14 +10074,14 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     if (i >= 0) queue.splice(i, 1);
     e.resolve();
     schedule();
-    if (!queue.length) { const w = idleWaiters; idleWaiters = []; w.forEach((f) => f()); }
+    if (!queue.length) { skipping = false; const w = idleWaiters; idleWaiters = []; w.forEach((f) => f()); }
   }
   function run(steps, hooks) {
     const suffix = new Array(steps.length + 1);
     suffix[steps.length] = new Set();
     for (let i = steps.length - 1; i >= 0; i--) suffix[i] = stepFootprint(steps[i], new Set(suffix[i + 1]));
     return new Promise((resolve) => {
-      const e = { steps: steps, hooks: hooks, suffix: suffix, idx: 0, started: false, resolve: resolve };
+      const e = { steps: steps, hooks: hooks, suffix: suffix, idx: 0, started: false, resolve: resolve, t0: performance.now() };
       queue.push(e);
       schedule();
     });
@@ -9877,11 +10096,24 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   // Drop every timeline (leaving a run). Pending promises resolve; running loops stop at their next step.
   function cancelAll() {
     gen++;
+    skipping = false;
     const q = queue.splice(0);
     q.forEach((e) => e.resolve());
     const w = idleWaiters; idleWaiters = []; w.forEach((f) => f());
   }
 
+  // v4.5: when the oldest running / queued timeline was handed over (performance.now()), null when idle
+  function oldest() { let t = null; for (const e of queue) if (t == null || e.t0 < t) t = e.t0; return t; }
+  // v4.5 SKIP: fast-forwards every running and queued timeline to its end (their hooks still apply every effect).
+  // Returns a promise resolving when the queue has drained (at once when idle).
+  function skip() {
+    if (!queue.length) return Promise.resolve(false);
+    skipping = true;
+    stats.skips = (stats.skips || 0) + 1;
+    const done = idle().then(() => true);
+    flush();
+    return done;
+  }
   // v4.1 shuffles (no-moves shuffle, Tempest, SCRAMBLE, Survival, Time Machine): every gem still on the board
   // (same id) slides from its old cell to its new one along a slight arc, one after another; gems that are gone fade
   // out first and new gems (new ids) pop in. Reduced motion: no arc, no stagger, a short glide.
@@ -9936,7 +10168,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     switch (s.t) {
       case 'swap': case 'tileswap': {
         // tileswap: a Direction tile moves its gem (the tile stays): same slide, slower, with a tile pulse
-        if (s.t === 'tileswap') { GF.Render.pulseTile(s.r, s.c); GF.Audio.tick(3); if (s.slot != null) GF.Render.flashCells([[s.r, s.c]], 'wizard'); }
+        if (s.t === 'tileswap') { Rx().pulseTile(s.r, s.c); Ax().tick(3); if (s.slot != null) Rx().flashCells([[s.r, s.c]], 'wizard'); }
         const A = D[s.a.r][s.a.c], B = D[s.b.r][s.b.c];
         D[s.a.r][s.a.c] = B; D[s.b.r][s.b.c] = A;
         const ms = s.t === 'tileswap' ? 220 : 140;
@@ -9957,8 +10189,8 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
           seen.add(k);
           if (sp.x !== p.c || sp.y !== p.r) ps.push(tween(sp, { x: p.c, y: p.r }, 260));
         }
-        GF.Audio.tick(3);
-        if (GF.Render.hauntPulse) GF.Render.hauntPulse(s.swaps);
+        Ax().tick(3);
+        if (Rx().hauntPulse) Rx().hauntPulse(s.swaps);
         await Promise.all(ps);
         break;
       }
@@ -9970,27 +10202,27 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
         // Prism + Prism: one big white flash and a rainbow wave over the whole board (the other prism's step is silent)
         if (s.boardClear) {
           if (!s.cleared) break;
-          GF.Audio.boom(); GF.Audio.chord(); GF.Audio.sweep();
-          GF.Render.boardWave(s.r, s.c);
-          GF.Render.shake(14);
+          Ax().boom(); Ax().chord(); Ax().sweep();
+          Rx().boardWave(s.r, s.c);
+          Rx().shake(14);
           await wait(520);
           break;
         }
-        if (s.kind === 'supernova') { GF.Audio.boom(); GF.Audio.sweep(); }
-        else if (s.kind === 'bomb') GF.Audio.boom(); else if (s.kind === 'star') GF.Audio.sweep();
-        else if (s.kind === 'shiny') GF.Audio.created('shiny'); else GF.Audio.chord();
-        if (s.shiny) GF.Audio.created('shiny');
-        GF.Render.flashCells(s.cells, s.kind, s.r, s.c);
+        if (s.kind === 'supernova') { Ax().boom(); Ax().sweep(); }
+        else if (s.kind === 'bomb') Ax().boom(); else if (s.kind === 'star') Ax().sweep();
+        else if (s.kind === 'shiny') Ax().created('shiny'); else Ax().chord();
+        if (s.shiny) Ax().created('shiny');
+        Rx().flashCells(s.cells, s.kind, s.r, s.c);
         // Pressured into Diamonds: the prism fired on coal squeezes every coal into dark crystal
-        if (s.coal) { GF.Render.flashCells(s.cells, 'coal'); GF.Render.crystalize(s.cells); GF.Audio.created('shiny'); }
-        GF.Render.shake(s.kind === 'supernova' ? 14 : s.kind === 'bomb' ? 10 : s.kind === 'shiny' ? 4 : 6);
+        if (s.coal) { Rx().flashCells(s.cells, 'coal'); Rx().crystalize(s.cells); Ax().created('shiny'); }
+        Rx().shake(s.kind === 'supernova' ? 14 : s.kind === 'bomb' ? 10 : s.kind === 'shiny' ? 4 : 6);
         await wait(140);
         break;
       // Meteor perk: a star-tinted 3x3 impact (bomb shockwave) around a matched Star
       case 'meteor':
-        GF.Audio.boom();
-        GF.Render.flashCells(s.cells, 'meteor', s.r, s.c);
-        GF.Render.shake(8);
+        Ax().boom();
+        Rx().flashCells(s.cells, 'meteor', s.r, s.c);
+        Rx().shake(8);
         await wait(140);
         break;
       // perks destroyed by this move (Martyr, Time Machine): the card fades out of the row
@@ -10000,7 +10232,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       // v4.3 Blazing Speed: the meter as it stood after this cascade level's matches (up: levels gained there)
       case 'blaze': if (H.blaze) H.blaze(s); break;
       case 'clear': {
-        GF.Audio.pop(s.level);
+        Ax().pop(s.level);
         const ps = [], grouped = new Set(), groups = lastGroups.get(H);
         lastGroups.delete(H);
         if (groups) {
@@ -10024,14 +10256,14 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
           const sp = D[c.r][c.c];
           // a matched locked gem scores but stays (its chains break in the following 'unlock' step)
           if (sp && c.unlock) { ps.push(tween(sp, { s: 1.15 }, 90).then(() => tween(sp, { s: 1 }, 90))); }
-          else if (sp) { GF.Render.burst(c.r, c.c, sp.gem); ps.push(tween(sp, { s: 0, a: 0 }, 180)); }
+          else if (sp) { Rx().burst(c.r, c.c, sp.gem); ps.push(tween(sp, { s: 0, a: 0 }, 180)); }
           // broken coal scores in its own 'coal' step; matched gems were summed into their group's popup
           if (!s.boardClear && c.kind !== 'coal' && !grouped.has(c.r * N + c.c)) H.float(c.r, c.c, '+' + GF.C.fmt(c.v), '');
         }
         H.setMovePoints(s.total, s.level);
         const broken = s.cells.filter((c) => !c.unlock);
         if (H.cleared && broken.length) H.cleared(broken.length, s.level);
-        GF.Render.shake(Math.min(8, broken.length / 2));
+        Rx().shake(Math.min(8, broken.length / 2));
         const faded = broken.map((c) => D[c.r][c.c]);
         await Promise.all(ps);
         // only drop the sprites this step faded: a resync (new run, load) may have refilled the grid meanwhile
@@ -10055,18 +10287,18 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
         if (H.coalAward) H.coalAward(s);
         break;
       }
-      case 'money': GF.Audio.ching(); H.float(s.r, s.c, '+$' + s.money, 'money'); H.money(); await wait(60); break;
+      case 'money': Ax().ching(); H.float(s.r, s.c, '+$' + s.money, 'money'); H.money(); await wait(60); break;
       case 'perk':
         H.perkFire(s);
-        if (s.mul) GF.Audio.mult(); else GF.Audio.tick(s.slot);
-        if (s.money) GF.Audio.ching();
+        if (s.mul) Ax().mult(); else Ax().tick(s.slot);
+        if (s.money) Ax().ching();
         H.setMovePoints(s.total);
         await wait(s.mul ? 420 : 170);
         break;
       case 'create': {
         const sp = sprite(s.gem, s.c, s.r); sp.s = 0;
         D[s.r][s.c] = sp;
-        GF.Audio.created(s.gem.kind);
+        Ax().created(s.gem.kind);
         await tween(sp, { s: 1 }, 150);
         break;
       }
@@ -10098,17 +10330,17 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
         break;
       }
       case 'tile': {
-        GF.Render.pulseTile(s.r, s.c);
-        if (s.slot != null) GF.Render.flashCells([[s.r, s.c]], 'wizard'); // fired by a perk (Wizard): a bright flash
+        Rx().pulseTile(s.r, s.c);
+        if (s.slot != null) Rx().flashCells([[s.r, s.c]], 'wizard'); // fired by a perk (Wizard): a bright flash
         let pop = null;
-        if (s.gem) { GF.Audio.created(s.modded ? s.gem.mod : s.gem.kind); const sp = sprite(s.gem, s.c, s.r); sp.s = 1.5; D[s.r][s.c] = sp; pop = tween(sp, { s: 1 }, 180); }
+        if (s.gem) { Ax().created(s.modded ? s.gem.mod : s.gem.kind); const sp = sprite(s.gem, s.c, s.r); sp.s = 1.5; D[s.r][s.c] = sp; pop = tween(sp, { s: 1 }, 180); }
         if (s.moves) { H.float(s.r, s.c, '+1 MOVE', 'money'); H.moves(); }
         await Promise.all([wait(110), pop]); // the cell stays in this step's footprint until the pop settles
         break;
       }
       // a perk or card edited a gem (transform / setGems / prelude): pop the new sprite in place
       case 'transform': {
-        GF.Audio.created(s.gem.kind !== 'normal' ? s.gem.kind : s.gem.mod);
+        Ax().created(s.gem.kind !== 'normal' ? s.gem.kind : s.gem.mod);
         const sp = sprite(s.gem, s.c, s.r); sp.s = 1.4; D[s.r][s.c] = sp;
         await tween(sp, { s: 1 }, 160);
         break;
@@ -10122,8 +10354,8 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
           if (s.t === 'unlock') delete sp.gem.lock; else sp.gem.lock = s.t === 'lock' ? 'locked' : 'warn';
           sp.lockAt = now;
         }
-        if (GF.Render.chains) GF.Render.chains(s.cells, s.t);
-        if (s.t === 'lock') { GF.Audio.clank(); GF.Render.shake(3); } else if (s.t === 'unlock') GF.Audio.unchain(); else GF.Audio.tick(1);
+        if (Rx().chains) Rx().chains(s.cells, s.t);
+        if (s.t === 'lock') { Ax().clank(); Rx().shake(3); } else if (s.t === 'unlock') Ax().unchain(); else Ax().tick(1);
         await wait(s.t === 'lockWarn' ? 120 : 200);
         break;
       }
@@ -10131,7 +10363,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       // v3.11: a big board banner (Last Hurrah); hosts without bigBanner fall back to the toast
       case 'banner': {
         if (H.bigBanner) H.bigBanner(s.text, s.kind); else H.banner(s.text);
-        GF.Audio.chord();
+        Ax().chord();
         // the popup lands before the specials fire (FULL CLEAR!: before the refill falls)
         await wait(s.kind === 'lastHurrah' ? 1100 : s.kind === 'fullClear' ? 1000 : 700);
         break;
@@ -10141,7 +10373,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
         // Descrambler: a big banner, then every gem slides to its sorted cell, one after another in reading order
         if (s.descramble) {
           if (H.bigBanner) H.bigBanner(s.label || 'DESCRAMBLED!', 'descramble'); else H.banner(s.label || 'DESCRAMBLED!');
-          GF.Audio.sweep();
+          Ax().sweep();
           const byId = new Map(), next = Array.from({ length: N }, () => Array(N).fill(null)), ps = [];
           for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (D[r][c]) byId.set(D[r][c].gem.id, D[r][c]);
           let i = 0;
@@ -10174,7 +10406,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     }
   }
 
-  Object.assign(Anim, { tween, update, wait, sync, syncCells, bump, play, atRest, footprint, geodePlan, run, active, busyCells, idle, cancelAll, stats });
+  Object.assign(Anim, { skip, oldest, isSkipping: () => skipping, tween, update, wait, sync, syncCells, bump, play, atRest, footprint, geodePlan, run, active, busyCells, idle, cancelAll, stats });
   GF.Anim = Anim;
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
@@ -10213,8 +10445,12 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   function show(id) { ['screen-title', 'screen-select', 'screen-game'].forEach((s) => $(s).classList.toggle('hidden', s !== id)); }
 
   // ---------- feedback ----------
+  // v4.5 SKIP: while the animator fast-forwards, floats / popups / banners are suppressed (a detached element is
+  // returned so callers can still style it)
+  const skipFx = () => GF.Anim.isSkipping();
   function spawnFloat(parent, x, y, text, cls) {
     const el = document.createElement('div');
+    if (skipFx()) return el;
     el.className = 'float ' + (cls || '');
     el.textContent = text;
     el.style.left = x + 'px'; el.style.top = y + 'px';
@@ -10226,12 +10462,13 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   // Floating idle animation: phase follows a shared clock so re-rendering the DOM never snaps it back to the start.
   function floatPhase(el, period, i) { el.style.animationDelay = (-((performance.now() / 1000) % period) - i * 0.4) + 's'; }
   function restart(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
-  function flash() { restart($('flash'), 'on'); }
+  function flash() { if (!skipFx()) restart($('flash'), 'on'); }
   // v4.2 multiplier popups: "xN" pops at the centre of the board, big and bouncy in the mult red (styled like the
   // round banner). Several in one move stack: each new one pops in the middle and nudges the ones still showing up,
   // smaller and fainter; at most MULPOP_MAX are on screen (the oldest leaves first), so quick runs stay legible.
   const MULPOP_MAX = 3, MULPOP_MS = 1100;
   function mulPop(t) {
+    if (skipFx()) return;
     const col = $('board-col');
     col.querySelectorAll('.mulpop:not(.out)').forEach((el) => {
       const k = (+el.dataset.k || 0) + 1;
@@ -10249,6 +10486,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   // long: a smaller, wrapping banner that stays a little longer (NO MOVES LEFT, SHUFFLING)
   // kind: a styled big banner ('lastHurrah': golden red, 'descramble': purple)
   function roundBanner(t, long, kind) {
+    if (skipFx()) return;
     const el = $('board-banner');
     el.textContent = t; el.classList.toggle('long', !!long);
     el.classList.toggle('hurrah', kind === 'lastHurrah'); el.classList.toggle('descr', kind === 'descramble');
@@ -10302,13 +10540,13 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     // one popup per match group, at its centre, in its colour (r/c may be fractional)
     matchPop(r, c, text, color) { const p = GF.Render.cellCenter(r, c); const el = spawnFloat($('fx'), p.x, p.y, text, 'match'); el.style.color = color != null ? GF.Render.colorHex(color) : '#ffffff'; },
     // broken coal: its geodes fly up like fireworks and fall where the animator pops their points (plan: landings)
-    coalBreak(s, plan) { GF.Render.geodes(s.r, s.c, plan); GF.Audio.crack(); },
-    geodeLand(s, k) { GF.Render.geodeLand(s.r, s.c, k); GF.Audio.geode(k); },
+    coalBreak(s, plan) { if (skipFx()) return; GF.Render.geodes(s.r, s.c, plan); GF.Audio.crack(); },
+    geodeLand(s, k) { if (skipFx()) return; GF.Render.geodeLand(s.r, s.c, k); GF.Audio.geode(k); },
     perkFire(s) {
       // uid (tagged in trySwap) survives perks removed by an earlier, still-animating move
       const row = $('perk-row');
       const card = s.uid != null ? row.querySelector('.perk[data-uid="' + s.uid + '"]') : row.children[s.slot];
-      if (card) {
+      if (card && !skipFx()) {
         const inner = card.querySelector('.inner');
         if (inner) restart(inner, 'shake');
         const r = card.getBoundingClientRect(), a = $('app').getBoundingClientRect();
@@ -10353,11 +10591,12 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     },
     // Time Machine: VHS-style rewind over the screen, then the old board comes back with +5 moves
     rewind() {
+      S.movesHold = null;
+      refreshHud();
+      if (skipFx()) return;
       restart($('rewind'), 'on'); restart($('board'), 'rw');
       roundBanner('TIME MACHINE!');
       GF.Audio.sweep();
-      S.movesHold = null;
-      refreshHud();
       const r = $('moves-bar').getBoundingClientRect(), a = $('app').getBoundingClientRect();
       spawnFloat($('app'), r.left - a.left + r.width / 2, r.top - a.top, '+5 MOVES', 'money');
     },
@@ -10475,6 +10714,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   }
   // level up: the meters flash and bounce, "xM" pops over the board's meter, a rising whoosh
   function blazeLevelUp(m) {
+    if (skipFx()) return;
     document.querySelectorAll('.blaze-meter').forEach((el) => restart(el, 'up'));
     GF.Audio.blaze(m);
     const el = $('blaze-board');
@@ -11340,7 +11580,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   }
   function toTitle() {
     recordRun(); // quitting (MAIN MENU, after a game over / victory) keeps the run's progress
-    endIntro('cancel'); endShopAnim(); dropMartyr(); hideVictory();
+    endIntro('cancel'); endShopAnim(); dropMartyr(); hideVictory(); hideGameOver();
     GF.Anim.cancelAll(); S.live = []; S.locked = false; S.freeing = false; closeTimer();
     if (GF.Render.clearFx) GF.Render.clearFx();
     S.run = null; cancelTargeting(); S.selected = null; S.hint = null; S.frozen = null; S.movesHold = null; S.dragging = false; S.cp = null;
@@ -11355,9 +11595,10 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
   // intro (v4.1): 'card' zooms the SELECT BOARD card onto the board, 'light' only staggers the UI in and drops the
   // gems; skipped (as before v4.1) under reduced motion or GF.UI.skipIntro.
   function newRun(fresh, o, intro) {
-    endIntro('cancel'); endShopAnim(); dropMartyr(); hideVictory();
-    const txt = o && o.seed != null && o.seed !== '' ? String(o.seed).trim() : fresh ? '' : $('seed-input').value.trim();
-    const seed = txt ? (/^\d+$/.test(txt) ? +txt : GF.RNG.hash(txt)) : undefined;
+    endIntro('cancel'); endShopAnim(); dropMartyr(); hideVictory(); hideGameOver();
+    // v4.5: the seed text (8 chars A-Z 0-9, or an old all-digit seed) goes to Run.create, which hashes it (seedFrom)
+    const txt = GF.RNG.cleanSeed(o && o.seed != null && o.seed !== '' ? String(o.seed) : fresh ? '' : $('seed-input').value);
+    const seed = txt || undefined;
     GF.Anim.cancelAll(); S.live = []; S.locked = false; S.freeing = false; closeTimer();
     if (GF.Render.clearFx) GF.Render.clearFx();
     if (fresh || S.run) { // drop everything the old run had on screen (as toTitle does)
@@ -11383,7 +11624,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     roundBanner('ROUND 1');
   }
   function resume(run) {
-    endIntro('cancel'); endShopAnim(); dropMartyr();
+    endIntro('cancel'); endShopAnim(); dropMartyr(); hideVictory(); hideGameOver();
     GF.Anim.cancelAll(); S.live = []; S.locked = false; S.freeing = false; closeTimer();
     S.run = run; S.cp = null; renderCascadePanel();
     GF.Render.setBoardType(run.boardType);
@@ -11971,7 +12212,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     S.shownScore = run.score;
     refresh();
     if (run.phase === 'won') await roundWon();
-    else if (run.phase === 'over') await gameOver();
+    else if (run.phase === 'over') await gameOver(res);
   }
   function animateMoney(from, to, ms) {
     return new Promise((resolve) => {
@@ -12100,7 +12341,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       ['GEMS BROKEN', st.gemsBroken, 'good', fmt(st.moves) + ' MOVES'],
       ['MONEY', run.money, 'gold', '$' + fmt(st.moneyEarned) + ' EARNED', money],
       ['ROUNDS', st.roundsWon || C.ROUNDS, '', 'OF ' + C.ROUNDS, (n) => String(n)],
-      ['SEED', null, '', '', null, String(run.seed)],
+      ['SEED', null, '', '', null, GF.Run.seedLabel(run)],
     ];
     const S2 = $('vic-stats'); S2.innerHTML = '';
     tiles.forEach(([lab, v, cls, sub, f, text], i) => {
@@ -12111,12 +12352,9 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       const b = d.querySelector('b');
       if (text != null) b.textContent = text; else countUp(b, v, f || fmt, 700 + i * 80, reduced);
     });
-    const PK = $('vic-perks'), PKn = run.perks.length;
-    PK.innerHTML = run.perks.length ? run.perks.map((p, i) => { const d = GF.Perks.byId[p.id]; return d ? '<span class="vic-perk ' + d.rarity + '" style="--i:' + i + '" title="' + d.name + '">' + iconImg('perk', p.id) + '</span>' : ''; }).join('') : '<span class="none">NONE</span>';
     // upgrades: vouchers bought (pink mini cards, tier numeral) and polish levels above Lv 1 (gem icon + level)
-    const ups = (run.vouchers || []).filter((id) => GF.Vouchers.DEFS[id]).map((id) => { const d = GF.Vouchers.DEFS[id]; return '<span class="vic-perk vch" title="' + d.name + '">' + iconImg('voucher', id) + (d.tier > 1 ? '<i class="vic-tier">' + ROMAN[d.tier] + '</i>' : '') + '</span>'; })
-      .concat(C.COLORS.map((name, k) => (run.polish[k] > 0 ? '<span class="vic-pol" title="' + name.toUpperCase() + ' POLISH Lv ' + (run.polish[k] + 1) + '"><img alt="" src="' + GF.Render.gemIconURL(k) + '"><i style="color:' + C.levelColor(run.polish[k] + 1) + '">' + (run.polish[k] + 1) + '</i></span>' : '')).filter(Boolean));
-    $('vic-ups').innerHTML = ups.length ? ups.map((h, i) => h.replace('<span class="', '<span style="--i:' + (i + PKn) + '" class="')).join('') : '<span class="none">NONE</span>';
+    $('vic-perks').innerHTML = miniPerks(run);
+    $('vic-ups').innerHTML = miniUpgrades(run, run.perks.length);
     V.classList.remove('hidden');
     victoryFx($('vic-fx'), reduced);
     GF.Audio.fanfare();
@@ -12142,25 +12380,164 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       setTimeout(() => { if (!$('victory').classList.contains('hidden')) $('vic-endless').focus({ preventScroll: true }); }, 50);
     });
   }
-  async function gameOver() {
+  // ---------- v4.5 GAME OVER screen ----------
+  // The defeat twin of the victory screen: a glitching, cracking "GAME OVER" title, grey gem shards falling on a canvas,
+  // slow dim red rays, then the run summary (board + difficulty, round reached, final score against the target with a
+  // bar, best move, gems broken, money, perk / upgrade mini cards, the seed with a COPY button) revealed one part after
+  // another; RETRY SAME SEED / NEW RUN / MAIN MENU. Reduced motion: no particles, glitch, crack drawing or count-ups.
+  let GFX = null;
+  function gameOverFx(cv, reduced) {
+    stopGameOverFx();
+    const ctx = cv.getContext('2d'), P = [], GREYS = ['#8a8494', '#6d6878', '#a8a2b4', '#4f4a5a', '#c4bfcf', '#5d5068'];
+    const fx = GFX = { raf: 0 };
+    let W = 0, H = 0, last = performance.now();
+    const px = 3;
+    const size = () => { const r = cv.getBoundingClientRect(); W = Math.max(1, Math.round(r.width / px)); H = Math.max(1, Math.round(r.height / px)); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; };
+    size();
+    // a shard: a tiny pixel diamond / sliver that tumbles down (spin flips its width), a few with a dim red glint
+    const shard = (y) => P.push({ x: Math.random() * W, y: y != null ? y : -4 - Math.random() * 20, vx: (Math.random() - 0.5) * 4, vy: 6 + Math.random() * 12, s: 1 + Math.floor(Math.random() * 3),
+      c: Math.random() < 0.08 ? '#7a2632' : GREYS[Math.floor(Math.random() * GREYS.length)], ph: Math.random() * 6, spin: 1.5 + Math.random() * 3 });
+    const draw = (p) => {
+      const w = Math.max(1, Math.round(p.s * Math.abs(Math.cos(p.ph)))), x = Math.round(p.x), y = Math.round(p.y);
+      ctx.fillStyle = p.c; ctx.fillRect(x - (w >> 1), y, w, p.s + 1);
+      if (p.s > 1) { ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(x - (w >> 1), y, 1, 1); }
+    };
+    if (reduced) { for (let i = 0; i < 60; i++) shard(Math.random() * H); ctx.clearRect(0, 0, W, H); P.forEach(draw); return; }
+    // the title slam: a burst of shards from the top third, then a steady slow fall
+    setTimeout(() => {
+      if (GFX !== fx) return;
+      for (let i = 0; i < 46; i++) { const a = Math.PI * (0.1 + Math.random() * 0.8); P.push({ x: W / 2 + (Math.random() - 0.5) * W * 0.3, y: H * 0.22, vx: Math.cos(a) * (10 + Math.random() * 28) * (Math.random() < 0.5 ? -1 : 1), vy: -Math.sin(a) * (8 + Math.random() * 20), s: 1 + Math.floor(Math.random() * 2), c: GREYS[i % GREYS.length], ph: Math.random() * 6, spin: 4 + Math.random() * 4, g: 30 }); }
+    }, 520);
+    for (let i = 0; i < 30; i++) shard(Math.random() * H * 0.8);
+    let next = 0;
+    const step = (now) => {
+      if (GFX !== fx) return;
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      size();
+      if (now > next && P.length < 220) { shard(); next = now + 90 + Math.random() * 140; }
+      ctx.clearRect(0, 0, W, H);
+      for (let i = P.length - 1; i >= 0; i--) {
+        const p = P[i];
+        p.vy += (p.g || 3) * dt; p.vx *= 0.995; p.x += p.vx * dt; p.y += p.vy * dt; p.ph += p.spin * dt;
+        if (p.g && p.vy > 14) p.g = 3; // burst shards settle into the slow fall
+        if (p.y > H + 4) { P.splice(i, 1); continue; }
+        draw(p);
+      }
+      fx.raf = requestAnimationFrame(step);
+    };
+    fx.raf = requestAnimationFrame(step);
+  }
+  function stopGameOverFx() { if (GFX) { cancelAnimationFrame(GFX.raf); GFX = null; } }
+  // counts up from 0 (reduced motion: the final value at once); stops when the screen is gone
+  function countUpIn(box, el, to, fmtFn, delay, reduced) {
+    if (reduced || !(to > 0)) { el.textContent = fmtFn(to); return; }
+    el.textContent = fmtFn(0);
+    const t0 = performance.now() + delay, dur = 900;
+    const tick = (now) => {
+      if (!el.isConnected || box.classList.contains('hidden')) return;
+      const t = Math.max(0, Math.min(1, (now - t0) / dur)), e = 1 - Math.pow(1 - t, 3);
+      el.textContent = fmtFn(to * e >= to ? to : Math.floor(to * e));
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  // perk + upgrade mini cards (shared by the victory and game over screens); i0: the first stagger index
+  function miniPerks(run) {
+    return run.perks.length ? run.perks.map((p, i) => { const d = GF.Perks.byId[p.id]; return d ? '<span class="vic-perk ' + d.rarity + '" style="--i:' + i + '" title="' + d.name + '">' + iconImg('perk', p.id) + '</span>' : ''; }).join('') : '<span class="none">NONE</span>';
+  }
+  function miniUpgrades(run, i0) {
+    const ups = (run.vouchers || []).filter((id) => GF.Vouchers.DEFS[id]).map((id) => { const d = GF.Vouchers.DEFS[id]; return '<span class="vic-perk vch" title="' + d.name + '">' + iconImg('voucher', id) + (d.tier > 1 ? '<i class="vic-tier">' + ROMAN[d.tier] + '</i>' : '') + '</span>'; })
+      .concat(C.COLORS.map((name, k) => (run.polish[k] > 0 ? '<span class="vic-pol" title="' + name.toUpperCase() + ' POLISH Lv ' + (run.polish[k] + 1) + '"><img alt="" src="' + GF.Render.gemIconURL(k) + '"><i style="color:' + C.levelColor(run.polish[k] + 1) + '">' + (run.polish[k] + 1) + '</i></span>' : '')).filter(Boolean));
+    return ups.length ? ups.map((h, i) => h.replace('<span class="', '<span style="--i:' + (i + i0) + '" class="')).join('') : '<span class="none">NONE</span>';
+  }
+  function copyText(t) {
+    const fallback = () => {
+      try { const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok; } catch (e) { return false; }
+    };
+    try { if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).then(() => true, () => fallback()); } catch (e) { /* fall back */ }
+    return Promise.resolve(fallback());
+  }
+  // the crack over the title: a jagged polyline drawn in after the slam (pixel coordinates in a 100 x 40 box)
+  const CRACK = '2,22 14,19 21,25 30,17 38,23 47,15 55,24 63,18 70,26 79,16 87,22 98,19';
+  function showGameOver(run, res) {
+    const reduced = reducedMotion(), st = GF.Run.stats(run), G = $('gameover');
+    const title = 'GAME OVER';
+    $('go-title').innerHTML = '<span class="go-word" data-text="' + title + '">' + title.split('').map((ch, i) => '<span style="--i:' + i + '" aria-hidden="true">' + (ch === ' ' ? '&nbsp;' : ch) + '</span>').join('') + '</span>'
+      + '<svg class="go-crack" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + CRACK + '"/><polyline class="hi" points="' + CRACK + '"/></svg>';
+    const why = res && res.noMovesLoss ? 'NO LEGAL MOVES LEFT' : 'OUT OF MOVES';
+    $('go-sub').textContent = why + ' ON ROUND ' + run.round + (run.endless ? ' (ENDLESS)' : '');
+    const def = GF.Boards.DEFS[(run.boardType && run.boardType.id) || 'default'] || GF.Boards.DEFS.default;
+    $('go-board').innerHTML = boardIcon(def.id) + '<span style="color:' + nameCol(def.id) + '">' + GF.Boards.label(run) + '</span>' + diffBadge(GF.Difficulty.clamp(run.difficulty || 1));
+    const target = GF.Run.targetFor(run, run.round), pct = Math.max(0, Math.min(1, run.score / Math.max(1, target)));
+    $('go-score-v').textContent = fmt(0); $('go-target-v').textContent = fmt(target);
+    $('go-pct').textContent = Math.floor(pct * 100) + '%';
+    const fill = $('go-bar-fill');
+    fill.style.setProperty('--p', pct.toFixed(4));
+    countUpIn(G, $('go-score-v'), run.score, fmt, 700, reduced);
+    const tiles = [
+      ['ROUND', run.round, 'bad', run.endless ? 'ENDLESS' : 'OF ' + C.ROUNDS, (n) => String(n)],
+      ['BEST MOVE', st.bestMove, 'pink', 'IN ONE MOVE'],
+      ['GEMS BROKEN', st.gemsBroken, 'good', fmt(st.moves) + ' MOVES'],
+      ['MONEY', run.money, 'gold', '$' + fmt(st.moneyEarned) + ' EARNED', money],
+    ];
+    const S2 = $('go-stats'); S2.innerHTML = '';
+    tiles.forEach(([lab, v, cls, sub, f], i) => {
+      const d = document.createElement('div');
+      d.className = 'go-stat'; d.style.setProperty('--i', i);
+      d.innerHTML = '<label>' + lab + '</label><b class="' + cls + '"></b><small>' + sub + '</small>';
+      S2.appendChild(d);
+      countUpIn(G, d.querySelector('b'), v, f || fmt, 900 + i * 90, reduced);
+    });
+    $('go-perks').innerHTML = miniPerks(run);
+    $('go-ups').innerHTML = miniUpgrades(run, run.perks.length);
+    $('go-seed').textContent = GF.Run.seedLabel(run);
+    $('go-copy').textContent = 'COPY';
+    G.classList.toggle('reduced', reduced);
+    G.classList.remove('hidden');
+    gameOverFx($('go-fx'), reduced);
+  }
+  function hideGameOver() { stopGameOverFx(); $('gameover').classList.add('hidden'); }
+  // Resolves with 'retry' | 'new' | 'menu' once the run has been replaced or left
+  async function gameOver(res) {
     const run = S.run;
     GF.Audio.lose();
     recordRun();
     GF.Run.clearSave();
-    await modal('GAME OVER', '<p>Reached round <b>' + run.round + '</b>' + (run.endless ? ' (endless)' : '') + '</p><p>Score <b>' + fmt(run.score) + ' / ' + fmt(GF.Run.targetFor(run, run.round)) + '</b></p><p>Best move <b>' + fmt(run.stats.bestMove) + '</b></p><p>Seed <b>' + run.seed + '</b></p>', [['MENU', true]]);
-    toTitle();
+    showGameOver(run, res);
+    return new Promise((resolve) => {
+      const opts = () => ({ board: run.boardType.id, subs: run.boardType.subs, difficulty: run.difficulty });
+      const done = (v) => {
+        ['go-retry', 'go-new', 'go-menu'].forEach((id) => { $(id).onclick = null; });
+        hideGameOver();
+        if (S.run === run) {
+          if (v === 'retry') newRun(true, Object.assign(opts(), { seed: GF.Run.seedLabel(run) }), 'light');
+          else if (v === 'new') newRun(true, opts(), 'light');
+          else toTitle();
+        }
+        resolve(v);
+      };
+      $('go-retry').onclick = () => { GF.Audio.unlock(); done('retry'); };
+      $('go-new').onclick = () => { GF.Audio.unlock(); done('new'); };
+      $('go-menu').onclick = () => done('menu');
+      $('go-copy').onclick = () => {
+        const seed = GF.Run.seedLabel(run);
+        copyText(seed).then((ok) => { if ($('gameover').classList.contains('hidden')) return; $('go-copy').textContent = ok ? 'COPIED!' : 'COPY FAILED'; GF.Audio.tick(ok ? 3 : 0); });
+      };
+      setTimeout(() => { if (!$('gameover').classList.contains('hidden')) $('go-retry').focus({ preventScroll: true }); }, 50);
+    });
   }
   function updateToggles() {
     const m = GF.Audio.isMuted();
-    $('btn-mute-t').textContent = 'SOUND: ' + (m ? 'OFF' : 'ON');
-    $('btn-crt-t').textContent = 'CRT: ' + (S.crt ? 'ON' : 'OFF');
     $('set-sound').textContent = m ? 'OFF' : 'ON'; $('set-sound').classList.toggle('off', m);
     $('set-crt').textContent = S.crt ? 'ON' : 'OFF'; $('set-crt').classList.toggle('off', !S.crt);
     const vol = Math.round(GF.Audio.getVolume() * 100);
     $('set-volume').value = String(vol); $('set-volume-v').textContent = String(vol);
     document.body.classList.toggle('crt', S.crt);
-    $('btn-speed').textContent = SPEEDS[S.speedIdx] + 'x';
+    $('btn-speed').textContent = speedLabel(); $('set-speed').textContent = speedLabel();
   }
+  // the speed as shown (DEV MODE may override GF.Anim.speed with a value outside SPEEDS, e.g. 8x)
+  function speedLabel() { return GF.Anim.speed + 'x'; }
+  function cycleSpeed() { S.speedIdx = (S.speedIdx + 1) % SPEEDS.length; GF.Anim.speed = SPEEDS[S.speedIdx]; prefSet('speedx', String(SPEEDS[S.speedIdx])); updateToggles(); }
   // ---------- settings & about panels (read-only views; usable in any phase, even while the board animates) ----------
   function openPanel(id) {
     hideTip(); $('hover-label').classList.add('hidden');
@@ -12173,7 +12550,12 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     document.querySelectorAll('.panel-modal').forEach((m) => { if (!m.classList.contains('hidden')) open = true; m.classList.add('hidden'); });
     return open;
   }
-  function openSettings() { updateToggles(); openPanel('settings-modal'); }
+  // v4.5: the same panel from the title (SETTINGS) and in a run; the run-only row (NEW RUN, MAIN MENU) hides without a run
+  function openSettings() {
+    updateToggles();
+    $('settings-modal').querySelector('.set-row.menu').classList.toggle('hidden', !S.run);
+    openPanel('settings-modal');
+  }
   const KIND_LABEL = { bomb: 'BOMB', star: 'STAR', prism: 'PRISM', supernova: 'NOVA', gold: 'GOLD', shiny: 'SHINY', wild: 'WILD', coal: 'COAL' };
   function kindIcon(k) {
     if (k === 'prism' || k === 'wild') return GF.Render.gemIconHTML(null, k, 'xi');
@@ -12245,8 +12627,10 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     const bt = run.boardType || { id: 'default' }, dl = GF.Difficulty.clamp(run.difficulty || 1), bdef = GF.Boards.DEFS[bt.id] || GF.Boards.DEFS.default;
     const subs = bdef.id === 'magic' ? GF.Boards.DISPLAY.filter((id) => GF.Boards.ids(run).indexOf(id) >= 0) : [];
     $('about-run').innerHTML = '<div class="ar-top">' + boardIcon(bdef.id) + '<span class="ar-name"><b style="color:' + nameCol(bdef.id) + '">' + bdef.name + '</b>' + (subs.length ? ': ' + subsHtml(subs) : '') + '</span>' + diffBadge(dl) + '</div>'
-      + '<p class="ar-rules">' + (subs.length ? subs : [bdef.id]).map((id) => GF.Boards.DEFS[id].desc).join(' ') + '</p>'
-      + '<p class="ar-rules">DIFFICULTY ' + GF.Difficulty.LEVELS[dl].name + ': ' + GF.Difficulty.rules(dl).map((x) => x.text + '.').join(' ') + '</p>';
+      + '<p class="ar-rules">' + (subs.length ? subs : [bdef.id]).map((id) => GF.Boards.DEFS[id].desc.replace(/\.?$/, '.')).join(' ') + '</p>'
+      + '<p class="ar-rules">DIFFICULTY ' + GF.Difficulty.LEVELS[dl].name + ': ' + GF.Difficulty.rules(dl).map((x) => x.text + '.').join(' ') + '</p>'
+      + '<p class="ar-seed">SEED <b id="about-seed"></b></p>';
+    $('about-seed').textContent = GF.Run.seedLabel(run);
     $('about-stats').innerHTML = rows.map(([l, v]) => '<div class="row"><span>' + l + '</span><i></i><b>' + v + '</b></div>').join('');
     if (!aboutTab) aboutTab = tabRow($('about-tabs'), (t) => {
       $('about-pane-stats').classList.toggle('hidden', t !== 'stats');
@@ -12437,15 +12821,24 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     GF.Boards.DISPLAY.forEach((id) => {
       const c = bsCard(id);
       if (!c) return;
-      const r = all[id], ok = !!r && r.round >= 1;
-      c.querySelector('.bs-rec-run').textContent = ok ? (r.won ? (r.round > C.ROUNDS ? 'VICTORY R' + r.round : 'VICTORY') : 'ROUND ' + r.round) : '—';
-      c.querySelector('.bs-rec').classList.toggle('won', ok && !!r.won);
-      c.querySelector('.bs-rec-move').textContent = ok ? fmt(r.bestMove || 0) : '—';
+      // v4.5: "BEST RUN: [VI] ROUND 32" (difficulty badge; old records count as I), "BEST MOVE: 32.0M"
+      const d = GF.Records.describe(all[id]), ok = !!d;
+      c.querySelector('.bs-rec-run').innerHTML = ok ? diffBadge(d.diff, 'rec') + '<span class="rec-r"></span>' : '—';
+      if (ok) c.querySelector('.bs-rec-run .rec-r').textContent = d.run;
+      c.querySelector('.bs-rec').classList.toggle('won', ok && d.won);
+      c.querySelector('.bs-rec-move').textContent = ok ? fmt(d.move) : '—';
       c.querySelector('.bs-rec').classList.toggle('none', !ok);
     });
   }
   // records the live run on its board (a new round reached, the run ended or left; GF.Records keeps the best)
-  function recordRun() { try { if (S.run) GF.Records.update(S.run); } catch (e) { /* records are best-effort */ } }
+  // v4.5: never while DEV MODE is on (the run is marked run.dev and stays unrecorded even after DEV MODE goes off)
+  function recordRun() {
+    try {
+      if (!S.run) return;
+      if (GF.Dev && GF.Dev.on) S.run.dev = true;
+      GF.Records.update(S.run);
+    } catch (e) { /* records are best-effort */ }
+  }
   function bsCard(id) { return $('bs-strip').querySelector('.bs-card[data-id="' + id + '"]'); }
   // the board type a card stands for (Magic: with the sub-boards picked so far, as the run will have them)
   const cardType = (id) => ({ id: id, subs: id === 'magic' ? SEL.subs.slice() : [] });
@@ -12877,6 +13270,32 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     // a new seed on the same board and difficulty
     newRun(true, run ? { board: run.boardType.id, subs: run.boardType.subs, difficulty: run.difficulty } : null, 'light');
   }
+  // ---------- v4.5 SKIP >> ----------
+  // Once the oldest running / queued timeline has played for SKIP_AFTER ms (real time: long cascades, slow speeds), a
+  // SKIP >> button shows by the board (Space / Enter too). It fast-forwards every timeline (GF.Anim.skip: each step's
+  // hooks still apply score, money and perk boxes; floats, popups, banners and sounds are suppressed), then the normal
+  // idle handlers run (settleIfIdle resyncs display == board and the HUD == run; a round end opens its screen).
+  const SKIP_AFTER = 5000;
+  function skipVisible(now) {
+    const t = GF.Anim.oldest();
+    return !!S.run && t != null && !S.skipping && !GF.Anim.isSkipping() && (now || performance.now()) - t > (GF.UI.skipAfter || SKIP_AFTER);
+  }
+  function skipMoves() {
+    if (!S.run || !animating() || S.skipping) return false;
+    const run = S.run;
+    S.skipping = true;
+    $('btn-skip').classList.add('hidden');
+    GF.Audio.tick(4);
+    GF.Anim.skip().then(() => {
+      S.skipping = false;
+      $('fx').querySelectorAll('.float').forEach((el) => el.remove());
+      clearMulPops();
+      if (S.run !== run) return;
+      toast('SKIPPED');
+      settleIfIdle(); // a round end (locked) resyncs in endRound instead
+    });
+    return true;
+  }
   function syncShopToggle() { $('btn-shop-toggle').textContent = $('shop').classList.contains('collapsed') ? 'SHOW' : 'HIDE'; }
   function loop(now) {
     GF.Anim.update(now);
@@ -12888,6 +13307,8 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     if (S.selected && S.run && animating() && !settled(S.selected)) S.selected = null; // a selected gem that becomes busy loses selection
     if (S.timer) { if (now >= S.timer.until) endTimer(); else drawTimerBar(now); }
     if (S.run) updateAbilities();
+    const sk = skipVisible(now), skb = $('btn-skip');
+    if (sk === skb.classList.contains('hidden')) skb.classList.toggle('hidden', !sk);
     const ov = S.run && (S.run.phase === 'play' || animating()) && S.targeting == null ? S.overlay : null;
     if (!S.run) GF.Render.drawIcons(now); // the glossary's live gems (title screen: no board frame draws them)
     if (S.run) GF.Render.frame({ zones: ov ? ov.zones : null, wanted: ov ? ov.wanted : null, patterns: ov ? ov.patterns : null, display: GF.Anim.display, board: S.run.board, selected: S.selected, selectedAt: S.selectedAt, busy: S.locked, hint: S.hint, hover: S.hover, placing: !!(S.run.pendingPlace && S.run.pendingPlace.length), targets: S.targeting != null ? S.targetCells : null, picked: S.targeting != null ? S.picks : null, tilePeriod: S.tilePeriod, denseTiles: S.denseTiles, time: now });
@@ -12921,7 +13342,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     const hint = !!S.hint && performance.now() < S.hint.until;
     const anims = GF.Anim.active();
     const tm = S.timer ? { left: Math.max(0, S.timer.until - performance.now()), swaps: S.timer.swaps } : null;
-    return r ? { phase: r.phase, busy: anims > 0 || !!I || !!S.shopAnim, intro: !!I, shopAnim: S.shopAnim || null, blaze: S.bz ? { m: S.bz.m, fill: S.bz.fill } : null, martyrPending: S.martyrPending || 0, anims: anims, locked: S.locked, desyncs: S.desyncs, movesLeft: r.movesLeft, score: r.score, round: r.round, money: r.money, hint: hint,
+    return r ? { skip: !$('btn-skip').classList.contains('hidden'), skipping: !!S.skipping, phase: r.phase, busy: anims > 0 || !!I || !!S.shopAnim, intro: !!I, shopAnim: S.shopAnim || null, blaze: S.bz ? { m: S.bz.m, fill: S.bz.fill } : null, martyrPending: S.martyrPending || 0, anims: anims, locked: S.locked, desyncs: S.desyncs, movesLeft: r.movesLeft, score: r.score, round: r.round, money: r.money, hint: hint,
       timer: tm, timerReady: GF.Run.timerReady(r), wrongTurns: S.wrongTurns, zones: S.overlay.zones.length, wanted: S.overlay.wanted.length, patterns: (S.overlay.patterns || []).length,
       selected: S.selected ? { r: S.selected.r, c: S.selected.c } : null,
       abilities: GF.Run.abilities(r), targeting: S.targeting == null ? null : S.targeting.ability || 'card' }
@@ -12943,7 +13364,7 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     updateToggles();
     $('btn-play').onclick = () => { GF.Audio.unlock(); GF.Audio.tick(2); openSelect(); };
     $('btn-continue').onclick = () => { GF.Audio.unlock(); const r = GF.Run.load(); if (r) resume(r); else toTitle(); };
-    [$('set-sound'), $('btn-mute-t')].forEach((b) => { b.onclick = () => { GF.Audio.setMuted(!GF.Audio.isMuted()); updateToggles(); if (!GF.Audio.isMuted()) { GF.Audio.unlock(); GF.Audio.tick(2); } }; });
+    [$('set-sound')].forEach((b) => { b.onclick = () => { GF.Audio.setMuted(!GF.Audio.isMuted()); updateToggles(); if (!GF.Audio.isMuted()) { GF.Audio.unlock(); GF.Audio.tick(2); } }; });
     $('set-volume').addEventListener('input', (e) => { GF.Audio.setVolume(+e.target.value / 100); $('set-volume-v').textContent = e.target.value; });
     $('set-volume').addEventListener('change', () => { GF.Audio.unlock(); GF.Audio.tick(2); updateToggles(); });
     $('btn-settings').onclick = openSettings;
@@ -12955,8 +13376,11 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
       m.querySelector('.panel-close').onclick = closePanels;
       m.addEventListener('pointerdown', (e) => { if (e.target === m) closePanels(); });
     });
-    [$('set-crt'), $('btn-crt-t')].forEach((b) => { b.onclick = () => { S.crt = !S.crt; prefSet('crt', S.crt ? '1' : '0'); updateToggles(); }; });
-    $('btn-speed').onclick = () => { S.speedIdx = (S.speedIdx + 1) % SPEEDS.length; GF.Anim.speed = SPEEDS[S.speedIdx]; prefSet('speedx', String(SPEEDS[S.speedIdx])); updateToggles(); };
+    [$('set-crt')].forEach((b) => { b.onclick = () => { S.crt = !S.crt; prefSet('crt', S.crt ? '1' : '0'); updateToggles(); }; });
+    $('btn-speed').onclick = cycleSpeed;
+    $('set-speed').onclick = () => { cycleSpeed(); GF.Audio.tick(2); };
+    $('btn-settings-t').onclick = () => { GF.Audio.unlock(); GF.Audio.tick(2); openSettings(); };
+    $('btn-skip').onclick = () => skipMoves();
     $('btn-reroll').onclick = () => { $('shop').classList.remove('collapsed'); if (S.targeting != null && typeof S.targeting !== 'number') cancelTargeting(); act(GF.Shop.reroll(S.run)); };
     $('btn-pack-skip').onclick = () => { GF.Packs.skip(S.run); GF.Run.save(S.run); openPackModal(); };
     $('btn-discard').onclick = () => { GF.Packs.discardPending(S.run); GF.Run.save(S.run); refresh(); };
@@ -12969,6 +13393,14 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
     new MutationObserver(syncShopToggle).observe($('shop'), { attributes: true, attributeFilter: ['class'] });
     syncShopToggle();
     if (window.ResizeObserver) { const ro = new ResizeObserver(() => fanAll()); ro.observe($('perk-frame')); ro.observe($('tray-frame')); ro.observe($('shop')); }
+    // v4.5 SKIP >>: Space / Enter while the button shows (and no modal or panel is open)
+    window.addEventListener('keydown', (e) => {
+      if ((e.key !== ' ' && e.key !== 'Enter') || $('btn-skip').classList.contains('hidden') || !$('modal').classList.contains('hidden')) return;
+      if (document.querySelector('.panel-modal:not(.hidden)') || (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName))) return;
+      e.preventDefault(); e.stopPropagation();
+      skipMoves();
+    }, true);
+    $('seed-input').addEventListener('input', (e) => { const v = GF.RNG.cleanSeed(e.target.value); if (v !== e.target.value) e.target.value = v; });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && closePanels()) return;
       if (e.key === 'Escape' && !$('screen-select').classList.contains('hidden') && $('modal').classList.contains('hidden')) { toTitle(); return; } if (e.key === 'Escape') { cancelTargeting(); hideTip(); $('shop').classList.remove('collapsed'); if (S.run) refresh(); } });
     document.addEventListener('pointerdown', (e) => { if (!$('tip').contains(e.target)) hideTip(); }, true);
@@ -12994,8 +13426,383 @@ body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis
 
   // newRun(o): o.intro true plays the light intro (tools skip it by default); skipIntro: true turns every intro off;
   // skipIntroNow(): jumps a running intro to its end state (as a click / key does)
-  GF.UI = { init: init, state: state, newRun: (o) => { GF.Audio.unlock(); newRun(true, o || {}, o && o.intro ? 'light' : null); }, skipIntro: false, skipIntroNow: () => endIntro('skip'), ability: (id) => activateAbility(id), findMove: findMove, findSettledMove: findSettledMove, trySwap: trySwap, displayMatchesBoard: displayMatchesBoard, debugRun: () => S.run, refresh: refresh, openPackModal: openPackModal };
+  // v4.5 DEV MODE (dev.js) works through these (state + the same flows the game uses)
+  const internals = () => ({ S, SPEEDS, refresh, refreshHud, layout, toast, modal, endRound, enterShop, resume, newRun, toTitle, playFreeResolve, useAbilityUI, settleIfIdle,
+    showHint, displayMatchesBoard, animating, updateToggles, recordRun, saveIfShop, checkDisplay, reducedMotion, diffBadge, iconImg, boardIcon, nameCol, itemInfo, entryItem });
+  GF.UI = { internals: internals, skip: () => skipMoves(), init: init, state: state, newRun: (o) => { GF.Audio.unlock(); newRun(true, o || {}, o && o.intro ? 'light' : null); }, skipIntro: false, skipIntroNow: () => endIntro('skip'), ability: (id) => activateAbility(id), findMove: findMove, findSettledMove: findSettledMove, trySwap: trySwap, displayMatchesBoard: displayMatchesBoard, debugRun: () => S.run, refresh: refresh, openPackModal: openPackModal };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
+
+// ---- dev.js
+(function (GF) {
+  'use strict';
+  if (typeof document === 'undefined') return;
+  // ---------- v4.5 DEV MODE ----------
+  // Secret toggle: type "gemdev" anywhere (outside text fields). A small DEV tag shows while it is on, plus a
+  // draggable, collapsible pixel panel of debug / test tools. Every action goes through the game's own state and flows
+  // (Run / Perks / Cards / Board APIs, then refresh / sync / endRound / enterShop / free resolves), and state-changing
+  // actions only run on an idle board. While DEV MODE is on the live run is marked run.dev: it never writes a
+  // best-run record (GF.Records.update skips it), even after DEV MODE is turned off again.
+  const C = GF.C;
+  const $ = (id) => document.getElementById(id);
+  const SECRET = 'gemdev';
+  const SPEEDS = [0.1, 0.25, 0.5, 1, 2, 4, 8];
+  const D = { on: false, mode: null, sync: false, fps: false, buf: '', fpsN: 0, fpsAt: 0, fpsV: 0, infoAt: 0, built: false };
+  const I = () => GF.UI.internals();
+  const run = () => I().S.run;
+  const esc = (t) => String(t).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  function say(t) { I().toast('DEV: ' + t); }
+  // a state change is safe: a run in play / shop, nothing animating, no lock, Timer or open modal
+  function idle(phases) {
+    const r = run(), S = I().S;
+    if (!r) { say('NO RUN'); return null; }
+    if (I().animating() || S.locked || S.freeing || S.timer || S.shopAnim || !$('modal').classList.contains('hidden')) { say('WAIT FOR IDLE'); return null; }
+    if ((phases || ['play', 'shop']).indexOf(r.phase) < 0) { say('NOT IN ' + r.phase.toUpperCase()); return null; }
+    return r;
+  }
+  const clone = (r) => r.board.cells.map((row) => row.map(GF.Board.clone));
+  function done(r) { I().refresh(); I().layout(); I().saveIfShop(); return true; }
+
+  // ---------- actions (also GF.Dev.*, used by the smoke test) ----------
+  const A = {
+    addMoney(n) { const r = idle(); if (!r) return false; r.money += Math.floor(+n || 0); return done(r); },
+    setMoves(n) {
+      const r = idle(['play']); if (!r) return false;
+      r.movesLeft = Math.max(1, Math.floor(+n || 1));
+      const S = I().S; S.roundMoves = Math.max(S.roundMoves || 0, r.movesLeft); S.lastLeft = null;
+      return done(r);
+    },
+    // reaching the target ends the round at once, as a move reaching it does
+    setScore(n) {
+      const r = idle(['play']); if (!r) return false;
+      r.score = Math.max(0, +n || 0);
+      I().S.shownScore = r.score;
+      if (r.score >= GF.Run.targetFor(r, r.round)) { r.phase = 'won'; I().endRound(r, {}); return true; }
+      return done(r);
+    },
+    win() { const r = idle(['play']); if (!r) return false; return A.setScore(Math.max(r.score, GF.Run.targetFor(r, r.round))); },
+    lose() { const r = idle(['play']); if (!r) return false; r.phase = 'over'; I().endRound(r, {}); return true; },
+    // the shop before round n (past 20: endless)
+    jump(n) {
+      const r = idle(); if (!r) return false;
+      n = Math.max(1, Math.min(999, Math.floor(+n || 1)));
+      r.round = n; if (n > C.ROUNDS) r.endless = true;
+      r.phase = 'shop'; r.shop = null; r.openPack = null; r.timer = null;
+      I().enterShop();
+      return true;
+    },
+    addPerk(id) {
+      const r = idle(); if (!r) return false;
+      const d = GF.Perks.byId[id];
+      if (!d) { say('NO PERK ' + id); return false; }
+      if (r.perks.length >= r.perkSlots) r.perkSlots = Math.min(C.MAX_SLOTS, r.perkSlots + 1);
+      if (r.perks.length >= r.perkSlots) { say('PERK SLOTS FULL'); return false; }
+      const inst = GF.Perks.create(id);
+      r.perks.push(inst);
+      if (d.onBuy) d.onBuy(r, inst, r.rng);
+      return done(r);
+    },
+    // removed without a refund; its onSell undo runs (Monochrome's colour, Loan Shark's $15, Blazing Speed's meter)
+    // but not the sell bonuses (Gifter, Printer)
+    removePerk(uid) {
+      const r = idle(); if (!r) return false;
+      const i = r.perks.findIndex((p) => p.uid === +uid);
+      if (i < 0) return false;
+      const inst = r.perks.splice(i, 1)[0], d = GF.Perks.byId[inst.id];
+      if (d && d.onSell && inst.id !== 'gifter' && inst.id !== 'printer') d.onSell(r, inst, i);
+      return done(r);
+    },
+    addTray(entry) {
+      const r = idle(); if (!r) return false;
+      if (typeof entry === 'string' && entry.charAt(0) === '{') { try { entry = JSON.parse(entry); } catch (e) { entry = null; } }
+      if (!GF.Cards.valid(entry)) { say('BAD ENTRY'); return false; }
+      if (r.consumables.length >= r.cardSlots) { say('TRAY FULL'); return false; }
+      r.consumables.push(entry);
+      return done(r);
+    },
+    // puts a gem on a cell; in play, matches it makes resolve as a free move (like a card's), in the shop they wait
+    spawn(rc, kind, color, mod) {
+      const r = idle(); if (!r) return false;
+      if (!GF.Board.inB(rc.r, rc.c)) return false;
+      const g = C.gem(kind || 'normal', color == null ? 0 : +color, mod || null);
+      r.board.cells[rc.r][rc.c] = g;
+      return resolveOrSync(r);
+    },
+    lock(rc) {
+      const r = idle(); if (!r) return false;
+      const g = GF.Board.inB(rc.r, rc.c) && r.board.cells[rc.r][rc.c];
+      if (!g) { say('EMPTY CELL'); return false; }
+      if (g.lock) delete g.lock; else g.lock = 'locked';
+      GF.Anim.sync(r.board);
+      return done(r);
+    },
+    shuffle() {
+      const r = idle(['play']); if (!r) return false;
+      const flags = GF.Perks.flags(r.perks, r), cols = GF.Run.colors(r), before = clone(r);
+      GF.Board.shuffle(r.board, r.rng, cols, flags);
+      const pre = { shuffle: true, cells: clone(r), label: 'DEV SHUFFLE' };
+      let res;
+      if (GF.Board.findGroups(r.board, flags, cols).length) res = GF.Run.freeResolve(r, { noTiles: true, prelude: () => [pre] });
+      else res = { points: 0, timeline: [{ t: 'shuffle', cells: pre.cells, label: pre.label }], summary: { free: true }, moneyDelta: 0, extraMoves: 0 };
+      GF.Anim.syncCells(before);
+      I().S.shownScore = r.score - (res.points || 0);
+      I().playFreeResolve(r, res, 0);
+      I().refresh();
+      return true;
+    },
+    setBlaze(m, fill) {
+      const r = idle(); if (!r) return false;
+      r.blaze = { m: Math.max(1, Math.floor(+m || 1)), fill: Math.max(0, Math.min(0.999, +fill || 0)) };
+      I().S.bz = null;
+      if (!r.perks.some((p) => p.id === 'blazing_speed')) say('METER SET (NEEDS BLAZING SPEED TO SHOW)');
+      return done(r);
+    },
+    hint() {
+      const r = idle(['play']); if (!r) return false;
+      const h = GF.Board.findHint(r.board, GF.Perks.flags(r.perks, r), GF.Run.colors(r));
+      if (!h) { say('NO MOVE ON THE BOARD'); return false; }
+      I().S.selected = null; I().S.hint = { cells: [h.a, h.b], until: performance.now() + 4000 };
+      return true;
+    },
+    // not saved: the speed button / settings go back to the saved speeds
+    speed(v) { GF.Anim.speed = +v > 0 ? +v : 1; I().updateToggles(); renderSpeed(); return true; },
+    rules(key, v) { GF.Difficulty.dev[key] = v === 'on' ? true : v === 'off' ? false : null; I().refresh(); return true; },
+    exportSave() {
+      const r = run();
+      if (!r) { say('NO RUN'); return null; }
+      if (I().animating()) { say('WAIT FOR IDLE'); return null; }
+      const txt = GF.Run.serialize(r);
+      const ta = $('dv-save'); if (ta) ta.value = txt;
+      copy(txt).then((ok) => say(ok ? 'SAVE COPIED' : 'SAVE IN THE BOX (COPY FAILED)'));
+      return txt;
+    },
+    importSave(txt) {
+      txt = txt != null ? txt : ($('dv-save') || {}).value;
+      let r;
+      try { r = GF.Run.deserialize(String(txt || '').trim()); } catch (e) { say('BAD SAVE JSON'); return false; }
+      $('modal').classList.add('hidden'); $('pack-modal').classList.add('hidden');
+      GF.Run.save(r);
+      I().resume(r);
+      say('SAVE LOADED');
+      return true;
+    },
+  };
+  function resolveOrSync(r) {
+    const flags = GF.Perks.flags(r.perks, r), cols = GF.Run.colors(r);
+    if (r.phase === 'play' && GF.Board.findGroups(r.board, flags, cols).length) {
+      const before = clone(r);
+      const res = GF.Run.freeResolve(r, { noTiles: true });
+      GF.Anim.syncCells(before);
+      I().S.shownScore = r.score - res.points;
+      I().playFreeResolve(r, res, 60);
+      I().refresh();
+      return true;
+    }
+    GF.Anim.sync(r.board);
+    return done(r);
+  }
+  function copy(t) {
+    const fb = () => { try { const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok; } catch (e) { return false; } };
+    try { if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).then(() => true, () => fb()); } catch (e) { /* fall back */ }
+    return Promise.resolve(fb());
+  }
+
+  // ---------- panel ----------
+  const KINDS = ['normal', 'bomb', 'star', 'supernova', 'prism', 'wild', 'coal'];
+  function trayOptions() {
+    const o = (v, t) => '<option value="' + esc(JSON.stringify(v)) + '">' + esc(t) + '</option>';
+    let h = '<optgroup label="ENHANCE">' + GF.Cards.IDS.map((id) => o(id, GF.Cards.DEFS[id].name)).join('') + '</optgroup>';
+    h += '<optgroup label="TILES">' + GF.Tiles.IDS.map((id) => o({ kind: 'tile', id: id }, GF.Tiles.DEFS[id].name)).join('') + '</optgroup>';
+    h += '<optgroup label="POLISH">' + C.COLORS.map((name, k) => o({ kind: 'upgrade', id: 'polish1', color: k }, GF.Cards.def({ kind: 'upgrade', id: 'polish1', color: k }).name)).join('')
+      + Object.keys(C.UPGRADE_CARD).filter((id) => id !== 'polish1').map((id) => o({ kind: 'upgrade', id: id }, GF.Cards.def({ kind: 'upgrade', id: id }).name)).join('') + '</optgroup>';
+    return h;
+  }
+  function build() {
+    if (D.built) return;
+    D.built = true;
+    const tag = document.createElement('div');
+    tag.id = 'dev-tag'; tag.className = 'hidden'; tag.title = 'DEV MODE (type gemdev to toggle)';
+    tag.innerHTML = 'DEV<span id="dev-fps"></span>';
+    document.body.appendChild(tag);
+    const p = document.createElement('div');
+    p.id = 'dev-panel'; p.className = 'hidden'; p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', 'Dev tools');
+    const btn = (act, label, extra) => '<button data-act="' + act + '"' + (extra || '') + '>' + label + '</button>';
+    const num = (id, v, w) => '<input id="' + id + '" type="number" value="' + v + '"' + (w ? ' style="width:' + w + 'px"' : '') + '>';
+    p.innerHTML = '<div class="dv-head"><b>DEV MODE</b><span class="dv-hbtns"><button data-act="collapse" title="Collapse">_</button><button data-act="off" title="Turn DEV MODE off">X</button></span></div>'
+      + '<div class="dv-body">'
+      + '<section><h4>INFO</h4><pre id="dv-info"></pre></section>'
+      + '<section><h4>RUN</h4>'
+      + '<div class="dv-row">' + num('dv-money', 50, 64) + btn('money', '+$') + num('dv-moves', 20, 52) + btn('moves', 'SET MOVES') + '</div>'
+      + '<div class="dv-row">' + num('dv-score', 0, 96) + btn('score', 'SET SCORE') + '</div>'
+      + '<div class="dv-row">' + btn('win', 'WIN ROUND') + btn('lose', 'LOSE ROUND') + '</div>'
+      + '<div class="dv-row">' + num('dv-round', 10, 52) + btn('jump', 'JUMP TO ROUND') + '</div></section>'
+      + '<section><h4>PERKS</h4><input id="dv-pfilter" placeholder="filter perks" autocomplete="off"><select id="dv-plist" size="6"></select>'
+      + '<div class="dv-row">' + btn('perk', 'ADD PERK') + '</div><div id="dv-owned"></div></section>'
+      + '<section><h4>TRAY</h4><div class="dv-row"><select id="dv-tray">' + trayOptions() + '</select>' + btn('tray', 'ADD') + '</div></section>'
+      + '<section><h4>BOARD</h4><div class="dv-row"><select id="dv-kind">' + KINDS.map((k) => '<option>' + k + '</option>').join('') + '</select>'
+      + '<select id="dv-color">' + C.COLORS.map((n, k) => '<option value="' + k + '">' + n + '</option>').join('') + '</select>'
+      + '<select id="dv-mod"><option value="">no mod</option><option>gold</option><option>shiny</option></select></div>'
+      + '<div class="dv-row">' + btn('mode-spawn', 'SPAWN @ CLICK', ' class="dv-mode" data-mode="spawn"') + btn('mode-lock', 'LOCK @ CLICK', ' class="dv-mode" data-mode="lock"') + '</div>'
+      + '<div class="dv-row">' + btn('shuffle', 'SHUFFLE') + btn('hint', 'HINT') + '</div></section>'
+      + '<section><h4>RULES</h4><div class="dv-row"><label>LOCKS <select id="dv-locks"><option value="auto">AUTO</option><option value="on">ON</option><option value="off">OFF</option></select></label>'
+      + '<label>NO-MOVES LOSS <select id="dv-nomoves"><option value="auto">AUTO</option><option value="on">ON</option><option value="off">OFF</option></select></label></div>'
+      + '<div class="dv-row">BLAZE x' + num('dv-bm', 3, 44) + 'FILL' + num('dv-bf', 0.5, 52) + btn('blaze', 'SET') + '</div></section>'
+      + '<section><h4>VIEW</h4><div class="dv-row" id="dv-speeds">' + SPEEDS.map((v) => '<button data-act="speed" data-v="' + v + '">' + v + 'x</button>').join('') + '</div>'
+      + '<div class="dv-row"><label><input type="checkbox" id="dv-sync"> SYNC CHECK OVERLAY</label><label><input type="checkbox" id="dv-fpson"> FPS</label></div></section>'
+      + '<section><h4>SAVE</h4><div class="dv-row">' + btn('export', 'EXPORT (COPY)') + btn('import', 'IMPORT') + '</div><textarea id="dv-save" rows="3" placeholder="paste a save JSON, then IMPORT" spellcheck="false"></textarea></section>'
+      + '</div>';
+    document.body.appendChild(p);
+    // phones: the panel starts folded to its title bar so the board stays usable
+    if (innerWidth < 760) { p.classList.add('collapsed'); p.querySelector('[data-act=collapse]').textContent = '+'; }
+    const ov = document.createElement('div');
+    ov.id = 'dev-sync'; ov.className = 'hidden'; ov.innerHTML = '<span class="dv-badge"></span><div class="dv-cells"></div>';
+    $('board-col').appendChild(ov);
+    // events
+    p.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-act]');
+      if (!b) return;
+      const a = b.dataset.act, v = (id) => $(id).value;
+      if (a === 'collapse') { p.classList.toggle('collapsed'); b.textContent = p.classList.contains('collapsed') ? '+' : '_'; return; }
+      if (a === 'off') { toggle(false); return; }
+      if (a === 'money') A.addMoney(v('dv-money'));
+      else if (a === 'moves') A.setMoves(v('dv-moves'));
+      else if (a === 'score') A.setScore(v('dv-score'));
+      else if (a === 'win') A.win();
+      else if (a === 'lose') A.lose();
+      else if (a === 'jump') A.jump(v('dv-round'));
+      else if (a === 'perk') { if (v('dv-plist')) A.addPerk(v('dv-plist')); else say('PICK A PERK'); }
+      else if (a === 'rmperk') A.removePerk(b.dataset.uid);
+      else if (a === 'tray') A.addTray(JSON.parse(v('dv-tray')));
+      else if (a === 'mode-spawn' || a === 'mode-lock') { D.mode = D.mode === b.dataset.mode ? null : b.dataset.mode; renderModes(); }
+      else if (a === 'shuffle') A.shuffle();
+      else if (a === 'hint') A.hint();
+      else if (a === 'blaze') A.setBlaze(v('dv-bm'), v('dv-bf'));
+      else if (a === 'speed') A.speed(b.dataset.v);
+      else if (a === 'export') A.exportSave();
+      else if (a === 'import') A.importSave();
+      renderOwned();
+    });
+    $('dv-pfilter').addEventListener('input', renderPerkList);
+    $('dv-locks').addEventListener('change', (e) => A.rules('locks', e.target.value));
+    $('dv-nomoves').addEventListener('change', (e) => A.rules('noMoves', e.target.value));
+    $('dv-sync').addEventListener('change', (e) => { D.sync = e.target.checked; ov.classList.toggle('hidden', !D.sync); });
+    $('dv-fpson').addEventListener('change', (e) => { D.fps = e.target.checked; $('dev-fps').textContent = ''; });
+    // keys typed in the panel never reach the game (Space / Enter / Escape / the secret word)
+    p.addEventListener('keydown', (e) => { if (e.target.matches('input, textarea, select')) e.stopPropagation(); });
+    dragHead(p);
+    renderPerkList();
+    // click modes: a board click places / locks instead of selecting (capture: before the board's own handler)
+    window.addEventListener('pointerdown', (e) => {
+      if (!D.on || !D.mode || !run()) return;
+      if (e.target !== $('board')) return;
+      const cell = GF.Render.cellAt(e.clientX, e.clientY);
+      if (!cell) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (D.mode === 'spawn') A.spawn(cell, $('dv-kind').value, +$('dv-color').value, $('dv-mod').value || null);
+      else A.lock(cell);
+    }, true);
+  }
+  function dragHead(p) {
+    const head = p.querySelector('.dv-head');
+    head.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button')) return;
+      e.preventDefault();
+      const r = p.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+      const move = (ev) => {
+        const x = Math.max(0, Math.min(innerWidth - 40, ev.clientX - dx)), y = Math.max(0, Math.min(innerHeight - 24, ev.clientY - dy));
+        p.style.left = x + 'px'; p.style.top = y + 'px'; p.style.right = 'auto';
+      };
+      const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+      window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+    });
+  }
+  function renderPerkList() {
+    const f = ($('dv-pfilter').value || '').trim().toLowerCase(), sel = $('dv-plist'), keep = sel.value;
+    const list = GF.Perks.DEFS.filter((d) => !f || d.name.toLowerCase().indexOf(f) >= 0 || d.id.indexOf(f) >= 0 || (d.rarity || '').indexOf(f) === 0)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    sel.innerHTML = list.map((d) => '<option value="' + d.id + '" class="' + d.rarity + '">' + esc(d.name) + ' (' + (d.rarity || '?').charAt(0).toUpperCase() + ')</option>').join('');
+    if (list.some((d) => d.id === keep)) sel.value = keep; else if (list.length) sel.selectedIndex = 0;
+  }
+  function renderOwned() {
+    const r = run(), box = $('dv-owned');
+    if (!box) return;
+    const sig = r ? r.perks.map((p) => p.uid).join(',') + '/' + r.perkSlots : '';
+    if (box.dataset.sig === sig) return;
+    box.dataset.sig = sig;
+    box.innerHTML = r ? (r.perks.length ? r.perks.map((p) => '<span class="dv-chip">' + esc((GF.Perks.byId[p.id] || { name: p.id }).name) + '<button data-act="rmperk" data-uid="' + p.uid + '" title="Remove">x</button></span>').join('') : '<i>no perks</i>') + ' <i>' + r.perks.length + '/' + r.perkSlots + '</i>' : '<i>no run</i>';
+  }
+  function renderModes() { document.querySelectorAll('#dev-panel .dv-mode').forEach((b) => b.classList.toggle('on', D.mode === b.dataset.mode)); document.body.classList.toggle('dev-picking', !!D.mode); }
+  function renderSpeed() { document.querySelectorAll('#dv-speeds button').forEach((b) => b.classList.toggle('on', +b.dataset.v === GF.Anim.speed)); }
+  function info() {
+    const r = run(), S = I().S, st = GF.UI.state();
+    if (!r) return 'no run (title)\nanims ' + st.anims;
+    const t = GF.Run.targetFor(r, r.round);
+    return [
+      'seed   ' + GF.Run.seedLabel(r) + '  (rng ' + (r.rng.s >>> 0) + ')',
+      'board  ' + GF.Boards.label(r) + '  ' + GF.Difficulty.roman(r),
+      'round  ' + r.round + (r.endless ? ' endless' : '') + '  phase ' + r.phase,
+      'score  ' + C.fmt(r.score) + ' / ' + C.fmt(t) + '  shown ' + C.fmt(S.shownScore || 0),
+      'moves  ' + r.movesLeft + '  money $' + r.money + '  idx ' + r.moveIndex,
+      'anims  ' + st.anims + (st.locked ? ' locked' : '') + '  desyncs ' + st.desyncs,
+      'rules  locks ' + (GF.Difficulty.locks(r) ? 'on' : 'off') + '  no-moves loss ' + (GF.Difficulty.noMovesLoses(r) ? 'on' : 'off'),
+      'blaze  x' + ((r.blaze && r.blaze.m) || 1) + ' ' + Math.round(((r.blaze && r.blaze.fill) || 0) * 100) + '%  dev ' + !!r.dev,
+    ].join('\n');
+  }
+  // the desync overlay: idle only (while timelines play, the display legitimately differs from the logic)
+  function drawSync() {
+    const ov = $('dev-sync'), r = run();
+    if (!ov || ov.classList.contains('hidden')) return;
+    const badge = ov.querySelector('.dv-badge'), cells = ov.querySelector('.dv-cells');
+    if (!r) { badge.textContent = ''; cells.innerHTML = ''; return; }
+    if (I().animating()) { badge.textContent = 'ANIM ' + GF.Anim.active(); badge.className = 'dv-badge anim'; if (cells.childElementCount) cells.innerHTML = ''; return; }
+    const Dc = GF.Anim.display.cells, bad = [];
+    for (let y = 0; y < C.SIZE; y++) for (let x = 0; x < C.SIZE; x++) {
+      const sp = Dc[y][x], g = r.board.cells[y][x];
+      const same = (!sp && !g) || (sp && g && sp.gem.id === g.id && sp.gem.kind === g.kind && sp.gem.color === g.color && (sp.gem.mod || null) === (g.mod || null) && (sp.gem.lock || null) === (g.lock || null));
+      if (!same) bad.push([y, x]);
+    }
+    badge.textContent = bad.length ? 'DESYNC ' + bad.length : 'SYNC OK';
+    badge.className = 'dv-badge ' + (bad.length ? 'bad' : 'ok');
+    const sig = bad.join(';');
+    if (cells.dataset.sig === sig) return;
+    cells.dataset.sig = sig;
+    const px = GF.Render.cellPx();
+    cells.innerHTML = bad.map(([y, x]) => { const c = GF.Render.cellCenter(y, x); return '<i style="left:' + (c.x - px / 2) + 'px;top:' + (c.y - px / 2) + 'px;width:' + px + 'px;height:' + px + 'px"></i>'; }).join('');
+  }
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (!D.on) return;
+    const r = run();
+    if (r && !r.dev) r.dev = true;
+    D.fpsN++;
+    if (now - D.fpsAt >= 500) { D.fpsV = Math.round(D.fpsN * 1000 / (now - D.fpsAt)); D.fpsN = 0; D.fpsAt = now; if (D.fps) $('dev-fps').textContent = ' ' + D.fpsV + 'FPS'; }
+    if (now - D.infoAt > 250 && !$('dev-panel').classList.contains('collapsed')) { D.infoAt = now; $('dv-info').textContent = info(); renderOwned(); renderSpeed(); }
+    if (D.sync) drawSync();
+  }
+  function toggle(force) {
+    build();
+    D.on = force != null ? !!force : !D.on;
+    GF.Dev.on = D.on;
+    $('dev-tag').classList.toggle('hidden', !D.on);
+    $('dev-panel').classList.toggle('hidden', !D.on);
+    $('dev-sync').classList.toggle('hidden', !(D.on && D.sync));
+    document.body.classList.toggle('dev', D.on);
+    if (!D.on) { D.mode = null; renderModes(); }
+    if (D.on && run()) run().dev = true;
+    if (D.on) { $('dv-info').textContent = info(); renderOwned(); renderSpeed(); }
+    if (GF.Audio && GF.Audio.tick) GF.Audio.tick(D.on ? 5 : 0);
+    I().toast(D.on ? 'DEV MODE ON' : 'DEV MODE OFF');
+    return D.on;
+  }
+  // the secret word, typed anywhere outside a text field
+  window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || !e.key || e.key.length !== 1) return;
+    if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    D.buf = (D.buf + e.key.toLowerCase()).slice(-SECRET.length);
+    if (D.buf === SECRET) { D.buf = ''; toggle(); }
+  });
+  requestAnimationFrame(loop);
+  GF.Dev = Object.assign({ on: false, toggle: toggle, SECRET: SECRET, state: () => ({ on: D.on, mode: D.mode, sync: D.sync, fps: D.fps }) }, A);
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 </script>
 
