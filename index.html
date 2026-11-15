@@ -486,6 +486,7 @@ body.mobile #gl-tabs .tab-n, body.mobile #gl-sub .tab-n { margin-left: 2px; }
 .bs-rec { position: absolute; left: -4px; right: -4px; top: calc(100% + 12px); display: flex; flex-direction: column; gap: 5px; font-size: 7px; line-height: 1.4; color: var(--muted); text-shadow: 1px 1px 0 #000; white-space: nowrap; }
 .bs-rec i { font-style: normal; color: var(--accent); }
 .bs-rec.none i { color: var(--muted); }
+.bs-rec.won .bs-rec-run { color: var(--good); } /* v4.4: a board beaten (round 20 cleared) */
 .bs-panel { width: min(640px, calc(100% - 32px)); background: var(--panel); border: 3px solid var(--ink); box-shadow: 4px 4px 0 #000; padding: 10px 12px; }
 .bs-label { font-size: 8px; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; gap: 8px; }
 #bs-sub-count { color: var(--good); } #bs-sub-count.none { color: var(--bad); animation: blink .6s steps(2) infinite; }
@@ -544,7 +545,7 @@ body.mobile #stuck-bar { font-size: 7px; top: -22px; }
 .intro-skip { position: fixed; right: 14px; bottom: 12px; font-size: 7px; color: var(--muted); text-shadow: 2px 2px 0 #000; opacity: .8; pointer-events: none; }
 body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
 /* ---------- v4.3 UI ---------- */
-/* Blazing Speed meter (ui.js drawBlaze): flame, a chunky pixel bar in 8 chunks (one per match), "xM". --f: fill 0..1,
+/* Blazing Speed meter (ui.js drawBlaze): flame, a chunky pixel bar in --n chunks (v4.4: 3/5/8/10 by level, one per match), "xM". --f: fill 0..1,
    --heat: 0 at x1 .. 1 at x6 (glow); the fill gradient and label colour come from JS (blazeLook) */
 .blaze-meter { --f: 0; --heat: 0; display: flex; align-items: center; gap: 6px; margin-top: 8px; height: 22px; }
 .bz-icon { flex: none; width: 22px; height: 22px; background: center / contain no-repeat; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 #000); }
@@ -554,7 +555,7 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
 .blaze-meter.lit .bz-bar { border-color: #ffb36b; box-shadow: 3px 3px 0 #000, 0 0 calc(4px + var(--heat) * 12px) calc(var(--heat) * 3px) rgba(255, 110, 40, calc(.35 + var(--heat) * .5)); }
 .bz-fill { position: absolute; left: 2px; top: 2px; bottom: 2px; width: calc((100% - 4px) * var(--f)); background: #ff6a1f;
   box-shadow: inset 0 3px 0 rgba(255, 255, 255, .35), inset 0 -3px 0 rgba(0, 0, 0, .3); }
-.bz-ticks { position: absolute; inset: 2px; pointer-events: none; background: repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 2px), rgba(0, 0, 0, .6) calc(12.5% - 2px) 12.5%); }
+.bz-ticks { --n: 3; --w: calc(100% / var(--n)); position: absolute; inset: 2px; pointer-events: none; background: repeating-linear-gradient(90deg, transparent 0 calc(var(--w) - 3px), rgba(255, 190, 140, .28) calc(var(--w) - 3px) calc(var(--w) - 2px), rgba(0, 0, 0, .7) calc(var(--w) - 2px) var(--w)); }
 .bz-m { flex: none; min-width: 40px; font-size: 13px; text-align: left; color: #ff9a4a; text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; }
 .blaze-meter.up .bz-bar { animation: bzFlash .5s ease-out; }
 .blaze-meter.up .bz-m { animation: bzBounce .5s ease-out; }
@@ -564,7 +565,6 @@ body.crt .intro-ghost canvas { filter: saturate(1.2) contrast(1.08); }
 @keyframes bzBounce { 0% { transform: scale(1); } 30% { transform: scale(1.7) rotate(-6deg); } 55% { transform: scale(.9); } 75% { transform: scale(1.1); } 100% { transform: scale(1); } }
 @keyframes bzHop { 30% { transform: translateY(-4px); } 60% { transform: translateY(1px); } }
 @keyframes bzDown { 33% { transform: translateX(-3px); } 66% { transform: translateX(3px); } }
-#shop > .blaze-meter { margin: 0 0 10px; }
 body.mobile .blaze-meter { height: 18px; margin-top: 6px; }
 body.mobile .bz-bar { height: 16px; }
 body.mobile .bz-icon { width: 18px; height: 18px; }
@@ -594,6 +594,65 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
 .gl-txt .gl-val { color: var(--accent); margin-top: 4px; }
 .gl-icon canvas.gemcv.spin { width: 40px; height: 40px; image-rendering: pixelated; }
 #tip canvas.gemcv.spin { width: 40px; height: 40px; image-rendering: pixelated; }
+/* ---------- v4.4 VICTORY screen (ui.js victory): fireworks canvas, shimmering title, run summary ---------- */
+#victory { position: fixed; inset: 0; z-index: 36; display: flex; align-items: center; justify-content: center; padding: 16px; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 35%, rgba(70, 30, 120, .78), rgba(8, 4, 16, .93) 70%); animation: vicBg .5s ease-out; }
+@keyframes vicBg { from { opacity: 0; } }
+#vic-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: pixelated; }
+.vic-box { position: relative; width: min(560px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; overflow-x: hidden; text-align: center; padding: 22px 20px 18px;
+  background: linear-gradient(var(--panel), #160e28); border: 4px solid var(--accent); box-shadow: 0 0 0 4px #000, 8px 8px 0 4px #000, 0 0 40px 6px rgba(255, 210, 63, .35);
+  animation: vicIn .7s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes vicIn { 0% { opacity: 0; transform: translateY(40px) scale(.6); } 100% { opacity: 1; transform: none; } }
+.vic-rays { position: absolute; left: 50%; top: 58px; width: 900px; height: 900px; margin: -450px 0 0 -450px; pointer-events: none; opacity: .16; z-index: 0;
+  background: repeating-conic-gradient(from 0deg, #ffd23f 0 8deg, transparent 8deg 20deg); -webkit-mask: radial-gradient(circle, #000 0 18%, transparent 52%); mask: radial-gradient(circle, #000 0 18%, transparent 52%);
+  animation: vicSpin 18s linear infinite; }
+@keyframes vicSpin { to { transform: rotate(360deg); } }
+.vic-box > *:not(.vic-rays) { position: relative; z-index: 1; }
+.vic-title { margin: 4px 0 8px; font-size: clamp(30px, 9vw, 54px); line-height: 1.1; white-space: nowrap; text-shadow: none !important; }
+.vic-title span { display: inline-block; color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(90deg, #ffd23f, #fff6cc 18%, #ffb020 30%, #ff4d6d 44%, #a259ff 56%, #3a86ff 68%, #3ddc84 80%, #ffd23f);
+  background-size: 400% 100%; background-position: calc(var(--i) * -12%) 0; filter: drop-shadow(3px 3px 0 #000) drop-shadow(0 0 8px rgba(255, 210, 63, .55));
+  animation: vicWave 1.4s ease-in-out calc(var(--i) * -0.11s) infinite, vicShimmer 3.2s linear infinite, vicDrop .55s cubic-bezier(.2, 1.6, .4, 1) calc(.25s + var(--i) * .06s) backwards; }
+@keyframes vicWave { 50% { transform: translateY(-6px) rotate(-3deg); } }
+@keyframes vicShimmer { to { background-position: -400% 0; } }
+@keyframes vicDrop { 0% { opacity: 0; transform: translateY(-60px) scale(2); } 100% { opacity: 1; } }
+.vic-sub { margin: 0 0 14px; font-size: 10px; color: var(--good); text-shadow: 2px 2px 0 #000; letter-spacing: 1px; }
+.vic-board { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; font-size: 11px; }
+.vic-board img { margin: 0; width: 28px; height: 28px; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 #000); }
+.vic-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 14px; }
+.vic-stat { background: #0d0818; border: 3px solid var(--panel2); box-shadow: 3px 3px 0 #000; padding: 8px 4px 7px; min-width: 0; animation: vicPop .4s ease-out calc(.7s + var(--i) * .08s) backwards; }
+.vic-stat label { display: block; font-size: 6px; color: var(--muted); margin-bottom: 7px; line-height: 1.4; }
+.vic-stat b { display: block; font-size: 12px; color: var(--ink); font-weight: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vic-stat b.gold { color: var(--accent); } .vic-stat b.good { color: var(--good); } .vic-stat b.pink { color: var(--rare); }
+.vic-stat small { display: block; font-size: 6px; color: var(--muted); margin-top: 5px; }
+@keyframes vicPop { 0% { opacity: 0; transform: scale(.5); } 70% { opacity: 1; transform: scale(1.08); } }
+.vic-perks-wrap { margin: 0 0 16px; }
+.vic-label { display: block; font-size: 7px; color: var(--muted); margin-bottom: 7px; }
+.vic-perks { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; min-height: 40px; }
+.vic-perk { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--panel2); border: 3px solid var(--common); box-shadow: 2px 2px 0 #000; animation: vicPop .35s ease-out calc(1.1s + var(--i) * .07s) backwards; }
+.vic-perk.uncommon { border-color: var(--uncommon); } .vic-perk.rare { border-color: var(--rare); }
+.vic-perk img { margin: 0; width: 28px; height: 28px; image-rendering: pixelated; }
+.vic-perk.vch { border-color: var(--rare); background: #2a1430; position: relative; }
+.vic-tier { position: absolute; right: -5px; bottom: -6px; font-style: normal; font-size: 7px; color: #fff; background: var(--rare); border: 2px solid #000; padding: 1px 2px; }
+.vic-pol { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 34px; height: 40px; background: #0d0818; border: 3px solid var(--panel2); box-shadow: 2px 2px 0 #000; animation: vicPop .35s ease-out calc(1.1s + var(--i) * .07s) backwards; }
+.vic-pol img { margin: 0; width: 18px; height: 18px; image-rendering: pixelated; }
+.vic-pol i { font-style: normal; font-size: 8px; margin-top: 2px; text-shadow: 1px 1px 0 #000; }
+.vic-kick { margin: 0; font-size: 9px; color: var(--accent); letter-spacing: 2px; text-shadow: 2px 2px 0 #000; animation: vicPop .4s ease-out .15s backwards, blink 1.1s steps(2) 1s 3; }
+.vic-perks-wrap + .vic-perks-wrap { margin-top: -6px; }
+.vic-perks .none { font-size: 8px; color: var(--muted); align-self: center; }
+.vic-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.vic-btns .big-btn { animation: vicGlow 1.2s ease-in-out infinite; }
+@keyframes vicGlow { 50% { box-shadow: 4px 4px 0 #000, 0 0 16px 4px rgba(255, 210, 63, .7), inset -3px -3px 0 rgba(0,0,0,.25), inset 3px 3px 0 rgba(255,255,255,.4); } }
+body.mobile .vic-box { padding: 16px 12px 14px; }
+body.mobile .vic-stats { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+body.mobile .vic-stat b { font-size: 10px; }
+body.mobile .vic-board { font-size: 9px; }
+body.mobile .vic-btns button { font-size: 9px; padding: 9px 10px; }
+body.mobile .vic-btns .big-btn { font-size: 12px; padding: 10px 18px; flex-basis: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  #victory, .vic-box, .vic-rays, .vic-title span, .vic-stat, .vic-perk, .vic-pol, .vic-kick, .vic-btns .big-btn { animation: none !important; }
+  .vic-title span { background-position: 0 0; background-image: linear-gradient(#fff6cc, #ffd23f 55%, #ffa000); }
+}
 </style>
 <div id="app">
   <section id="screen-title" class="screen">
@@ -653,7 +712,6 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     </main>
     <aside id="shop" class="hidden">
       <h2>SHOP <button id="btn-shop-toggle">HIDE</button></h2>
-      <div class="blaze-meter hidden" id="blaze-shop" aria-label="Blazing Speed"><i class="bz-icon"></i><div class="bz-bar"><div class="bz-fill"></div><div class="bz-ticks"></div></div><span class="bz-m">x1</span></div>
       <h3>PERKS</h3><div id="shop-items" class="slots fan"></div>
       <button id="btn-reroll" class="wide">REROLL $2</button>
       <div class="shop-pair">
@@ -671,6 +729,20 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     <div id="pack-tray"></div>
     <div class="pack-btns"><button id="btn-pack-skip">SKIP</button></div>
   </div></div>
+  <div id="victory" class="hidden" role="dialog" aria-modal="true" aria-labelledby="vic-title">
+    <canvas id="vic-fx" aria-hidden="true"></canvas>
+    <div class="vic-box">
+      <div class="vic-rays" aria-hidden="true"></div>
+      <p class="vic-kick">&#9733; FACTORY COMPLETE &#9733;</p>
+      <h2 id="vic-title" class="vic-title" aria-label="VICTORY!"></h2>
+      <p class="vic-sub">ALL <span id="vic-rounds-n">20</span> ROUNDS CLEARED</p>
+      <div id="vic-board" class="vic-board"></div>
+      <div id="vic-stats" class="vic-stats"></div>
+      <div class="vic-perks-wrap"><span class="vic-label">PERKS</span><div id="vic-perks" class="vic-perks"></div></div>
+      <div class="vic-perks-wrap" id="vic-up-wrap"><span class="vic-label">UPGRADES</span><div id="vic-ups" class="vic-perks"></div></div>
+      <div class="vic-btns"><button id="vic-endless" class="big-btn">ENDLESS &gt;</button><button id="vic-new">NEW RUN</button><button id="vic-menu">MAIN MENU</button></div>
+    </div>
+  </div>
   <div id="modal" class="hidden"><div class="box"><h2 id="modal-title"></h2><div id="modal-body"></div><div id="modal-btns"></div></div></div>
   <div id="settings-modal" class="panel-modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title"><div class="box">
     <h2 id="settings-title">SETTINGS</h2>
@@ -814,7 +886,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
   C.GEM_MOD_PRICE = 2;
   C.GEM_MOD_CHANCE = 0.3;
   C.GEM_ITEM_WEIGHT = 9;
-  C.MERCY_MOVES = 5;
+  C.MERCY_MOVES = 5; C.MERCY_TARGET = 0.75; // v4.4 Mercy: targets 25% lower (was 10%)
   C.SAVE_VER = 4; // 2: v3.6 vouchers/cards, 3: v3.11 Equity state, 4: v4.1 difficulty I-VI (older saves are migrated)
   // v4.3: jewel items are real gems only (a plain 'normal' gem always carries Gold or Shiny; coloured specials carry
   // one GEM_MOD_CHANCE of the time); no modifier-only items
@@ -832,10 +904,16 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
   C.REMOVED_PERKS = { hungry: 'common', pawn_shop: 'common', clearance_sale: 'common', coupon: 'common', overworked: 'common',
     polished_shine: 'uncommon', renovation: 'uncommon', golden_ticket: 'uncommon', whetstone: 'uncommon',
     overcharge: 'rare', compound: 'rare' };
-  // v4.3 Blazing Speed (run.blaze = {m, fill}; Run.blazeFill / blazeTick): each match adds BLAZE_FILL; a full bar
-  // gives m + 1 and resets to BLAZE_RESET. The bar drains BLAZE_DRAIN x m per second (real time); empty at m > 1:
+  // v4.3 Blazing Speed (run.blaze = {m, fill}; Run.blazeFill / blazeTick): each match adds one chunk; a full bar
+  // gives m + 1 and resets (v4.4: see below). The bar drains BLAZE_DRAIN x m per second (real time); empty at m > 1:
   // m - 1 and the bar refills to BLAZE_DROP_FILL; at m = 1 it rests at 0.
-  C.BLAZE_FILL = 1 / 8; C.BLAZE_RESET = 0.15; C.BLAZE_DRAIN = 0.12; C.BLAZE_DROP_FILL = 0.7;
+  // v4.4: the bar has C.blazeChunks(m) chunks at level m (x1 3, x2 5, x3 8, x4+ 10); a match adds one chunk
+  // (1 / chunks). A level-up resets the bar to BLAZE_RESET_CHUNK of the new level's chunk (so a level always takes
+  // exactly `chunks` matches without drain). Drain is halved (0.06 x m per second) and only runs in play while the
+  // round target is not yet reached (Run.blazeDrains).
+  C.BLAZE_CHUNKS = [3, 5, 8, 10];
+  C.blazeChunks = (m) => C.BLAZE_CHUNKS[Math.max(0, Math.min(C.BLAZE_CHUNKS.length - 1, Math.floor(m || 1) - 1))];
+  C.BLAZE_RESET_CHUNK = 0.5; C.BLAZE_DRAIN = 0.06; C.BLAZE_DROP_FILL = 0.7;
   // v4.3 Survival: gems added to the refill pool at each round start after round 1, and on a full clear
   C.SURVIVAL_ROUND_POOL = 64; C.SURVIVAL_FULL_CLEAR = 64;
   // v4.3 Glossary GEMS tab data: every gem kind, the two modifiers and the locked state (UI renders the 3D gem)
@@ -2880,7 +2958,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
   const blazeM = (run) => (run && run.blaze && run.blaze.m > 1 ? run.blaze.m : 1);
   const blaze = (x) => { const m = blazeM(x.run); return m > 1 && x.groupPoints ? { add: (m - 1) * x.groupPoints } : null; };
   def({ id: 'blazing_speed', rarity: 'rare', name: 'Blazing Speed',
-    desc: 'Matches fill a speed meter; a full one adds +1x. Every match scores x the meter. It drains over time',
+    desc: 'Matches fill a speed meter; a full one adds +1x. Every match scores x the meter. It drains in play',
     on: { match: blaze }, force: blaze,
     onBuy: (run, inst) => { if (!run.perks.some((p) => p.id === 'blazing_speed' && p !== inst)) run.blaze = { m: 1, fill: 0 }; },
     onSell: (run) => { if (!run.perks.some((p) => p.id === 'blazing_speed')) run.blaze = { m: 1, fill: 0 }; },
@@ -3050,7 +3128,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
   'use strict';
   const C = GF.C;
   // phase: 'moveEnd' (after every move), 'roundStart', 'every' / 'mystery' / 'direction' (count moves), 'rounds'
-  // (counts round starts; unit 'rounds'). v3.11: Fast Forward (opts.speed) speeds up every counter.
+  // (counts round starts; unit 'rounds'; v4.4: no tile uses it since Wild counts moves). v3.11: Fast Forward (opts.speed) speeds up every counter.
   // Action: mod (add a modifier), magic (recolor), mystery, swap (Direction), otherwise convert to kind.
   const DEFS = {
     gold:  { name: 'Gold Tile',  price: 5,  phase: 'roundStart', mod: 'gold', icon: '$', desc: 'Round start: the gem here becomes Gold' },
@@ -3058,10 +3136,10 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     bomb:  { name: 'Bomb Tile',  price: 7,  phase: 'every', period: 4, kind: 'bomb', icon: 'B', desc: 'Every 4 moves: the gem here becomes a Bomb' },
     star:  { name: 'Star Tile',  price: 8,  phase: 'every', period: 4, kind: 'star', icon: '+', desc: 'Every 4 moves: the gem here becomes a Star' },
     prism: { name: 'Prism Tile', price: 10, phase: 'every', period: 8, kind: 'prism', any: true, icon: 'P', desc: 'Every 8 moves: the gem here becomes a Prism' },
-    wild:  { name: 'Wild Tile',  price: 6,  phase: 'rounds', period: 3, unit: 'rounds', kind: 'wild', any: true, icon: 'W', desc: 'Every 3 rounds: the gem here becomes Wild' },
+    wild:  { name: 'Wild Tile',  price: 6,  phase: 'every', period: 3, kind: 'wild', any: true, icon: 'W', desc: 'Every 3 moves: the gem here becomes Wild' }, // v4.4: moves (was rounds)
     mystery: { name: 'Mystery Tile', price: 8, phase: 'mystery', period: 6, icon: '?', desc: 'Every 6 moves: the gem here becomes a random special, Gold or Shiny gem' },
     magic: { name: 'Magic Tile', price: 5,  phase: 'moveEnd', magic: true, icon: 'M', desc: 'After each move: the gem here turns the most common color' },
-    direction: { name: 'Direction Tile', price: 7, phase: 'direction', period: 3, swap: true, icon: '>', desc: 'Every 3 moves: the gem here swaps with a neighbour' },
+    direction: { name: 'Direction Tile', price: 7, phase: 'direction', period: 2, swap: true, icon: '>', desc: 'Every 2 moves: the gem here swaps with a neighbour' }, // v4.4: 2 (was 3)
   };
   const IDS = Object.keys(DEFS);
   const COUNTED = { every: 'moveEnd', mystery: 'moveEnd', direction: 'moveEnd', rounds: 'roundStart' };
@@ -3958,7 +4036,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
   // x Mercy (x0.9), rounded once more when a multiplier applies
   function targetFor(run, n) {
     const t = target(n);
-    const mul = GF.Difficulty.targetMul(run) * GF.Boards.hook(run, 'targetMul', 1, n) * (GF.Vouchers && GF.Vouchers.has(run, 'mercy') ? 0.9 : 1);
+    const mul = GF.Difficulty.targetMul(run) * GF.Boards.hook(run, 'targetMul', 1, n) * (GF.Vouchers && GF.Vouchers.has(run, 'mercy') ? C.MERCY_TARGET : 1);
     return mul === 1 ? t : C.roundNice(t * mul);
   }
   function colors(run) { return GF.Resolver.colorsOf(run); }
@@ -4252,21 +4330,27 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     return run.blaze;
   }
   const hasBlaze = (run) => (run.perks || []).some((p) => p.id === 'blazing_speed');
-  // One match: +BLAZE_FILL; a full bar gives m + 1 and resets to BLAZE_RESET. Returns the levels gained (0/1).
+  // One match: + one chunk of the current level (1 / C.blazeChunks(m)); a full bar gives m + 1 and resets to half a
+  // chunk of the new level. Returns the levels gained (0/1).
   function blazeFill(run) {
     const b = blazeState(run);
-    b.fill += C.BLAZE_FILL;
+    b.fill += 1 / C.blazeChunks(b.m);
     if (b.fill < 1 - 1e-9) return 0;
     b.m++;
-    b.fill = C.BLAZE_RESET;
+    b.fill = C.BLAZE_RESET_CHUNK / C.blazeChunks(b.m);
     return 1;
   }
-  // Real-time drain (the UI calls it every frame, in play and in the shop): BLAZE_DRAIN x m of the bar per second.
+  // v4.4: the meter drains only in play, and stops once the round target is reached (score >= target)
+  function blazeDrains(run) { return !!run && hasBlaze(run) && run.phase === 'play' && !(run.score >= targetFor(run, run.round)); }
+  // Real-time drain (the UI calls it every frame): BLAZE_DRAIN x m of the bar per second while blazeDrains(run).
   // An empty bar at m > 1 drops a level and refills to BLAZE_DROP_FILL (the rest of dt drains on at the new level);
   // at m = 1 it rests at 0. Returns null without the perk, else {m, fill, down: levels lost}.
   function blazeTick(run, dtMs) {
     if (!run || !hasBlaze(run)) return null;
-    const b = blazeState(run);
+    return blazeDrain(blazeState(run), blazeDrains(run) ? dtMs : 0);
+  }
+  // the drain rule on a bare meter b = {m, fill} (mutated); the UI drains its shown copy with it
+  function blazeDrain(b, dtMs) {
     let t = Math.max(0, +dtMs || 0) / 1000, down = 0;
     for (let guard = 0; guard < 1000 && t > 0; guard++) {
       const rate = C.BLAZE_DRAIN * b.m;
@@ -4392,7 +4476,8 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     o.pendingPlace = o.pendingPlace || []; o.vouchers = o.vouchers || [];
     if (o.timer === undefined) o.timer = null;
     migrate(o);
-    migrateV43(o); // before the tray is filtered (Polish +2 entries become Polish +1)
+    migrateV43(o); // before the tray is filtered (Polish +2 entries become colour polish)
+    migrateV44(o);
     if ((o.saveVer || 1) < 2) migrateV36(o);
     // v3.11 (SAVE_VER 3): Equity became a per-round counter (ids of renamed perks are kept)
     if ((o.saveVer || 1) < 3) o.perks.forEach((p) => { if (p.id === 'equity') p.state = { hot: 0, cold: 0 }; });
@@ -4485,6 +4570,16 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     o.polishSpecial = ps;
     blazeState(o);
   }
+  // v4.4: Wild counts moves (period 3, was rounds) and Direction fires every 2 moves (was 3): saved counters are
+  // clamped below the tile's period so none is past due (idempotent; runs on every load)
+  function migrateV44(o) {
+    const b = o.board;
+    if (!b || !Array.isArray(b.tiles) || !Array.isArray(b.tileState)) return;
+    for (let r = 0; r < C.SIZE; r++) for (let c = 0; c < C.SIZE; c++) {
+      const d = b.tiles[r] && GF.Tiles.DEFS[b.tiles[r][c]];
+      if (d && d.period && b.tileState[r]) b.tileState[r][c] = Math.max(0, Math.min(d.period - 1, +b.tileState[r][c] || 0));
+    }
+  }
   function save(run) {
     try { localStorage.setItem(C.SAVE_KEY, serialize(run)); return true; } catch (e) { return false; }
   }
@@ -4496,7 +4591,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
   function hasSave() { try { return !!localStorage.getItem(C.SAVE_KEY); } catch (e) { return false; } }
 
   GF.Run = { KINDS, newStats, fillStats, stats, bump, earn, recordMove, create, target, targetFor, colors, roundMoves, moneyFloor, startRound, swapKind, doMove, finishRound, continueEndless, freeResolve, rescues, stuckEnd, RESCUE_BANNER,
-    abilities, canUseAbility, useAbility, survivalEnd, blazeFill, blazeTick,
+    abilities, canUseAbility, useAbility, survivalEnd, blazeFill, blazeTick, blazeDrains, blazeDrain,
     timerReady, timerStart, timerSwap, timerEnd, timerBatch,
     serialize, deserialize, save, load, clearSave, hasSave };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
@@ -4517,8 +4612,12 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     if (run.phase === 'victory' && !run.endless) return C.ROUNDS;
     return Math.max(1, Math.floor(run.round || 1));
   }
+  // v4.4: a run that cleared round 20 (the victory screen, or endless after it) is recorded as a victory (won: true)
+  function won(run) { return !!run && ((run.phase === 'victory' && run.round > C.ROUNDS) || !!run.endless); }
   function entry(run) {
-    return { round: reached(run), bestMove: Math.max(0, Math.floor((run && run.stats && run.stats.bestMove) || 0)) };
+    const e = { round: reached(run), bestMove: Math.max(0, Math.floor((run && run.stats && run.stats.bestMove) || 0)) };
+    if (won(run)) e.won = true;
+    return e;
   }
   const keyOf = (run) => (run && run.boardType && GF.Boards.DEFS[run.boardType.id] ? run.boardType.id : 'default');
   // true when record a beats record b (a missing or broken b is always beaten; a missing a never wins)
@@ -4526,6 +4625,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     if (!valid(a)) return false;
     if (!valid(b)) return true;
     if (a.round !== b.round) return a.round > b.round;
+    if (!!a.won !== !!b.won) return !!a.won; // v4.4: at the same round a victory beats a loss
     return a.bestMove > b.bestMove;
   }
   function valid(r) { return !!r && typeof r === 'object' && r.round >= 1 && isFinite(r.round) && r.bestMove >= 0 && isFinite(r.bestMove); }
@@ -4535,7 +4635,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
       return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
     } catch (e) { return {}; }
   }
-  function get(id) { const r = all()[id]; return valid(r) ? { round: r.round, bestMove: r.bestMove } : null; }
+  function get(id) { const r = all()[id]; if (!valid(r)) return null; const o = { round: r.round, bestMove: r.bestMove }; if (r.won) o.won = true; return o; }
   // Records the run if it beats its board's record. Returns true when the record changed.
   function update(run) {
     if (!run) return false;
@@ -4546,7 +4646,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     return true;
   }
 
-  GF.Records = { KEY, reached, entry, better, keyOf, all, get, update };
+  GF.Records = { KEY, reached, won, entry, better, keyOf, all, get, update };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- cards.js
@@ -4700,7 +4800,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
       const col = bril || spec ? null : C.COLORS[color], Col = col && col.charAt(0).toUpperCase() + col.slice(1);
       const sd = spec ? C.POLISH_SPECIAL[spec] : null;
       POLISH_DEFS[key] = { id: 'upgrade:' + key, kind: 'polish', polish: id, special: spec, color: col ? color : null, price: C.UPGRADE_CARD[id].price, playOnly: false, target: null, picks: 0, upTo: false, adjacent: false,
-        name: bril ? 'Brilliance' : sd ? sd.name : 'Polish ' + Col + ' +1',
+        name: bril ? 'Brilliance' : sd ? sd.name : Col + ' Polish',
         desc: bril ? '+1 Polish to every color' : sd ? sd.desc : '+50% points per ' + Col + ' gem',
         apply: (run) => {
           if (bril) for (let k = 0; k < 7; k++) run.polish[k]++;
@@ -4891,7 +4991,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     effect: (run) => { const cols = GF.Resolver.colorsOf(run); if (cols.length > 3) run.removedColors.push(run.rng.pick(cols)); } });
   def({ id: 'stock_rising_1', name: 'Stock Rising I', desc: 'Max interest +$5' });
   def({ id: 'stock_rising_2', name: 'Stock Rising II', tier: 2, requires: 'stock_rising_1', desc: 'Max interest +$10 more' });
-  def({ id: 'mercy', name: 'Mercy', desc: 'Round targets 10% lower. -5 moves each round' });
+  def({ id: 'mercy', name: 'Mercy', desc: 'Round targets 25% lower. -5 moves each round' });
   def({ id: 'jewel_hunter', name: 'Jewel Hunter', desc: 'The shop also sells gems' });
   def({ id: 'enchanter', name: 'Enchanter', desc: 'Enhance cards appear twice as often' });
   def({ id: 'gemsmith', name: 'Gemsmith', desc: 'Polish cards appear twice as often' });
@@ -8453,6 +8553,15 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     // v4.3 Blazing Speed level-up: a rising whoosh, higher with each level
     blaze(m) { const f = 330 * Math.pow(2, Math.min(8, (m || 2) - 2) / 6); tone(f, 0.22, 'sawtooth', 0.05, f * 3); noise(0.12, 0.08); tone(f * 2, 0.12, 'square', 0.03, null, 0.1); },
     bad() { tone(160, 0.15, 'square', 0.05, 100); },
+    // v4.4 VICTORY fanfare: a rising brass-like arpeggio, a held major chord with a sparkle on top
+    fanfare() {
+      [[523, 0], [659, 0.12], [784, 0.24], [1047, 0.36], [784, 0.52], [1047, 0.64]].forEach(([f, d]) => { tone(f, 0.16, 'square', 0.05, null, d); tone(f / 2, 0.16, 'triangle', 0.05, null, d); });
+      [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 1.1, i % 2 ? 'triangle' : 'square', 0.035, null, 0.84 + i * 0.015));
+      tone(131, 1.2, 'sawtooth', 0.04, null, 0.84);
+      [2093, 2637, 3136, 4186].forEach((f, i) => tone(f, 0.18, 'sine', 0.025, null, 1.0 + i * 0.07));
+    },
+    // a firework burst on the VICTORY screen (quiet)
+    firework() { noise(0.25, 0.05); tone(1800 + Math.random() * 800, 0.12, 'sine', 0.012, 600); },
     // v4.0 locked gems: chains slamming shut (a heavy metal clank) and snapping open (a bright rattle)
     clank() { noise(0.08, 0.12); tone(196, 0.16, 'square', 0.06, 150); tone(1175, 0.1, 'triangle', 0.03, 880, 0.02); },
     unchain() { [988, 1319, 1760].forEach((f, i) => tone(f, 0.06, 'square', 0.03, f * 0.8, i * 0.035)); noise(0.05, 0.06, 0.02); },
@@ -10348,13 +10457,16 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     updateStuck();
     updateAbilities();
   }
-  // ---------- v4.3 Blazing Speed meter (under the moves bar; a copy in the shop panel) ----------
+  // ---------- v4.3 Blazing Speed meter (under the moves bar; v4.4: frozen in the shop, no shop-panel copy) ----------
   // S.bz is the meter as shown. At idle it is the run's own (run.blaze, drained by Run.blazeTick every frame). While
   // moves animate it keeps what the player has seen so far and drains on by the same rule; each 'blaze' timeline step
   // (the logic meter right after that cascade level's matches) sets it to that snapshot drained by the real time since
   // the move was computed, so the bar fills in step with the matches and meets the logic exactly at the last one.
-  const BZ_PERKS = [{ id: 'blazing_speed' }];
-  function bzDrain(b, ms) { const o = { perks: BZ_PERKS, blaze: { m: b.m, fill: b.fill } }; GF.Run.blazeTick(o, ms); return { m: o.blaze.m, fill: o.blaze.fill }; }
+  // v4.4: the shown meter freezes whenever the run's own does (shop, or the round target reached)
+  function bzDrain(b, ms) {
+    if (!GF.Run.blazeDrains(S.run)) return { m: b.m, fill: b.fill };
+    const o = { m: b.m, fill: b.fill }; GF.Run.blazeDrain(o, ms); return { m: o.m, fill: o.fill };
+  }
   function blazeOwned(run) { return !!run && (run.perks || []).some((p) => p.id === 'blazing_speed'); }
   function blazeStep(s, t0) {
     if (!blazeOwned(S.run)) return;
@@ -10382,9 +10494,9 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     const run = S.run, on = blazeOwned(run), els = document.querySelectorAll('.blaze-meter');
     const wasOn = S.bzOn;
     S.bzOn = on;
-    els.forEach((el) => el.classList.toggle('hidden', !on));
+    els.forEach((el) => el.classList.toggle('hidden', !on)); // v4.4: shown frozen in the shop (no copy in the panel)
     if (on !== !!wasOn && run && !$('screen-game').classList.contains('hidden')) layout(); // the board gives the meter room
-    if (!on) { S.bz = null; return; }
+    if (!on) { S.bz = null; S.bzSig = null; return; }
     const L = run.blaze || { m: 1, fill: 0 };
     const prev = S.bz;
     S.bz = !prev || (!animating() && !S.freeing) ? { m: L.m, fill: L.fill } : bzDrain(prev, dt);
@@ -10402,6 +10514,8 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
       el.classList.toggle('lit', b.m > 1);
       const fill = el.querySelector('.bz-fill'), lab = el.querySelector('.bz-m');
       if (fill.dataset.m !== String(b.m)) { fill.dataset.m = String(b.m); fill.style.background = look.grad; lab.style.color = look.label; }
+      const n = String(C.blazeChunks(b.m)); // v4.4: the bar's chunks for this level (3/5/8/10)
+      if (el.dataset.chunks !== n) { el.dataset.chunks = n; el.querySelector('.bz-ticks').style.setProperty('--n', n); }
       lab.textContent = 'x' + b.m;
     });
   }
@@ -10730,7 +10844,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     if (it.kind === 'card') { const d = GF.Cards.DEFS[it.id]; return { icon: iconImg('card', it.id), name: d.name, desc: d.desc, cls: 'enh' }; }
     if (it.kind === 'tile') { const d = GF.Tiles.DEFS[it.id]; return { icon: iconImg('tile', it.id), name: d.name, desc: d.desc, cls: 'tile' }; }
     if (it.kind === 'gem') return { icon: GF.Render.gemIconHTML(it.color, it.id, null, it.mod), name: jewelName(it), desc: GEM_INFO[it.id] + (it.mod ? '. ' + MOD_INFO[it.mod] : ''), cls: 'tile' };
-    // v4.3: polish +1 per colour, special polish cards and Brilliance (names / descriptions from Cards.def)
+    // v4.4: colour polish ("Red Polish"), special polish cards and Brilliance (names / descriptions from Cards.def)
     const d = GF.Cards.def(GF.Cards.entryOf(it)) || { name: String(it.id), desc: '' };
     const name = d.name.toUpperCase();
     let desc = d.desc;
@@ -11212,7 +11326,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
   function layout() {
     const w = window.innerWidth, h = window.innerHeight, mobile = w < 760;
     document.body.classList.toggle('mobile', mobile);
-    const shopOpen = S.run && S.run.phase === 'shop';
+    const shopOpen = S.run && S.run.phase === 'shop' && !S.shopLeaving; // v4.4: NEXT ROUND lays out the round early (FLIP)
     const availW = mobile ? w - 24 : w - 220 - (shopOpen ? 320 : 0) - 64;
     // space under the board's top edge (rows above it never depend on the board size); 48: moves bar + padding
     const top = $('board').getBoundingClientRect().top - $('app').getBoundingClientRect().top;
@@ -11226,7 +11340,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
   }
   function toTitle() {
     recordRun(); // quitting (MAIN MENU, after a game over / victory) keeps the run's progress
-    endIntro('cancel'); endShopAnim(); dropMartyr();
+    endIntro('cancel'); endShopAnim(); dropMartyr(); hideVictory();
     GF.Anim.cancelAll(); S.live = []; S.locked = false; S.freeing = false; closeTimer();
     if (GF.Render.clearFx) GF.Render.clearFx();
     S.run = null; cancelTargeting(); S.selected = null; S.hint = null; S.frozen = null; S.movesHold = null; S.dragging = false; S.cp = null;
@@ -11241,7 +11355,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
   // intro (v4.1): 'card' zooms the SELECT BOARD card onto the board, 'light' only staggers the UI in and drops the
   // gems; skipped (as before v4.1) under reduced motion or GF.UI.skipIntro.
   function newRun(fresh, o, intro) {
-    endIntro('cancel'); endShopAnim(); dropMartyr();
+    endIntro('cancel'); endShopAnim(); dropMartyr(); hideVictory();
     const txt = o && o.seed != null && o.seed !== '' ? String(o.seed).trim() : fresh ? '' : $('seed-input').value.trim();
     const seed = txt ? (/^\d+$/.test(txt) ? +txt : GF.RNG.hash(txt)) : undefined;
     GF.Anim.cancelAll(); S.live = []; S.locked = false; S.freeing = false; closeTimer();
@@ -11399,7 +11513,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
   // one after another. Out (NEXT ROUND): a small bounce, the panel slides away, then the round starts. Reduced motion:
   // a short fade. GF.UI.skipIntro (tools): no transition. While the panel moves, S.shopAnim is set: the shop and the
   // board take no input (state().busy says so). GF.UI.introScale slows it down for screenshots.
-  const SHOP_MS = { slide: 460, pop: 240, stagger: 420, bounce: 170, out: 300, fade: 140 };
+  const SHOP_MS = { slide: 460, pop: 240, stagger: 420, bounce: 170, out: 300, fade: 140, flip: 420 };
   let SA = null;
   function shopMotion() { return GF.UI && GF.UI.skipIntro ? 'none' : reducedMotion() ? 'fade' : 'full'; }
   function endShopAnim() {
@@ -11408,9 +11522,51 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     SA = null; clearTimeout(a.timer);
     a.anims.forEach((x) => { try { x.cancel(); } catch (e) { /* gone */ } });
     S.shopAnim = null; $('shop').classList.remove('anim-lock');
+    unpinShop();
+  }
+  // v4.4 NEXT ROUND (desktop): the leaving shop is pinned where it is (out of the grid) so the rest of the game can
+  // take its round layout at once; FLIP then slides (and zooms, when the board size changes) each part from where it
+  // was. Mobile (the shop is a fixed sheet): the parts settle with a small bob while the sheet slides down.
+  const FLIP_IDS = ['hud', 'cascade-panel', 'perk-frame', 'tray-frame', 'board-wrap'];
+  function pinShop() {
+    const sh = $('shop'), r = sh.getBoundingClientRect();
+    sh.classList.add('pinned');
+    Object.assign(sh.style, { position: 'fixed', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', margin: '0', zIndex: '30' });
+  }
+  function unpinShop() {
+    const sh = $('shop'), was = S.shopLeaving;
+    S.shopLeaving = false;
+    if (sh.classList.contains('pinned')) { sh.classList.remove('pinned'); ['position', 'left', 'top', 'width', 'height', 'margin', 'zIndex'].forEach((k) => { sh.style[k] = ''; }); }
+    return was;
+  }
+  function flipGame(a, k, delay, dur) {
+    const els = FLIP_IDS.map($).filter((el) => el && el.offsetParent !== null);
+    const mobile = document.body.classList.contains('mobile');
+    if (mobile) {
+      S.shopLeaving = true; drawBlaze(0);
+      els.forEach((el, i) => a.anims.push(el.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(6px) scale(.985)', offset: 0.45 }, { transform: 'translateY(-3px)', offset: 0.75 }, { transform: 'none' }],
+        { duration: dur, delay: delay + i * 30 * k, easing: 'ease-in-out' })));
+      return dur + delay + (els.length - 1) * 30 * k;
+    }
+    const first = els.map((el) => el.getBoundingClientRect());
+    pinShop();
+    S.shopLeaving = true;
+    layout(); drawBlaze(0);
+    let end = 0;
+    els.forEach((el, i) => {
+      const f = first[i], l = el.getBoundingClientRect();
+      if (!l.width || !l.height) return;
+      const dx = f.left - l.left, dy = f.top - l.top, sx = f.width / l.width, sy = f.height / l.height;
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && Math.abs(sx - 1) < 0.004 && Math.abs(sy - 1) < 0.004) return;
+      const d = delay + i * 12 * k;
+      a.anims.push(el.animate([{ transformOrigin: '0 0', transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')' }, { transformOrigin: '0 0', transform: 'none' }],
+        { duration: dur, delay: d, easing: 'cubic-bezier(.3,1.25,.5,1)', fill: 'backwards' }));
+      end = Math.max(end, d + dur);
+    });
+    return end;
   }
   function shopParts() {
-    return Array.from(document.querySelectorAll('#shop > h2, #shop > .blaze-meter:not(.hidden), #shop > h3, #shop-items > *, #btn-reroll, #shop .shop-box > h3, #shop-voucher > *, #shop-packs > *, #pending:not(.hidden), #btn-next, #shop-hint'));
+    return Array.from(document.querySelectorAll('#shop > h2, #shop > h3, #shop-items > *, #btn-reroll, #shop .shop-box > h3, #shop-voucher > *, #shop-packs > *, #pending:not(.hidden), #btn-next, #shop-hint'));
   }
   const shopOff = () => (document.body.classList.contains('mobile') ? (d) => 'translateY(' + (d == null ? '105%' : d + 'px') + ')' : (d) => 'translateX(' + (d == null ? 'calc(100% + 48px)' : -d + 'px') + ')');
   function shopIn() {
@@ -11446,15 +11602,20 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     } else {
       const off = shopOff(), b = SHOP_MS.bounce / (SHOP_MS.bounce + SHOP_MS.out);
       total = (SHOP_MS.bounce + SHOP_MS.out) * k;
+      // v4.4: the rest of the game slides / zooms into its round layout while the panel leaves
+      const flipEnd = flipGame(a, k, SHOP_MS.bounce * k, SHOP_MS.flip * k);
       a.anims.push(sh.animate([{ transform: 'none', easing: 'ease-out' }, { transform: 'scale(1.045)', offset: b * 0.4, easing: 'ease-in-out' }, { transform: 'scale(.97)', offset: b * 0.75, easing: 'ease-out' },
         { transform: 'scale(1)', offset: b, easing: 'ease-out' }, { transform: off(-10), offset: b + (1 - b) * 0.25, easing: 'cubic-bezier(.55,0,.9,.45)' }, { transform: off(), opacity: 1 }],
         { duration: total, fill: 'forwards' }));
+      total = Math.max(total, flipEnd);
     }
     a.timer = setTimeout(() => {
       if (SA !== a) return;
       SA = null; S.shopAnim = null; S.locked = false; sh.classList.remove('anim-lock');
+      const flipped = unpinShop();
+      a.anims.forEach((x) => { try { x.cancel(); } catch (e) { /* gone */ } }); // done: the parts are home, the panel goes next
       if (S.run === run && run.phase === 'shop') then();
-      a.anims.forEach((x) => { try { x.cancel(); } catch (e) { /* gone */ } }); // the panel is hidden by now
+      else if (flipped) layout();
     }, total);
   }
   // Round-start free move (frozen jewel/card matches): input locked until it finishes; points go to the HUD score.
@@ -11857,11 +12018,129 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
     refresh();
     if (run.phase === 'victory') { GF.Run.save(run); await victory(); } else enterShop();
   }
-  async function victory() {
+  // ---------- v4.4 VICTORY screen ----------
+  // A full-screen celebration after round 20: the title drops in letter by letter with a gold / rainbow shimmer, a
+  // fireworks + confetti canvas, the run summary (board + difficulty, round 20 score, best move, gems broken, money,
+  // perks, rounds), ENDLESS / NEW RUN / MAIN MENU. Reduced motion: no particles or count-ups, a static gold title.
+  // The board's record is saved as a victory (GF.Records won). Resolves with 'endless' | 'new' | 'menu'.
+  let VFX = null;
+  function victoryFx(cv, reduced) {
+    stopVictoryFx();
+    const ctx = cv.getContext('2d'), P = [], COLS = ['#ffd23f', '#ff4d6d', '#3ddc84', '#3a86ff', '#a259ff', '#ff6bd6', '#fff6cc', '#7fe7ff'];
+    const fx = VFX = { raf: 0, P: P, next: 0, conf: 0 };
+    let W = 0, H = 0, px = 3, last = performance.now();
+    const size = () => { const r = cv.getBoundingClientRect(); W = Math.max(1, Math.round(r.width / px)); H = Math.max(1, Math.round(r.height / px)); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H; };
+    size();
+    const burst = (x, y) => {
+      const col = COLS[Math.floor(Math.random() * COLS.length)], col2 = COLS[Math.floor(Math.random() * COLS.length)], n = 34 + Math.floor(Math.random() * 18);
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2 + Math.random() * 0.2, v = 22 + Math.random() * 30; P.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1, decay: 0.55 + Math.random() * 0.4, c: i % 3 ? col : col2, s: i % 4 ? 1 : 2, g: 22 }); }
+      if (P.length < 900) GF.Audio.firework();
+    };
+    const rocket = () => P.push({ x: W * (0.15 + Math.random() * 0.7), y: H + 2, vx: (Math.random() - 0.5) * 10, vy: -(H * 0.9 + Math.random() * H * 0.35), life: 1, decay: 0, c: '#fff6cc', s: 1, g: H * 0.95, rocket: true, ty: H * (0.12 + Math.random() * 0.33) });
+    const confetti = (n) => { for (let i = 0; i < n; i++) P.push({ x: Math.random() * W, y: -Math.random() * H * 0.4, vx: (Math.random() - 0.5) * 14, vy: 8 + Math.random() * 18, life: 1, decay: 0.12 + Math.random() * 0.08, c: COLS[i % COLS.length], s: 2, g: 6, conf: true, ph: Math.random() * 6 }); };
+    if (reduced) { // a still scatter of confetti
+      confetti(70); P.forEach((p) => { p.y = Math.random() * H; });
+      ctx.clearRect(0, 0, W, H); P.forEach((p) => { ctx.fillStyle = p.c; ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2); });
+      return;
+    }
+    confetti(90);
+    [0.25, 0.5, 0.75].forEach((f, i) => setTimeout(() => { if (VFX === fx) burst(W * f, H * (0.22 + (i % 2) * 0.1)); }, 250 + i * 260));
+    const step = (now) => {
+      if (VFX !== fx) return;
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      size();
+      if (now > fx.next) { rocket(); fx.next = now + 520 + Math.random() * 700; }
+      if (now > fx.conf) { confetti(6); fx.conf = now + 260; }
+      ctx.clearRect(0, 0, W, H);
+      for (let i = P.length - 1; i >= 0; i--) {
+        const p = P[i];
+        p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+        if (p.rocket) {
+          if (p.vy >= -4 || p.y <= p.ty) { P.splice(i, 1); burst(p.x, p.y); continue; }
+          ctx.fillStyle = '#ffb347'; ctx.fillRect(Math.round(p.x), Math.round(p.y + 2), 1, 2);
+        } else if (p.conf) { p.ph += dt * 8; p.vx += Math.sin(p.ph) * 4 * dt * 10; p.vx *= 0.96; }
+        else { p.vx *= 0.97; p.vy *= 0.97; }
+        p.life -= p.decay * dt;
+        if (p.life <= 0 || p.y > H + 4) { P.splice(i, 1); continue; }
+        ctx.globalAlpha = p.conf ? 1 : Math.max(0, Math.min(1, p.life * 1.4));
+        ctx.fillStyle = p.life < 0.3 && !p.conf && Math.random() < 0.5 ? '#fff6cc' : p.c;
+        const w = p.conf ? (Math.sin(p.ph) > 0 ? 2 : 1) : p.s;
+        ctx.fillRect(Math.round(p.x), Math.round(p.y), w, p.conf ? 2 : p.s);
+      }
+      ctx.globalAlpha = 1;
+      fx.raf = requestAnimationFrame(step);
+    };
+    fx.raf = requestAnimationFrame(step);
+  }
+  function stopVictoryFx() { if (VFX) { cancelAnimationFrame(VFX.raf); VFX = null; } }
+  // counts a stat up from 0 (reduced motion: the final value at once)
+  function countUp(el, to, fmtFn, delay, reduced) {
+    if (reduced || !(to > 0)) { el.textContent = fmtFn(to); return; }
+    el.textContent = fmtFn(0);
+    const t0 = performance.now() + delay, dur = 900;
+    const tick = (now) => {
+      if (!el.isConnected || $('victory').classList.contains('hidden')) return;
+      const t = Math.max(0, Math.min(1, (now - t0) / dur)), e = 1 - Math.pow(1 - t, 3);
+      el.textContent = fmtFn(Math.round(to * e));
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  function showVictory(run) {
+    const reduced = reducedMotion(), st = GF.Run.stats(run), V = $('victory');
+    const title = 'VICTORY!';
+    $('vic-title').innerHTML = title.split('').map((ch, i) => '<span style="--i:' + i + '" aria-hidden="true">' + ch + '</span>').join('');
+    $('vic-rounds-n').textContent = C.ROUNDS;
+    const def = GF.Boards.DEFS[run.boardType.id] || GF.Boards.DEFS.default;
+    $('vic-board').innerHTML = boardIcon(def.id) + '<span style="color:' + nameCol(def.id) + '">' + GF.Boards.label(run) + '</span>' + diffBadge(run.difficulty || 1);
+    const target = GF.Run.targetFor(run, C.ROUNDS);
+    const tiles = [
+      ['FINAL SCORE', run.score, 'gold', 'ROUND ' + C.ROUNDS + ' / ' + fmt(target)],
+      ['BEST MOVE', st.bestMove, 'pink', 'IN ONE MOVE'],
+      ['GEMS BROKEN', st.gemsBroken, 'good', fmt(st.moves) + ' MOVES'],
+      ['MONEY', run.money, 'gold', '$' + fmt(st.moneyEarned) + ' EARNED', money],
+      ['ROUNDS', st.roundsWon || C.ROUNDS, '', 'OF ' + C.ROUNDS, (n) => String(n)],
+      ['SEED', null, '', '', null, String(run.seed)],
+    ];
+    const S2 = $('vic-stats'); S2.innerHTML = '';
+    tiles.forEach(([lab, v, cls, sub, f, text], i) => {
+      const d = document.createElement('div');
+      d.className = 'vic-stat'; d.style.setProperty('--i', i);
+      d.innerHTML = '<label>' + lab + '</label><b class="' + cls + '"></b>' + (sub ? '<small>' + sub + '</small>' : '');
+      S2.appendChild(d);
+      const b = d.querySelector('b');
+      if (text != null) b.textContent = text; else countUp(b, v, f || fmt, 700 + i * 80, reduced);
+    });
+    const PK = $('vic-perks'), PKn = run.perks.length;
+    PK.innerHTML = run.perks.length ? run.perks.map((p, i) => { const d = GF.Perks.byId[p.id]; return d ? '<span class="vic-perk ' + d.rarity + '" style="--i:' + i + '" title="' + d.name + '">' + iconImg('perk', p.id) + '</span>' : ''; }).join('') : '<span class="none">NONE</span>';
+    // upgrades: vouchers bought (pink mini cards, tier numeral) and polish levels above Lv 1 (gem icon + level)
+    const ups = (run.vouchers || []).filter((id) => GF.Vouchers.DEFS[id]).map((id) => { const d = GF.Vouchers.DEFS[id]; return '<span class="vic-perk vch" title="' + d.name + '">' + iconImg('voucher', id) + (d.tier > 1 ? '<i class="vic-tier">' + ROMAN[d.tier] + '</i>' : '') + '</span>'; })
+      .concat(C.COLORS.map((name, k) => (run.polish[k] > 0 ? '<span class="vic-pol" title="' + name.toUpperCase() + ' POLISH Lv ' + (run.polish[k] + 1) + '"><img alt="" src="' + GF.Render.gemIconURL(k) + '"><i style="color:' + C.levelColor(run.polish[k] + 1) + '">' + (run.polish[k] + 1) + '</i></span>' : '')).filter(Boolean));
+    $('vic-ups').innerHTML = ups.length ? ups.map((h, i) => h.replace('<span class="', '<span style="--i:' + (i + PKn) + '" class="')).join('') : '<span class="none">NONE</span>';
+    V.classList.remove('hidden');
+    victoryFx($('vic-fx'), reduced);
+    GF.Audio.fanfare();
+  }
+  function hideVictory() { stopVictoryFx(); $('victory').classList.add('hidden'); }
+  function victory() {
     const run = S.run;
-    recordRun();
-    const v = await modal('VICTORY!', '<p>You beat all ' + C.ROUNDS + ' rounds.</p><p>Best move <b>' + fmt(run.stats.bestMove) + '</b></p><p>Seed <b>' + run.seed + '</b></p>', [['ENDLESS', 'endless'], ['MENU', 'menu']]);
-    if (v === 'endless') { GF.Run.continueEndless(run); enterShop(); } else { GF.Run.clearSave(); toTitle(); }
+    recordRun(); // v4.4: recorded as a victory on its board
+    showVictory(run);
+    return new Promise((resolve) => {
+      const done = (v) => {
+        ['vic-endless', 'vic-new', 'vic-menu'].forEach((id) => { $(id).onclick = null; });
+        hideVictory();
+        if (S.run !== run) { resolve(v); return; }
+        if (v === 'endless') { GF.Run.continueEndless(run); enterShop(); }
+        else if (v === 'new') { GF.Run.clearSave(); newRun(true, { board: run.boardType.id, subs: run.boardType.subs, difficulty: run.difficulty }, 'light'); }
+        else { GF.Run.clearSave(); toTitle(); }
+        resolve(v);
+      };
+      $('vic-endless').onclick = () => done('endless');
+      $('vic-new').onclick = () => done('new');
+      $('vic-menu').onclick = () => done('menu');
+      setTimeout(() => { if (!$('victory').classList.contains('hidden')) $('vic-endless').focus({ preventScroll: true }); }, 50);
+    });
   }
   async function gameOver() {
     const run = S.run;
@@ -12159,7 +12438,8 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
       const c = bsCard(id);
       if (!c) return;
       const r = all[id], ok = !!r && r.round >= 1;
-      c.querySelector('.bs-rec-run').textContent = ok ? 'ROUND ' + r.round : '—';
+      c.querySelector('.bs-rec-run').textContent = ok ? (r.won ? (r.round > C.ROUNDS ? 'VICTORY R' + r.round : 'VICTORY') : 'ROUND ' + r.round) : '—';
+      c.querySelector('.bs-rec').classList.toggle('won', ok && !!r.won);
       c.querySelector('.bs-rec-move').textContent = ok ? fmt(r.bestMove || 0) : '—';
       c.querySelector('.bs-rec').classList.toggle('none', !ok);
     });
@@ -12490,7 +12770,7 @@ body.mobile #board-banner.fullclear { font-size: 22px; }
       const d = C.GEM_INFO[k], g = GL_GEM[k] || [null], kind = g[1] || k, color = g[0];
       const ps = C.POLISH_SPECIAL[k];
       const vals = [];
-      if (k === 'normal') vals.push('POLISH +1 (of its colour): +50% value per level.');
+      if (k === 'normal') vals.push('COLOUR POLISH (e.g. RED POLISH, of its colour): +50% value per level.');
       if (ps) vals.push(ps.name.toUpperCase() + ': ' + ps.desc + ' per level.');
       if (C.GEM_PRICE[k] != null) vals.push('Jewel pack / shop gem: $' + C.GEM_PRICE[k] + (k === 'normal' ? ' (always Gold or Shiny)' : ''));
       if (C.MODS[k]) vals.push('Comes on gems from Jewel packs, cards and perks (+$' + C.GEM_MOD_PRICE + ' on a shop gem).');
