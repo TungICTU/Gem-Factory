@@ -255,6 +255,9 @@ button.wide { width: 100%; margin-top: 8px; }
 #hover-label { position: absolute; z-index: 39; pointer-events: none; background: #0d0818; border: 2px solid var(--ink); padding: 4px 6px; font-size: 8px; color: var(--accent); white-space: nowrap; }
 .perk.uncommon { border-color: var(--uncommon); }
 .perk.rare { border-color: var(--rare); }
+/* v4.8 a Permanent one-shot perk that was used (Lifebuoy, Time Machine): greyed, SPENT box */
+.perk.spent .inner { filter: grayscale(1) brightness(.55); }
+.perk.spent { border-color: #4a4560; }
 .perk .inner { display: flex; align-items: center; justify-content: center; }
 .perk .inner.shake { animation: shake .3s linear; }
 @keyframes shake { 25% { transform: rotate(-6deg); } 75% { transform: rotate(6deg); } }
@@ -421,6 +424,16 @@ body.mobile #gl-tabs .tab-n, body.mobile #gl-sub .tab-n { margin-left: 2px; }
 .slot.free .price { color: #000; background: var(--good); display: inline-block; padding: 2px 4px 1px; box-shadow: 2px 2px 0 #000; }
 .slot.free.off { opacity: 1; }
 .free-tag { position: absolute; top: -9px; right: -12px; z-index: 2; font-size: 7px; line-height: 1; padding: 3px 3px 2px; color: #000; background: var(--good); border: 2px solid #000; transform: rotate(12deg); box-shadow: 2px 2px 0 #000; }
+/* v4.8 perk attachment badges: small coloured circles with a white pixel icon, top right (a second one beside it) */
+.slot .frame { position: relative; }
+.att-badges { position: absolute; top: -7px; right: -7px; z-index: 3; display: flex; flex-direction: row-reverse; gap: 1px; pointer-events: none; }
+.att { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #000; box-shadow: 1px 1px 0 #000; box-sizing: border-box; }
+.att img { width: 10px; height: 10px; image-rendering: pixelated; }
+.att.att-invisible { border-color: #cfc8e8; }
+.att.inline { width: 14px; height: 14px; vertical-align: -3px; margin-right: 4px; box-shadow: none; }
+.att.inline img { width: 9px; height: 9px; }
+#tip .att-line { font-size: 8px; line-height: 1.5; margin-top: 4px; }
+#tip .att-line b { display: inline; margin: 0 2px 0 0; }
 .claw-spark { position: absolute; left: 3px; top: 3px; width: 4px; height: 4px; background: #fff; box-shadow: 4px 0 0 #fff, -4px 0 0 #fff, 0 4px 0 #fff, 0 -4px 0 #fff; animation: clawSpark 1.4s steps(4) infinite; pointer-events: none; }
 @keyframes clawSpark { 0%, 100% { opacity: 0; transform: scale(.4); } 30% { opacity: 1; transform: scale(1); } 60% { opacity: .2; transform: translate(40px, 38px) scale(.6); } 80% { opacity: 1; transform: translate(40px, 38px) scale(1); } }
 #tip button.free-btn { background: var(--good); color: #000; border-color: #0b5e2f; text-shadow: none; }
@@ -493,12 +506,7 @@ body.mobile #gl-tabs .tab-n, body.mobile #gl-sub .tab-n { margin-left: 2px; }
 .bs-label { font-size: 8px; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; gap: 8px; }
 #bs-sub-count { color: var(--good); } #bs-sub-count.none { color: var(--bad); animation: blink .6s steps(2) infinite; }
 #bs-subs { border-color: #e040fb; }
-#bs-sub-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-.bs-sub { --bn: var(--bc); display: inline-flex; align-items: center; gap: 5px; font-size: 7px; padding: 4px 6px 4px 4px; border: 2px solid var(--bc); box-shadow: 2px 2px 0 #000; color: var(--muted); background: #140d24; }
-.bs-sub .bs-sub-ico { width: 20px; height: 20px; image-rendering: pixelated; opacity: .55; }
-.bs-sub.on { color: #000; background: var(--bc); }
-.bs-sub.on .bs-sub-ico { opacity: 1; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.5)); }
-.bs-sub.full { opacity: .45; }
+#bs-chals { border-color: var(--accent); }
 #bs-diff-row { display: flex; gap: 10px; justify-content: center; }
 .bs-dbtn { min-width: 46px; height: 34px; font-size: 11px; box-shadow: 3px 3px 0 #000; filter: saturate(.35) brightness(.7); }
 .bs-dbtn:hover:not(:disabled) { background: var(--dc); filter: none; }
@@ -808,15 +816,50 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
 @keyframes landed { 0% { transform: scale(1.35); filter: brightness(2); } 100% { transform: none; filter: none; } }
 /* Area 51 refusal */
 .float.zone { color: #a8eca0; font-size: 11px; z-index: 23; text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; animation: matchPop .9s ease-out forwards; }
-/* Magic sub-board picker: a vertical column right of the board strip, before the > arrow (desktop) */
-.bs-wrap #bs-subs { flex: none; position: relative; z-index: 4; width: 176px; align-self: stretch; margin: 6px 58px 6px 6px; padding: 7px 8px 7px; display: flex; flex-direction: column; box-sizing: border-box; }
-.bs-wrap #bs-subs.hidden { display: none; }
-.bs-wrap #bs-subs .bs-label { margin-bottom: 6px; font-size: 7px; }
-.bs-wrap #bs-sub-list { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr; grid-auto-rows: 1fr; gap: 3px; justify-content: stretch; }
-.bs-wrap .bs-sub { font-size: 7px; padding: 0 5px 0 3px; gap: 6px; min-height: 0; box-shadow: 2px 2px 0 #000; }
-.bs-wrap .bs-sub .bs-sub-ico { width: 14px; height: 14px; }
-.bs-wrap.magic #bs-strip { -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); }
-.bs-wrap.magic::after { display: none; }
+/* v4.8 side column (Magic picker / CHALLENGE list), glossary-style rows that scroll inside a fixed height. Desktop: laid
+   over the strip's right end just before the > arrow, so the strip keeps its full width and the selected card stays
+   exactly at the screen's centre (the strip fades out before the column). Mobile: a full-width panel under the strip. */
+.bs-wrap .bs-side { position: absolute; z-index: 4; right: 58px; top: 8px; bottom: 8px; width: 220px; margin: 0; padding: 7px 4px 6px 8px; display: flex; flex-direction: column; box-sizing: border-box; }
+.bs-wrap .bs-side.hidden { display: none; }
+.bs-side .bs-label { margin-bottom: 6px; padding-right: 4px; font-size: 7px; }
+#bs-chal-count { color: var(--accent); }
+.bs-list { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; overflow-x: hidden; padding: 1px 4px 3px 0; outline: none; scrollbar-width: thin; scrollbar-color: var(--accent) #140d24; overscroll-behavior: contain; }
+.bs-wrap .bs-list { flex: 1; min-height: 0; }
+#bs-sub-list { scrollbar-color: #e040fb #140d24; }
+body.mobile .bs-list { max-height: 252px; }
+.bs-list:focus-visible { outline: 2px dashed var(--accent); outline-offset: 1px; }
+.bs-list-head { flex: none; margin: 3px 0 1px; padding: 0 2px 4px; font-size: 6px; letter-spacing: 1px; color: var(--muted); border-bottom: 2px dotted #4a3b70; }
+.bs-list-head:first-child { margin-top: 0; }
+.bs-row { flex: none; display: flex; align-items: center; gap: 6px; width: 100%; min-height: 30px; padding: 3px 5px 3px 3px; text-align: left; font-size: 7px; color: var(--muted); background: #140d24;
+  border: 2px solid color-mix(in srgb, var(--bc) 45%, #000); border-left: 4px solid var(--bc); box-shadow: 2px 2px 0 #000; }
+.bs-row:hover:not(:disabled) { background: color-mix(in srgb, var(--bc) 14%, #140d24); }
+.bs-row-ico { flex: none; width: 18px; height: 18px; margin: 0; image-rendering: pixelated; opacity: .7; }
+.bs-row-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.bs-row-t b { font-weight: normal; font-size: 7px; line-height: 1.2; color: var(--bn, var(--bc)); text-shadow: 1px 1px 0 #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bs-row-t small { font-size: 6px; line-height: 1.45; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.bs-row-rec { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 6px; color: var(--accent); text-shadow: 1px 1px 0 #000; }
+.bs-row-rec:empty { display: none; }
+.bs-row-rec i { font-style: normal; }
+.bs-row-rec.won i { color: var(--good); }
+.bs-row-rec .diff-badge.rec { font-size: 5px; min-width: 14px; padding: 2px 2px 1px; box-shadow: none; border-width: 1px; }
+.bs-row.on, .bs-row.on:hover:not(:disabled) { background: var(--bc); border-color: #000; color: #000; }
+.bs-row.on .bs-row-ico { opacity: 1; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.5)); }
+.bs-row.on .bs-row-t b, .bs-row.on .bs-row-t small, .bs-row.on .bs-row-rec { color: #000; text-shadow: none; }
+.bs-row.bs-ch.on, .bs-row.bs-ch.on:hover:not(:disabled) { background: color-mix(in srgb, var(--bc) 34%, #140d24); border-color: var(--accent); border-left-color: var(--bc); outline: 1px solid #000; box-shadow: 2px 2px 0 #000, 0 0 10px color-mix(in srgb, var(--accent) 45%, transparent); }
+.bs-row.bs-ch.on .bs-row-t b { color: var(--ink); text-shadow: 1px 1px 0 #000; } .bs-row.bs-ch.on .bs-row-t small { color: var(--ink); } .bs-row.bs-ch.on .bs-row-rec { color: var(--accent); text-shadow: 1px 1px 0 #000; }
+.bs-row.bs-ch.on .bs-row-t b::before { content: '> '; color: var(--accent); }
+.bs-row.full { opacity: .45; }
+.bs-wrap.side #bs-strip { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 330px), transparent calc(100% - 276px)); mask-image: linear-gradient(90deg, #000 calc(100% - 330px), transparent calc(100% - 276px)); }
+.bs-wrap.side::after { display: none; }
+/* v4.8 the CHALLENGE card: dark, hazard-striped, a CHALLENGE ribbon; checker, name, desc and record of the pick */
+.bs-card.bs-chal-card { --bc: #ffd23f; border: 4px solid transparent; border-image: repeating-linear-gradient(-45deg, #ffd23f 0 7px, #111 7px 14px) 4;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bc) 20%, transparent) 0, transparent 65%), repeating-linear-gradient(-45deg, #1b1622 0 9px, #110e17 9px 18px); }
+.bs-chal-card .bs-chal-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); padding: 3px 6px 2px; font-size: 7px; letter-spacing: 1px; color: #000; background: #ffd23f; border: 2px solid #000; box-shadow: 2px 2px 0 #000; white-space: nowrap; z-index: 1; }
+.bs-chal-card b { font-size: 9px; line-height: 1.3; }
+body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-chal-tag { font-size: 6px; }
+/* v4.8 a CHALLENGE tag before a challenge's name (CONTINUE, victory, game over, ABOUT THIS RUN) */
+.chal-tag { display: inline-block; padding: 2px 4px 1px; font-size: .72em; line-height: 1.2; letter-spacing: 1px; color: #000; text-shadow: none; vertical-align: middle;
+  background: repeating-linear-gradient(-45deg, #ffd23f 0 4px, #e3b72a 4px 8px); border: 1px solid #000; }
 </style>
 <div id="app">
   <section id="screen-title" class="screen">
@@ -833,7 +876,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       <div id="bs-strip" tabindex="0" role="listbox" aria-label="Boards"></div>
       <button id="bs-next" class="bs-arrow" aria-label="Next board">&gt;</button>
     </div>
-    <div id="bs-subs" class="bs-panel hidden"><div class="bs-label">MAGIC: PICK 1-3 BOARDS <span id="bs-sub-count">0/3</span></div><div id="bs-sub-list"></div></div>
+    <div id="bs-subs" class="bs-panel bs-side hidden"><div class="bs-label">MAGIC: PICK 1-3 BOARDS <span id="bs-sub-count">0/3</span></div><div id="bs-sub-list" class="bs-list"></div></div>
+    <div id="bs-chals" class="bs-panel bs-side hidden"><div class="bs-label">PICK A CHALLENGE <span id="bs-chal-count"></span></div><div id="bs-chal-list" class="bs-list" tabindex="0" role="listbox" aria-label="Challenges"></div></div>
     <div id="bs-diff" class="bs-panel"><div class="bs-label">DIFFICULTY</div><div id="bs-diff-row" role="radiogroup" aria-label="Difficulty"></div><div id="bs-diff-desc"></div></div>
     <div class="bs-foot">
       <label class="seed">SEED <input id="seed-input" placeholder="RANDOM" autocomplete="off" spellcheck="false" autocapitalize="characters" aria-label="Seed: 8 letters or digits"></label>
@@ -1041,6 +1085,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (Number(ms) >= 10) { e++; ms = (m / 10).toFixed(2); }
     return sign + ms + 'e' + e;
   };
+  // v4.8 Survival: round-end money from gems left (board + pool), $1 per 8, max $20; the GEMS LEFT bar is full above 64
+  C.SURVIVAL_GEMS_PER = 8; C.SURVIVAL_GEMS_MAX = 20; C.SURVIVAL_BAR_FULL = 64;
   C.CARD_SLOTS = 2;
   C.PACK_SIZES = {
     S: { show: 2, picks: 1, price: 4, weight: 40 },
@@ -1201,12 +1247,22 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   //   price(run, p, kind)               shop price before rounding (kind: perk, card, tile, gem, upgrade, pack, voucher)
   //   rerollPrice(run, p)               reroll price before rounding
   //   swapRule(run, v)                  'adjacent' | 'any'
-  //   freeNoMatchSwap(run, v)           Survival (Task 3)
+  //   perkAcquired(run, inst)           v4.8: a perk was just gained, any way (GF.Perks.acquire: shop, Judgement, Gifter,
+  //                                     Printer, Perky, a start perk, DEV MODE), before its onBuy; challenges force
+  //                                     attachments here (GF.Perks.addAttachment). Return inst (or nothing).
   //   roundStart(run)                   each round start (ability charges)
   //   shopOpen(run)                     a new shop opens (v4.7: no board uses it any more)
   //   baseMoves(run, v)                 base moves of a round (before Bonanza, Mercy and perks)
   //   tilePeriod(run, period, tileId)   a counted tile's period (Haunted: Direction fires every move)
   //   targetMul(run, v, round)          round target multiplier (balance; multiplies across Magic subs)
+  //   shopPerk(run, item)               v4.8: a perk item was stocked in the shop (Rent Is Due / Rare Find show their
+  //                                     forced attachment there already: Debt makes it cost $1)
+  // v4.8 challenge switches read through helpers below (several may combine in Magic):
+  //   start: [[perk id, attachments], ...]   perks granted at run creation (Boards.grantStart; all challenges' are given)
+  //   onlyBy: [destroy sources]              "Only" scoring: a cleared gem scores only when its destroy source (the
+  //                                          clear cell's by: bomb / star / supernova / prism) is listed; several Only
+  //                                          boards: the union (Boards.onlySources)
+  //   noPerks (Unperkify), noSpecials (Pacifist), noPayout (Bankrupt), forceAtt (Rent Is Due: debt, Rare Find: pristine)
   // Per-board run data lives in run.boardState (saved with the run); ability charges in run.abilities
   // ({id: {left, max}}, see ABILITIES; Run.useAbility spends them).
   const DEFS = {};
@@ -1214,15 +1270,23 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   function def(d) { d.icon = d.icon || 'board_' + d.id; d.hooks = d.hooks || {}; DEFS[d.id] = d; ORDER.push(d.id); }
   const ALL7 = [0, 1, 2, 3, 4, 5, 6];
   const RANDOM_MIN = 0, RANDOM_MAX = 0.45, RANDOM_LIVE_MIN = 3;
-  const COAL_CHANCE = 0.07, COAL_MAX = 20;
+  const COAL_CHANCE = 0.15, COAL_MAX = 30; // v4.8 Coal Mine (was Black: 7%, cap 20)
+  const YELLOW_GOLD = 0.05; // v4.8 Yellow: each spawned plain gem may be Gold
   // v4.0 balance pass (tools/simulate.js 40 runs, difficulty I, aiming at a median death round of 7-16 and at most
   // 25% wins): round targets x these. Mono's 4 colours cascade without end, so its multiplier also grows per round.
   // v4.3: Random x1.5 (median 17 and 30% wins at x1 over 80 runs; 15 at x1.5)
   // v4.7: Survival re-tuned for no move limit + 128 pool gems per round: x0.65 kept (100 runs at growth 1.50: median
   // 11, 4% wins; x0.6 / x0.55: median 12; x0.8 at 1.49: 11). Humans also get free no-match swaps the bot never uses.
-  const TARGET_MUL = { haunted: 6, strange: 3.5, black: 0.7, survival: 0.65, random: 1.5 };
+  // v4.8: Haunted x6, Strange x3, Coal Mine (was Black x0.7) x1.5
+  // v4.8 Task B (40 runs, difficulty I; median death round at x1 -> tuned): Survival after its gem payout 19 -> x2 (12
+  // and 14 on two seed sets; x2.3: 12 / 11 but more round 1-2 deaths); Explosives / Crystals / Optics 1 -> x0.15 (13) /
+  // x0.2 (14) / x0.1 (14); 1 Move Only 6 -> x0.6 (8); Blazing Speed 21 (60% wins) -> x4 (15); Gambler's Choice 21 (98%
+  // wins) -> x5 (16); Pacifist (spec x0.5: 17) -> x0.65 (15). At x1 and kept: Gravity Flip 15, Area 51 15, Cardsharp 15,
+  // Rare Find 16, Unperkify 13, Rent Is Due 10, Bankrupt 9; Coal Mine x1.5: 14.
+  const TARGET_MUL = { haunted: 6, strange: 3, coal_mine: 1.5, survival: 2, random: 1.5, pacifist: 0.65,
+    explosives: 0.15, crystals: 0.2, optics: 0.1, one_move: 0.6, blazing: 4, gamblers: 5 };
   const MONO_MUL = 2, MONO_MUL_GROWTH = 1.25, MONO_COLORS = 5; // v4.3: 5 colours (was 4)
-  const flatMul = (id) => (run, v) => v * TARGET_MUL[id];
+  const flatMul = (id) => (run, v) => v * (TARGET_MUL[id] != null ? TARGET_MUL[id] : 1);
 
   // Random board (v4.2): a weight per live colour, a whole percent drawn from 0-45, normalised to sum 1 while every
   // weight stays within 0%-45% (clamped weights are fixed and the rest rescaled until none crosses a bound). A
@@ -1275,6 +1339,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   }
   // Haunted / Strange: every cell starts with a tile. Both boards: a random 50/50 mix (done once, by Haunted).
   // Mystery counters start staggered so the 64 tiles do not all fire on the same move.
+  // v4.8: these tiles are fixed (board.fixed): never removed or replaced (GF.Board.tileFixed)
   function fillTiles(run, pick) {
     const b = run.board, D = GF.Tiles.DEFS;
     for (let r = 0; r < C.SIZE; r++) for (let c = 0; c < C.SIZE; c++) {
@@ -1282,7 +1347,16 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       b.tiles[r][c] = id;
       b.tileState[r][c] = id === 'mystery' ? run.rng.int(D.mystery.period) : 0;
     }
+    GF.Board.fixAllTiles(b);
   }
+  // v4.8: a starting perk (Pink's rare, a challenge's start perks) through GF.Perks.acquire, with attachments att
+  function startPerk(run, id, att) {
+    return GF.Perks.acquire(run, GF.Perks.create(id), { att: att });
+  }
+  const PI = ['permanent', 'invisible'], PERM = ['permanent'];
+  // v4.8 challenges: their start perks (def.start), granted by their onCreate hook; Magic grants every challenge's
+  const grant = (run, id) => { (DEFS[id].start || []).forEach(([pid, att]) => { startPerk(run, pid, att); }); };
+  const startHook = (id) => (run) => { grant(run, id); };
 
   // v4.5: board descriptions are a few words each, no explanations (the glossary / tooltips explain abilities)
   def({ id: 'default', name: 'DEFAULT', color: '#e8e8e8', desc: 'Classic rules' });
@@ -1290,31 +1364,39 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     hooks: { roundStart: (run) => { charge(run, 'break'); } } });
   def({ id: 'blue', name: 'BLUE', color: '#4f9dff', desc: 'FREE SWAP: 10 swaps per round',
     hooks: { roundStart: (run) => { charge(run, 'freeSwap'); } } });
-  def({ id: 'yellow', name: 'YELLOW', color: '#ffd23f', desc: 'Start with $20',
-    hooks: { onCreate: (run) => { run.money += 10; } } });
+  def({ id: 'yellow', name: 'YELLOW', color: '#ffd23f', desc: 'Starts with $20. Gems have 5% chance to be Gold',
+    hooks: {
+      onCreate: (run) => { run.money += 10; },
+      // v4.8: a spawned plain gem (normal kind, no modifier) may come in Gold
+      spawnGem: (run, gem) => (gem && gem.kind === 'normal' && !gem.mod && gem.color != null && run.rng.chance(YELLOW_GOLD) ? Object.assign(gem, { mod: 'gold' }) : gem),
+    } });
   def({ id: 'orange', name: 'ORANGE', color: '#ff8c42', desc: 'SCRAMBLE: 2 free shuffles per round',
     hooks: { roundStart: (run) => { charge(run, 'scramble'); } } });
   def({ id: 'purple', name: 'PURPLE', color: '#b57bff', desc: 'Swap any 2 gems that match',
     hooks: { swapRule: () => 'any' } });
-  def({ id: 'black', name: 'BLACK', color: '#5a5a66', desc: '7% Coal spawns. Targets x0.7',
-    hooks: { targetMul: flatMul('black'), spawnGem: (run, gem, board) => (GF.Board.coalCount(board) < COAL_MAX && run.rng.chance(COAL_CHANCE) ? C.gem('coal') : gem) } });
+  // v4.8: Black became the challenge Coal Mine (old saves and records: black -> coal_mine). Task B may refine it.
+  def({ id: 'coal_mine', name: 'COAL MINE', color: '#5a5a66', challenge: true, desc: 'Permanent Coal Miner. 15% Coal. Targets x1.5',
+    start: [['coal_miner', PERM]],
+    hooks: {
+      targetMul: flatMul('coal_mine'),
+      onCreate: (run) => { if (!run.perks.some((p) => p.id === 'coal_miner')) grant(run, 'coal_mine'); },
+      spawnGem: (run, gem, board) => (GF.Board.coalCount(board) < COAL_MAX && run.rng.chance(COAL_CHANCE) ? C.gem('coal') : gem),
+    } });
   def({ id: 'green', name: 'GREEN', color: '#3ddc84', desc: 'Shop 50% off. Rerolls x4',
     hooks: { price: (run, p) => p * 0.5, rerollPrice: (run, p) => p * 4 } });
-  def({ id: 'hell', name: 'HELL', color: '#a3162b', desc: 'Start with a rare perk. 15 moves',
+  // v4.8 Pink replaces Hell (old saves and records: hell -> pink): a rare perk to start, no move penalty
+  def({ id: 'pink', name: 'PINK', color: '#ff6bd6', desc: 'Starts with a rare perk',
     hooks: {
       onCreate: (run) => {
         const owned = new Set(run.perks.map((p) => p.id));
         // Monochrome would take a colour from Mono's 5
         const pool = GF.Perks.DEFS.filter((d) => d.rarity === 'rare' && !d.id.startsWith('t_') && !owned.has(d.id) &&
           !(d.id === 'monochrome' && has(run, 'mono')));
-        if (!pool.length || run.perks.length >= run.perkSlots) return;
-        const d = run.rng.pick(pool), inst = GF.Perks.create(d.id);
-        run.perks.push(inst);
-        if (d.onBuy) d.onBuy(run, inst, run.rng);
+        if (!pool.length || !GF.Perks.hasRoom(run) || noPerks(run)) return; // v4.8 Unperkify (Magic): no perk
+        startPerk(run, run.rng.pick(pool).id);
       },
-      baseMoves: (run, v) => v - 5,
     } });
-  def({ id: 'haunted', name: 'HAUNTED', color: '#8a7fa8', desc: 'Direction tile on every cell. Targets x6',
+  def({ id: 'haunted', name: 'HAUNTED', color: '#8a7fa8', challenge: true, desc: 'Fixed Direction tile on every cell. Targets x6',
     hooks: {
       targetMul: flatMul('haunted'),
       onCreate: (run) => {
@@ -1323,16 +1405,16 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       },
       tilePeriod: (run, p, id) => (id === 'direction' ? 1 : p),
     } });
-  def({ id: 'strange', name: 'STRANGE', color: '#2ec4b6', desc: 'Mystery tile on every cell. Targets x3.5',
+  def({ id: 'strange', name: 'STRANGE', color: '#2ec4b6', challenge: true, desc: 'Fixed Mystery tile on every cell. Targets x3',
     hooks: { targetMul: flatMul('strange'), onCreate: (run) => { if (!has(run, 'haunted')) fillTiles(run, () => 'mystery'); } } });
   // v4.7: no move limit (Run.infiniteMoves), no REFILL: each round start adds C.SURVIVAL_ROUND_POOL gems to the pool
-  def({ id: 'survival', name: 'SURVIVAL', color: '#8b5a2b', desc: 'No move limit. +128 gems each round',
+  // v4.8: no free no-match swaps (every swap / empty-cell move must match); round end pays $1 per 8 gems left
+  def({ id: 'survival', name: 'SURVIVAL', color: '#8b5a2b', challenge: true, desc: 'No move limit. +128 gems each round',
     hooks: {
       targetMul: flatMul('survival'),
       refillEnabled: () => false,
-      freeNoMatchSwap: () => true,
     } });
-  def({ id: 'mono', name: 'MONO', color: '#c0c6cc', desc: 'Only 5 colours. Targets x2, +25%/round',
+  def({ id: 'mono', name: 'MONO', color: '#c0c6cc', challenge: true, desc: 'Only 5 colours. Targets x2, +25%/round',
     hooks: {
       targetMul: (run, v, n) => v * MONO_MUL * Math.pow(MONO_MUL_GROWTH, Math.max(0, (n || 1) - 1)),
       onCreate: (run) => {
@@ -1340,7 +1422,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         run.removedColors = ALL7.filter((k) => keep.indexOf(k) < 0);
       },
     } });
-  def({ id: 'random', name: 'RANDOM', color: '#ff7ad9', desc: 'Random colour rates 0-45%. Targets x1.5',
+  def({ id: 'random', name: 'RANDOM', color: '#ff7ad9', challenge: true, desc: 'Random colour rates 0-45%. Targets x1.5',
     hooks: {
       targetMul: flatMul('random'),
       onCreate: (run) => { run.boardState.weights = randomWeights(run.rng, GF.Resolver.colorsOf(run)); },
@@ -1352,18 +1434,66 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     } });
   def({ id: 'magic', name: 'MAGIC', color: '#e040fb', desc: 'Play 1-3 boards at once' });
 
+  // ---------- v4.8 challenges (spec "Challenges (20)"; listed after the six above, in this order) ----------
+  def({ id: 'one_move', name: '1 MOVE ONLY', color: '#ff5470', challenge: true, desc: '1 move per round. Last Hurrah + Aura Farming',
+    start: [['last_hurrah', PI], ['aura_farming', PI]],
+    hooks: { onCreate: startHook('one_move'), baseMoves: () => 1, targetMul: flatMul('one_move') } });
+  def({ id: 'blazing', name: 'BLAZING SPEED', color: '#ff7b1c', challenge: true, desc: 'Starts with Blazing Speed',
+    start: [['blazing_speed', PI]], hooks: { onCreate: startHook('blazing'), targetMul: flatMul('blazing') } });
+  // Unperkify: no perks at all (no slots, none in the shop, Judgement never rolls, Gifter / Printer / Perky / Pink make
+  // nothing: Perks.canGain). A challenge's own start perks (Magic) are still granted.
+  def({ id: 'unperkify', name: 'UNPERKIFY', color: '#6c6c80', challenge: true, desc: 'No perks. 0 perk slots', noPerks: true,
+    hooks: { onCreate: (run) => { run.perkSlots = 0; }, targetMul: flatMul('unperkify') } });
+  def({ id: 'cardsharp', name: 'CARDSHARP', color: '#e8c547', challenge: true, desc: 'Starts with a permanent Poker',
+    start: [['poker', PERM]], hooks: { onCreate: startHook('cardsharp'), targetMul: flatMul('cardsharp') } });
+  def({ id: 'explosives', name: 'EXPLOSIVES ONLY', color: '#ff6a3d', challenge: true, desc: 'Only Bomb blasts score. Permanent Bomb Maker',
+    start: [['bomb_maker', PERM]], onlyBy: ['bomb'], hooks: { onCreate: startHook('explosives'), targetMul: flatMul('explosives') } });
+  def({ id: 'crystals', name: 'CRYSTALS ONLY', color: '#9ad1ff', challenge: true, desc: 'Only Stars & Novas score. Permanent Star Maker',
+    start: [['star_maker', PERM]], onlyBy: ['star', 'supernova'], hooks: { onCreate: startHook('crystals'), targetMul: flatMul('crystals') } });
+  def({ id: 'optics', name: 'OPTICS ONLY', color: '#7fe7ff', challenge: true, desc: 'Only Prisms score. Permanent Spawnpoint',
+    start: [['spawnpoint', PERM]], onlyBy: ['prism'], hooks: { onCreate: startHook('optics'), targetMul: flatMul('optics') } });
+  def({ id: 'gamblers', name: "GAMBLER'S CHOICE", color: '#3ddc84', challenge: true, desc: 'Wrong Turn, Magic Wand, Russian Roulette',
+    start: [['wrong_turn', PI], ['magic_wand', PI], ['russian_roulette', PI]],
+    hooks: { onCreate: startHook('gamblers'), targetMul: flatMul('gamblers') } });
+  // Rent Is Due / Rare Find: every perk gained carries the attachment (Perks.forceAttachment), shop perks included
+  def({ id: 'rent_due', name: 'RENT IS DUE', color: '#ffd23f', challenge: true, desc: 'Every perk has Debt', forceAtt: 'debt',
+    hooks: { perkAcquired: (run, inst) => { GF.Perks.forceAttachment(inst, 'debt'); }, shopPerk: (run, it) => { GF.Perks.forceAttachment(it, 'debt'); },
+      targetMul: flatMul('rent_due') } });
+  def({ id: 'area51_raid', name: 'RAIDING AREA 51', color: '#3ddc84', challenge: true, desc: 'Starts with 3 Area 51',
+    start: [['area_51', PI], ['area_51', PI], ['area_51', PI]], hooks: { onCreate: startHook('area51_raid'), targetMul: flatMul('area51_raid') } });
+  def({ id: 'rare_find', name: 'RARE FIND', color: '#3ddc84', challenge: true, desc: 'Every perk is Pristine', forceAtt: 'pristine',
+    hooks: { perkAcquired: (run, inst) => { GF.Perks.forceAttachment(inst, 'pristine'); }, shopPerk: (run, it) => { GF.Perks.forceAttachment(it, 'pristine'); },
+      targetMul: flatMul('rare_find') } });
+  def({ id: 'pacifist', name: 'PACIFIST', color: '#b5f5d0', challenge: true, desc: 'Matches never make specials. Targets x0.65', noSpecials: true,
+    hooks: { targetMul: flatMul('pacifist') } });
+  // Gravity Flip: board.flip (Board.gravity / refill / refillUpTo / checkerboard / descramble mirror; the display too)
+  def({ id: 'gravity_flip', name: 'GRAVITY FLIP', color: '#a259ff', challenge: true, desc: 'Gems fall upward',
+    hooks: { onCreate: (run) => { run.board.flip = true; }, targetMul: flatMul('gravity_flip') } });
+  def({ id: 'bankrupt', name: 'BANKRUPT', color: '#8a86a0', challenge: true, desc: 'No round-end payout', noPayout: true,
+    hooks: { targetMul: flatMul('bankrupt') } });
+
   // v4.2 display order (SELECT BOARD strip, glossary, Magic picker, labels): Default, the 6 colours in rainbow order,
   // then the rest. ORDER stays the definition order, which is also the order board hooks chain in (and so the order
   // a Magic run's onCreate hooks draw from the rng), so seeded runs play as before.
-  const DISPLAY = ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'mono', 'haunted', 'strange', 'survival', 'hell', 'random', 'magic'];
-  ORDER.forEach((id) => { if (DISPLAY.indexOf(id) < 0) DISPLAY.push(id); });
+  // v4.8: MAIN boards (the SELECT BOARD strip, Magic last) then CHALLENGES (one CHALLENGE card + list; every def with
+  // challenge: true, these six first, then the rest in definition order)
+  const MAIN = ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'magic'];
+  const CHALLENGES = ['coal_mine', 'mono', 'haunted', 'strange', 'survival', 'random'];
+  ORDER.forEach((id) => { if (MAIN.indexOf(id) < 0 && CHALLENGES.indexOf(id) < 0) (DEFS[id].challenge ? CHALLENGES : MAIN).push(id); });
+  const DISPLAY = MAIN.concat(CHALLENGES);
+  const isChallenge = (id) => CHALLENGES.indexOf(id) >= 0;
+  // v4.8 renamed ids (saves, records, Magic subs)
+  const RENAMED = { hell: 'pink', black: 'coal_mine' };
+  const rename = (id) => RENAMED[id] || id;
   const SUB_EXCLUDE = { default: 1, magic: 1 };
   // Normalises create options: unknown board -> default; Magic subs valid, unique, not default/magic, at most 3.
   function normalize(id, subs) {
+    id = rename(id);
     if (!DEFS[id]) id = 'default';
     const out = [];
     if (id === 'magic') {
-      for (const s of subs || []) {
+      for (let s of subs || []) {
+        s = rename(s);
         if (DEFS[s] && !SUB_EXCLUDE[s] && out.indexOf(s) < 0 && out.length < 3) out.push(s);
       }
     }
@@ -1381,11 +1511,22 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     const args = Array.prototype.slice.call(arguments, 3);
     for (const id of ids(run)) {
       const fn = DEFS[id].hooks[name];
-      if (fn) value = fn.apply(null, [run, value].concat(args));
+      if (fn) { const v = fn.apply(null, [run, value].concat(args)); if (v !== undefined) value = v; } // v4.8: undefined keeps the value
     }
     return value;
   }
   function hasHook(run, name) { return ids(run).some((id) => !!DEFS[id].hooks[name]); }
+  // v4.8 challenge switches over the active boards (Magic: any sub)
+  const any = (run, k) => ids(run).some((id) => !!DEFS[id][k]);
+  function noPerks(run) { return any(run, 'noPerks'); }
+  function noSpecials(run) { return any(run, 'noSpecials'); }
+  function noPayout(run) { return any(run, 'noPayout'); }
+  // "Only" scoring: null (every gem scores) or the Set of allowed destroy sources (union over the Only boards)
+  function onlySources(run) {
+    let out = null;
+    for (const id of ids(run)) if (DEFS[id].onlyBy) { out = out || new Set(); DEFS[id].onlyBy.forEach((k) => out.add(k)); }
+    return out;
+  }
   // Display name: the board's name; Magic lists its subs (MAGIC: YELLOW + HELL).
   function label(run) {
     const bt = run && run.boardType;
@@ -1394,7 +1535,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     return DEFS.magic.name + ': ' + DISPLAY.filter((id) => ids(run).indexOf(id) >= 0).map((id) => DEFS[id].name).join(' + ');
   }
 
-  GF.Boards = { DEFS, ORDER, DISPLAY, ABILITIES, ABILITY_ORDER, normalize, ids, has, hook, hasHook, label, randomWeights, COAL_CHANCE, COAL_MAX, TARGET_MUL };
+  GF.Boards = { DEFS, ORDER, DISPLAY, MAIN, CHALLENGES, RENAMED, rename, isChallenge, YELLOW_GOLD, ABILITIES, ABILITY_ORDER, normalize, ids, has, hook, hasHook, label, randomWeights, COAL_CHANCE, COAL_MAX, TARGET_MUL,
+    noPerks, noSpecials, noPayout, onlySources };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- difficulty.js
@@ -1409,9 +1551,10 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     1: { name: 'I', adds: 'The base game', desc: 'The base game.' },
     2: { name: 'II', adds: 'If there are no legal moves, game over', desc: 'The base game. If there are no legal moves, game over.' },
     3: { name: 'III', adds: 'Target increased by x1.1', desc: 'The base game. If there are no legal moves, game over. Target increased by x1.1.' },
-    4: { name: 'IV', adds: 'Shop prices increased by x1.25', desc: 'The base game. If there are no legal moves, game over. Target increased by x1.1. Shop prices increased by x1.25.' },
-    5: { name: 'V', adds: 'Gems can randomly be locked', desc: 'The base game. If there are no legal moves, game over. Target increased by x1.1. Shop prices increased by x1.25. Gems can randomly be locked.' },
-    6: { name: 'VI', adds: 'Target increased by x1.5', desc: 'The base game. If there are no legal moves, game over. Target increased by x1.5. Shop prices increased by x1.25. Gems can randomly be locked.' },
+    // v4.8: IV is "Perks can have attachments" (was shop prices x1.25)
+    4: { name: 'IV', adds: 'Perks can have attachments', desc: 'The base game. If there are no legal moves, game over. Target increased by x1.1. Perks can have attachments.' },
+    5: { name: 'V', adds: 'Gems can randomly be locked', desc: 'The base game. If there are no legal moves, game over. Target increased by x1.1. Perks can have attachments. Gems can randomly be locked.' },
+    6: { name: 'VI', adds: 'Target increased by x1.5', desc: 'The base game. If there are no legal moves, game over. Target increased by x1.5. Perks can have attachments. Gems can randomly be locked.' },
   };
   const MAX = 6;
   // Cumulative rule lines for level d: [{lv, text}], always starting with I's "The base game" (v4.2); VI's x1.5
@@ -1428,7 +1571,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   const lv = (run) => (run && run.difficulty >= 1 ? Math.min(MAX, Math.floor(run.difficulty)) : 1);
   function clamp(d) { d = Math.floor(+d); return d >= 1 && d <= MAX ? d : d > MAX ? MAX : 1; }
   function targetMul(run) { const d = lv(run); return d >= 6 ? 1.5 : d >= 3 ? 1.1 : 1; }
-  function priceMul(run) { return lv(run) >= 4 ? 1.25 : 1; }
+  // v4.8 IV+: shop perks may carry attachments (Shop.rollItem, GF.Perks.rollAttachments)
+  function attachments(run) { return lv(run) >= 4; }
   // v4.5 DEV MODE overrides (GF.Difficulty.dev.locks / .noMoves: null = the level's rule, true / false = forced)
   const dev = { locks: null, noMoves: null };
   function noMovesLoses(run) { return dev.noMoves != null ? !!dev.noMoves : lv(run) >= 2 && !run.legacy; }
@@ -1438,7 +1582,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   const LOCK_CHANCE = 0.10, LOCK_MAX = 15, LOCK_PICK = 3;
   function roman(run) { return LEVELS[lv(run)].name; }
 
-  GF.Difficulty = { dev, LEVELS, MAX, rules, LOCK_CHANCE, LOCK_MAX, LOCK_PICK, clamp, targetMul, priceMul, noMovesLoses, locks, roman };
+  GF.Difficulty = { dev, LEVELS, MAX, rules, LOCK_CHANCE, LOCK_MAX, LOCK_PICK, clamp, targetMul, attachments, noMovesLoses, locks, roman };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- board.js
@@ -1464,6 +1608,30 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   const COAL = 'coal';
 
   function create() { return { cells: grid(null), tiles: grid(null), tileState: grid(0) }; }
+  // v4.8 Gravity Flip (board.flip true, saved with the board): gems fall UP and new gems enter from the bottom edge.
+  // gravity, refill, refillUpTo, checkerboard and descramble run on the vertically mirrored cells (mirrored: reverse
+  // the rows in place, run, reverse back) and map the rows they report back (r -> N - 1 - r). Their spawns then
+  // carry up: true (the display drops them in from below: start row r + drop) and, under a locked gem, bot (the
+  // segment's entry edge in rows: drawn only above it) instead of top. Matching is mirror-symmetric (rows, columns,
+  // both diagonals, 2x2), so nothing else changes.
+  const flipped = (board) => !!(board && board.flip);
+  const mr = (r) => N - 1 - r;
+  function mirrored(board, fn) {
+    board.cells.reverse();
+    try { return fn(); } finally { board.cells.reverse(); }
+  }
+  const flipMoves = (moves) => moves.map((m) => ({ id: m.id, from: [mr(m.from[0]), m.from[1]], to: [mr(m.to[0]), m.to[1]] }));
+  function flipSpawns(spawns) {
+    return spawns.map((sp) => {
+      const o = { r: mr(sp.r), c: sp.c, drop: sp.drop, gem: sp.gem, up: true };
+      if (sp.top > 0) o.bot = N - sp.top;
+      return o;
+    });
+  }
+  // v4.8 fixed tiles (Haunted / Strange): board.fixed[r][c] true = that cell's tile can never be removed or replaced
+  // (Brushstroke, tile cards and placements, Shop.removeTile, Virus, Magic Wand all refuse it). Absent = none fixed.
+  function tileFixed(board, r, c) { return !!(board && board.fixed && board.fixed[r] && board.fixed[r][c]); }
+  function fixAllTiles(board) { board.fixed = grid(true); }
 
   // Gems appearing on the board, per colour (ABOUT THIS RUN): new boards and fills, refills, settle/shuffle
   // replacements, jewel placements, clones, and recolours INTO a colour. Kind changes that keep the colour
@@ -1634,6 +1802,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // The empty move tried on a copy of the cells: {board, land} or null.
   function simEmpty(board, a, b) {
     const copy = { cells: board.cells.map((row) => row.slice()), tiles: board.tiles, tileState: board.tileState };
+    if (board.flip) copy.flip = true;
     const mv = emptyMove(copy, a, b);
     return mv ? { board: copy, land: mv.land, from: mv.from } : null;
   }
@@ -1850,6 +2019,11 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // (left to right); the gems they displace fill the cells they left, in reading order. Special kinds stay put
   // (normal gems keep their gold/shiny modifier). Gems keep their ids. Returns the cells that changed.
   function checkerboard(board, k) {
+    // v4.8 Gravity Flip: from the top-left corner, top row down
+    if (flipped(board)) return mirrored(board, () => checkerboard0(board, k)).map(([r, c]) => [mr(r), c]);
+    return checkerboard0(board, k);
+  }
+  function checkerboard0(board, k) {
     const movable = [];
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) { const g = board.cells[r][c]; if (g && g.kind === 'normal' && !isLocked(g)) movable.push([r, c]); }
     const mine = movable.filter(([r, c]) => board.cells[r][c].color === k).map(([r, c]) => board.cells[r][c]);
@@ -1872,6 +2046,11 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // Locked gems stay on their cells; the rest are laid around them, on the cells that held a gem (Survival's empty
   // cells stay empty).
   function descramble(board) {
+    // v4.8 Gravity Flip: laid from the bottom row up (left to right), so the sorted blocks rest on the gravity side
+    if (flipped(board)) return mirrored(board, () => descramble0(board));
+    return descramble0(board);
+  }
+  function descramble0(board) {
     const all = [], slots = [];
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (board.cells[r][c] && !isLocked(board.cells[r][c])) { all.push(board.cells[r][c]); slots.push([r, c]); }
     const coloured = all.filter((g) => g.color != null);
@@ -1904,6 +2083,10 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // Per column segment: a locked gem splits its column; gems above it rest on it, gems below fall within their
   // own segment, and nothing passes through it.
   function gravity(board) {
+    if (flipped(board)) return flipMoves(mirrored(board, () => gravity0(board)));
+    return gravity0(board);
+  }
+  function gravity0(board) {
     const moves = [];
     for (let c = 0; c < N; c++) {
       let write = N - 1;
@@ -1930,11 +2113,15 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // (holder.refillPool gems), dropped like a normal refill (random colours, Lootdrop, spawnGem) through refillUpTo,
   // until the pool runs dry; the pool shrinks by the gems spawned.
   function refill(board, rng, colors, opts) {
+    if (flipped(board)) return flipSpawns(mirrored(board, () => refill0(board, rng, colors, opts)));
+    return refill0(board, rng, colors, opts);
+  }
+  function refill0(board, rng, colors, opts) {
     const spawns = [];
     if (opts && opts.noRefill) {
       const holder = opts.refillPool;
       if (!holder || !(holder.refillPool > 0)) return spawns;
-      const out = refillUpTo(board, rng, colors, opts, holder.refillPool, true);
+      const out = refillUpTo0(board, rng, colors, opts, holder.refillPool, true);
       holder.refillPool -= out.length;
       return out;
     }
@@ -1967,6 +2154,10 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // (drop: the segment's empty count, so a partial fill still falls in from above the segment's top).
   // random (v4.1, the Survival pool's cascades): colours drawn as a normal refill (no match avoidance, Lootdrop).
   function refillUpTo(board, rng, colors, opts, max, random) {
+    if (flipped(board)) return flipSpawns(mirrored(board, () => refillUpTo0(board, rng, colors, opts, max, random)));
+    return refillUpTo0(board, rng, colors, opts, max, random);
+  }
+  function refillUpTo0(board, rng, colors, opts, max, random) {
     const loot = (random && opts && opts.lootdrop) || 0;
     const queues = [];
     for (let c = 0; c < N; c++) {
@@ -2216,7 +2407,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   }
 
   GF.Board = {
-    create, isLocked, swapBlocked, noteSpawn, emptyPair, emptyMove, emptyMoveOk, emptyMoveMatches, takeSpawns, isDoublePrism, isCoalPrism, coalCount, checkerboard, descramble, COAL, inB, key, clone, plain, matchesColor, setGem, findGroups, adjacent, swap, isPrismSwap, canSwap, hasMoves, wouldMatch,
+    create, flipped, tileFixed, fixAllTiles, isLocked, swapBlocked, noteSpawn, emptyPair, emptyMove, emptyMoveOk, emptyMoveMatches, takeSpawns, isDoublePrism, isCoalPrism, coalCount, checkerboard, descramble, COAL, inB, key, clone, plain, matchesColor, setGem, findGroups, adjacent, swap, isPrismSwap, canSwap, hasMoves, wouldMatch,
     inMatch, pickColor, fillNoMatch, clearNormals, rearrange, settle, newRound, refillUpTo, emptyCount, carryOver, findHint, shuffle, gravity, refill, blastCells,
     colorCounts, mostCommonColor, leastCommonColor, colorCells, newClearState, expandClear,
     pickExtra, pickNear, transformRandom, planSpecials,
@@ -2253,7 +2444,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       const d = resolveDef(row, i, new Set(), false);
       if (!d) continue;
       if (d.farm != null) { weights = weights || [1, 1, 1, 1, 1, 1, 1]; weights[d.farm] *= 2; }
-      if (d.lootdrop) loot++;
+      if (d.lootdrop) loot += hasAtt(row[i], 'pristine') ? 2 : 1; // v4.8 Pristine: 5% -> 10%
     }
     const out = {
       square: has('square'), c4: has('c4'), starStruck: has('star_struck'),
@@ -2304,6 +2495,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   function sellValue(inst) {
     // never sell for more than half of what was actually paid (discounts can't be flipped for profit)
     const base = byId[inst.id].price;
+    // v4.8 Approved: sells for its full buy price (what was paid; a perk never bought: its shop price)
+    if (hasAtt(inst, 'approved')) return (inst.paid != null ? inst.paid : base) + (inst.sellBonus || 0);
     const ref = inst.paid != null ? Math.min(base, inst.paid) : base;
     return Math.max(inst.paid != null ? 1 : 0, Math.floor(ref / 2)) + inst.sellBonus;
   }
@@ -2349,7 +2542,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       let e2;
       try { e2 = td.force(x, row[j + 2]); } finally { x.mirroring = false; }
       if (!e2) return;
-      applyEcho(echo, td, x, row[j + 2], e2, j + 2, { mirrored: j + 1 }, apply);
+      applyEcho(echo, td, x, row[j + 2], e2, j + 2, { mirrored: j + 1 }, pristineApply(row[j + 2], apply));
       j += 2;
     }
   }
@@ -2363,7 +2556,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         if (!d || d.passive || !d.on || !d.on[event]) continue;
         const eff = d.on[event](x, row[i]);
         if (!eff) continue;
-        applyEcho(echo, d, x, row[i], eff, i, null, apply);
+        applyEcho(echo, d, x, row[i], eff, i, null, pristineApply(row[i], apply));
         chainMirror(x, row, i, apply, echo);
       }
     } finally { x.event = prev; }
@@ -2390,13 +2583,130 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     const row = run.perks, inst = row[i];
     if (!inst) return null;
     const own = byId[inst.id], d = resolveDef(row, i, new Set(), false);
-    const v = d && d.display ? d.display(run, inst) || null : null;
+    // v4.8: a Permanent one-shot perk whose effect was used (Lifebuoy, Time Machine) stays in its slot, SPENT
+    if (isSpent(inst)) return { text: 'SPENT', kind: 'status', active: false };
+    let v = d && d.display ? d.display(run, inst) || null : null;
+    if (v && hasAtt(inst, 'pristine')) v = pristineDisplay(v, d);
     if (!own.copy) return v;
     if (!d) return { text: 'NONE', kind: 'status', active: false };
     return v || { text: 'COPY', kind: 'status' };
   }
 
-  GF.Perks = { DEFS, byId, def, create, setNextUid, flags, family, sellValue, resolveDef, dispatch, roll, status, display };
+  // ---------------- v4.8 attachments ----------------
+  // Add-ons on a perk instance: inst.att = ['permanent', ...] (at most ATT_MAX, distinct; saved with the run).
+  // Shop perks may carry them from difficulty IV (rollAttachments; the shop item's att is copied onto the bought
+  // instance). Mimic / Replica copy a perk's effect, never its attachments (each slot's own instance counts), and
+  // Printer / Gifter copies start without any (a challenge's perkAcquired hook may still add one).
+  //   permanent  never sold, removed or destroyed (Shop.sellPerk refuses; destroySelf, Time Machine and Lifebuoy
+  //              use keep it); DEV MODE remove still works
+  //   approved   sells for its full buy price; +100 points every player move (Resolver.move, a perk step: approved)
+  //   pristine   the perk's effect outputs doubled (pristineEff, in dispatch) and its chances (chance(inst, p))
+  //   debt       -$3 at each round end (Resolver.roundEnd: a perk step with debt: true); costs $1 in the shop
+  //   invisible  takes no perk slot (slotsUsed / hasRoom / slotCap)
+  const ATT = {
+    permanent: { id: 'permanent', name: 'Permanent', color: '#ff6bd6', icon: 'att_lock', desc: "Can't be sold, removed or destroyed" },
+    approved: { id: 'approved', name: 'Approved', color: '#3a86ff', icon: 'att_thumb', desc: 'Sells for its full buy price. +100 points every move' },
+    pristine: { id: 'pristine', name: 'Pristine', color: '#3ddc84', icon: 'star', desc: "Doubles this perk's numbers (chances max 100%)" },
+    debt: { id: 'debt', name: 'Debt', color: '#ffd23f', icon: 'att_dollar', desc: '-$3 at the end of each round. Costs $1 in the shop' },
+    invisible: { id: 'invisible', name: 'Invisible', color: '#1a1030', icon: 'att_eye', desc: "Doesn't take a perk slot" },
+  };
+  const ATT_IDS = Object.keys(ATT);
+  const ATT_MAX = 2, ATT_ONE = 0.15, ATT_TWO = 0.03, APPROVED_POINTS = 100, DEBT_COST = 3;
+  function atts(inst) { return inst && Array.isArray(inst.att) ? inst.att : []; }
+  function hasAtt(inst, id) { return atts(inst).indexOf(id) >= 0; }
+  // Adds attachment id to inst (a perk instance or a shop item). false when unknown, already there or full.
+  function addAttachment(inst, id) {
+    if (!inst || !ATT[id] || hasAtt(inst, id) || atts(inst).length >= ATT_MAX) return false;
+    inst.att = atts(inst).concat([id]);
+    return true;
+  }
+  // v4.8 challenges (Rent Is Due: debt, Rare Find: pristine) force an attachment onto every perk: added, or when the
+  // perk already carries 2, it replaces the last one that is not Permanent / Invisible (a challenge's start perks
+  // keep those); no change when both are. true when inst carries id afterwards.
+  function forceAttachment(inst, id) {
+    if (!inst || !ATT[id]) return false;
+    if (hasAtt(inst, id) || addAttachment(inst, id)) return true;
+    const a = atts(inst).slice();
+    for (let i = a.length - 1; i >= 0; i--) {
+      if (a[i] === 'permanent' || a[i] === 'invisible') continue;
+      a[i] = id;
+      inst.att = a;
+      return true;
+    }
+    return false;
+  }
+  // A shop perk's attachments: ATT_TWO chance of 2 distinct, else ATT_ONE chance of 1, else none (one draw for the
+  // count, then the picks).
+  function rollAttachments(rng) {
+    const u = rng.next();
+    const n = u < ATT_TWO ? 2 : u < ATT_TWO + ATT_ONE ? 1 : 0;
+    if (!n) return [];
+    return rng.shuffle(ATT_IDS.slice()).slice(0, n);
+  }
+  const isPermanent = (inst) => hasAtt(inst, 'permanent');
+  const canSell = (inst) => !!inst && !isPermanent(inst);
+  // v4.8: a Permanent one-shot perk (Lifebuoy, Time Machine) that was used: kept in its slot, inactive (state.spent)
+  const isSpent = (inst) => !!(inst && inst.state && inst.state.spent);
+  // v4.8 Unperkify: no new perks can be gained by any effect (Judgement, Gifter, Printer, Perky, Pink); 0 slots
+  const canGain = (run) => !(GF.Boards && run && GF.Boards.noPerks(run));
+  // Perk slots: invisible perks take none
+  const baseSlots = (run) => (!canGain(run) ? 0 : run.perkSlots != null ? run.perkSlots : C.START_SLOTS); // 0 is a real count (Unperkify)
+  function slotsUsed(run) { return (run.perks || []).filter((p) => !hasAtt(p, 'invisible')).length; }
+  function slotCap(run) { return baseSlots(run) + (run.perks || []).filter((p) => hasAtt(p, 'invisible')).length; }
+  function hasRoom(run) { return slotsUsed(run) < baseSlots(run); }
+  function freeSlots(run) { return Math.max(0, baseSlots(run) - slotsUsed(run)); }
+  // Pristine: a chance the perk rolls, doubled (max 1)
+  function chance(inst, p) { return hasAtt(inst, 'pristine') ? Math.min(1, p * 2) : p; }
+  // Pristine: an effect with its numbers doubled: add x2, mult x2 (x2 -> x4, x1.5 -> x3; only m > 1), money / income
+  // x2 (gains only: costs and penalties are not doubled), Martyr's target share and sell bonuses x2. Counts stay.
+  function pristineEff(eff) {
+    if (!eff || typeof eff !== 'object') return eff;
+    const o = Object.assign({}, eff);
+    if (o.add > 0) o.add *= 2;
+    if (o.mul != null && o.mul > 1) o.mul *= 2;
+    if (o.money > 0) o.money *= 2;
+    if (o.income > 0) o.income *= 2;
+    if (o.scoreFrac > 0) o.scoreFrac *= 2;
+    if (o.sellBonus > 0) o.sellBonus *= 2;
+    return o;
+  }
+  const pristineApply = (inst, apply) => (hasAtt(inst, 'pristine') ? (e, s, m) => apply(pristineEff(e), s, m) : apply);
+  // fmt-style number tokens (12, 1,234, 1.5, 2.50K, 1.23e9) <-> numbers
+  const NUM = /\d[\d,]*(?:\.\d+)?(?:e\d+|[KM])?/g;
+  function parseNum(t) {
+    const s = t.replace(/,/g, ''), k = s.slice(-1);
+    if (k === 'K') return parseFloat(s) * 1e3;
+    if (k === 'M') return parseFloat(s) * 1e6;
+    return Number(s);
+  }
+  const xnum = (m) => (m >= 100 ? C.fmt(m) : String(Math.round(m * 100) / 100));
+  // The value box of a Pristine perk: the numbers its effects double, doubled too
+  function pristineDisplay(v, d) {
+    if (!v || typeof v.text !== 'string' || !v.text) return v;
+    let text = v.text;
+    if (v.kind === 'add' && text.charAt(0) === '+') text = text.replace(NUM, (t) => C.fmt(parseNum(t) * 2));
+    else if (v.kind === 'mult') text = text.replace(new RegExp('x(' + NUM.source + ')', 'g'), (all, t) => { const m = parseNum(t); return m > 1 ? 'x' + xnum(m * 2) : all; });
+    else if (v.kind === 'money' && text.charAt(0) === '+') text = text.replace(NUM, (t) => C.fmt(parseNum(t) * 2));
+    else if (v.kind === 'chance' && d && d.chanceScaled) text = text.replace(/(\d+(?:\.\d+)?)%/g, (all, t) => Math.min(100, Number(t) * 2) + '%');
+    return text === v.text ? v : Object.assign({}, v, { text: text });
+  }
+  // Every way a perk is gained (shop, Judgement, Gifter, Printer, Perky, a board's start perk, DEV MODE) ends here:
+  // opts.at: the slot to insert at (default: the end); opts.att: attachments it arrives with. Then the boards'
+  // perkAcquired hook (GF.Boards.hook(run, 'perkAcquired', inst): challenges force attachments), then its onBuy.
+  function acquire(run, inst, opts) {
+    opts = opts || {};
+    (opts.att || []).forEach((id) => addAttachment(inst, id));
+    if (opts.at != null && opts.at >= 0 && opts.at <= run.perks.length) run.perks.splice(opts.at, 0, inst);
+    else run.perks.push(inst);
+    if (GF.Boards) GF.Boards.hook(run, 'perkAcquired', inst);
+    const d = byId[inst.id];
+    if (d && d.onBuy) d.onBuy(run, inst, run.rng);
+    return inst;
+  }
+
+  GF.Perks = { DEFS, byId, def, create, setNextUid, flags, family, sellValue, resolveDef, dispatch, roll, status, display,
+    ATT, ATT_IDS, ATT_MAX, ATT_ONE, ATT_TWO, APPROVED_POINTS, DEBT_COST, atts, hasAtt, addAttachment, rollAttachments, isPermanent, canSell,
+    slotsUsed, slotCap, hasRoom, freeSlots, chance, pristineEff, pristineDisplay, acquire, forceAttachment, isSpent, canGain };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- perks-base.js
@@ -2580,7 +2890,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
 // ---- perks-v2.js
 (function (GF) {
   'use strict';
-  const def = GF.Perks.def;
+  const def = GF.Perks.def, P = GF.Perks;
   const add = (n) => () => ({ add: n });
   const mul = (n) => () => ({ mul: n });
   const isBlast = (o) => !!o && (o.source === 'blast' || o.source === 'color');
@@ -2677,11 +2987,11 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     force: (x) => (x.event === 'roundStart' ? { scoreFrac: 0.25 } : null) });
   def({ id: 'insurance', rarity: 'uncommon', name: 'Lifebuoy', desc: 'Win the first round you would lose. Then it is gone', passive: true });
   def({ id: 'baseball_bat', rarity: 'rare', name: 'Baseball Bat', desc: 'Swaps don\'t need to make a match', passive: true });
-  def({ id: 'pyromaniac', rarity: 'uncommon', name: 'Pyromaniac', desc: 'Exploding Bombs have a 50% chance to leave a new Bomb',
-    on: { special: (x) => (x.special.kind === 'bomb' && x.rng.chance(0.5) ? { spawnSpecial: { kind: 'bomb' } } : null) },
+  def({ id: 'pyromaniac', rarity: 'uncommon', name: 'Pyromaniac', desc: 'Exploding Bombs have a 50% chance to leave a new Bomb', chanceScaled: true,
+    on: { special: (x, i) => (x.special.kind === 'bomb' && x.rng.chance(P.chance(i, 0.5)) ? { spawnSpecial: { kind: 'bomb' } } : null) },
     force: (x) => (x.special ? { spawnSpecial: { kind: 'bomb' } } : null) });
-  def({ id: 'star_catcher', rarity: 'uncommon', name: 'Star Catcher', desc: 'Firing Stars have a 50% chance to leave a new Star',
-    on: { special: (x) => (x.special.kind === 'star' && x.rng.chance(0.5) ? { spawnSpecial: { kind: 'star' } } : null) },
+  def({ id: 'star_catcher', rarity: 'uncommon', name: 'Star Catcher', desc: 'Firing Stars have a 50% chance to leave a new Star', chanceScaled: true,
+    on: { special: (x, i) => (x.special.kind === 'star' && x.rng.chance(P.chance(i, 0.5)) ? { spawnSpecial: { kind: 'star' } } : null) },
     force: (x) => (x.special ? { spawnSpecial: { kind: 'star' } } : null) });
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
@@ -2713,8 +3023,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   };
   def({ id: 'imbalanced', name: 'Imbalanced', desc: 'x2 points for matches of the most or least common color',
     on: { match: imbalanced }, force: (x) => (x.groupPoints ? { add: x.groupPoints } : null) });
-  def({ id: 'stratamax', name: 'Stratamax', desc: 'Moves clearing 15+ gems: 25% chance to make a Bomb, Star or Prism',
-    on: { afterCascade: (x) => (x.summary.gemsCleared >= 15 && x.rng.chance(0.25) ? { transform: { kind: x.rng.pick(LOOT), count: 1 } } : null) },
+  def({ id: 'stratamax', name: 'Stratamax', desc: 'Moves clearing 15+ gems: 25% chance to make a Bomb, Star or Prism', chanceScaled: true,
+    on: { afterCascade: (x, i) => (x.summary.gemsCleared >= 15 && x.rng.chance(P.chance(i, 0.25)) ? { transform: { kind: x.rng.pick(LOOT), count: 1 } } : null) },
     force: (x) => ({ transform: { kind: x.rng.pick(LOOT), count: 1 } }) });
   def({ id: 'pyroblower', name: 'Pyroblower', desc: 'Setting off 3+ Bombs in a move makes a new Bomb',
     on: { afterCascade: (x) => (x.summary.specials.bomb >= 3 ? { transform: { kind: 'bomb', count: 1 } } : null) },
@@ -2862,7 +3172,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     status: (i) => ({ seq: (i.state.seq || []).slice(), step: i.state.step || 0,
       text: (i.state.seq || []).map((k, j) => (j < (i.state.step || 0) ? '[' + cname(k) + ']' : cname(k))).join(' > ') }) });
   // flags.lootdrop (Board.refill): each refilled gem has 5% to drop as a Bomb, Star or Prism
-  def({ id: 'lootdrop', rarity: 'uncommon', name: 'Lootdrop', desc: 'New gems have a 5% chance to be a Bomb, Star or Prism', lootdrop: true });
+  def({ id: 'lootdrop', rarity: 'uncommon', name: 'Lootdrop', desc: 'New gems have a 5% chance to be a Bomb, Star or Prism', lootdrop: true, chanceScaled: true });
 
   // ---------- Rare (6) ----------
   // v4.3 rework: starts at x1; a target colour (state.color, among colours in play) and count (state.need, 2-5).
@@ -2999,11 +3309,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     onSell: (run, inst, slot) => {
       if ((inst.state.rounds || 0) < 2 || !(slot > 0)) return;
       const left = run.perks[slot - 1];
-      if (!left || left.id === 'printer') return;
-      const cp = P.create(left.id);
-      run.perks.splice(slot, 0, cp);
-      const d = P.byId[left.id];
-      if (d.onBuy) d.onBuy(run, cp, run.rng);
+      if (!left || left.id === 'printer' || !P.canGain(run)) return; // v4.8 Unperkify: nothing printed
+      P.acquire(run, P.create(left.id), { at: slot }); // v4.8: the copy carries no attachments (hook aside)
     },
     status: (i) => { const n = i.state.rounds || 0; return { rounds: n, ready: n >= 2, text: n >= 2 ? 'Ready' : n + '/2 rounds' }; } });
 
@@ -3039,7 +3346,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // v4.6: 1 perk (was 2)
   def({ id: 'gifter', name: 'Gifter', gifts: 1, desc: 'When sold, gives 1 random perk',
     onSell: (run) => {
-      const n = Math.min(1, run.perkSlots - run.perks.length);
+      const n = P.canGain(run) ? Math.min(1, P.freeSlots(run)) : 0; // v4.8 Unperkify: no gift
       const ex = new Set(P.flags(run.perks, run).showman ? [] : run.perks.map((p) => p.id));
       ex.add('gifter');
       const gifted = [];
@@ -3047,9 +3354,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         const id = P.roll(run.rng, ex);
         if (!id) break;
         if (!P.flags(run.perks, run).showman) ex.add(id);
-        const inst = P.create(id);
-        run.perks.push(inst);
-        if (P.byId[id].onBuy) P.byId[id].onBuy(run, inst, run.rng);
+        P.acquire(run, P.create(id)); // v4.8: no attachments of its own; the perkAcquired hook may add some
         gifted.push(id);
       }
       return { gifted: gifted };
@@ -3113,7 +3418,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   def({ id: 'last_hurrah', rarity: 'uncommon', name: 'Last Hurrah', passive: true,
     desc: 'Out of moves below the target: every special gem on the board fires. Once per round',
     status: (i) => ({ used: !!i.state.used, text: i.state.used ? 'Used this round' : 'Ready' }) });
-  def({ id: 'claw_machine', rarity: 'uncommon', name: 'Claw Machine', passive: true, chance: 0.25,
+  def({ id: 'claw_machine', rarity: 'uncommon', name: 'Claw Machine', passive: true, chance: 0.25, chanceScaled: true,
     desc: 'Each shop stock or reroll: 25% chance one item is free' });
   const witchTile = (x, i) => {
     if (!i.state.tile || !GF.Tiles.DEFS[i.state.tile]) i.state.tile = x.rng ? x.rng.pick(GF.Tiles.IDS) : GF.Tiles.IDS[0];
@@ -3316,14 +3621,11 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   };
   // Perky's gift: a new perk of that rarity in a free slot (owned ids excluded unless Showman). Returns the instance.
   P.createPerk = (run, rarity) => {
-    if (!run.perks || run.perks.length >= (run.perkSlots || C.START_SLOTS)) return null;
+    if (!run.perks || !P.hasRoom(run) || !P.canGain(run)) return null; // v4.8 Unperkify
     const showman = P.flags(run.perks, run).showman;
     const id = P.rollRarity(run.rng, rarity, new Set(showman ? [] : run.perks.map((p) => p.id)));
     if (!id) return null;
-    const inst = P.create(id);
-    run.perks.push(inst);
-    if (P.byId[id].onBuy) P.byId[id].onBuy(run, inst, run.rng);
-    return inst;
+    return P.acquire(run, P.create(id));
   };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
@@ -3443,7 +3745,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (!cells.length || !x.board) return null;
     const board = x.board, strip = [], breaks = [], tiles = [];
     for (const v of cells) {
-      if (board.tiles[v.r][v.c]) {
+      if (board.tiles[v.r][v.c] && !B().tileFixed(board, v.r, v.c)) { // v4.8: fixed tiles stay
         board.tiles[v.r][v.c] = null; board.tileState[v.r][v.c] = 0;
         tiles.push([v.r, v.c]);
         if (x.run && GF.Run) GF.Run.tileRemoved(x.run, 1);
@@ -3488,9 +3790,21 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
 
   // ---------- Magic Wand (uncommon) ----------
   // Round start: {placeTile: {r, c, id}} (Resolver.roundStart; a tile already there is replaced and counted removed)
+  // v4.8: never a fixed tile's cell (Haunted / Strange); a board with no free cell gets nothing
   const wand = (x, avoid) => {
-    let r, c;
-    for (let t = 0; t < 10; t++) { r = x.rng.int(N); c = x.rng.int(N); if (!avoid || avoid.r !== r || avoid.c !== c) break; }
+    let r, c, ok = false;
+    for (let t = 0; t < 10; t++) {
+      r = x.rng.int(N); c = x.rng.int(N);
+      if (B().tileFixed(x.board, r, c)) continue;
+      ok = true;
+      if (!avoid || avoid.r !== r || avoid.c !== c) break;
+    }
+    if (!ok || B().tileFixed(x.board, r, c)) {
+      const free = [];
+      for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if (!B().tileFixed(x.board, i, j)) free.push([i, j]);
+      if (!free.length) return null;
+      [r, c] = x.rng.pick(free);
+    }
     return { placeTile: { r: r, c: c, id: x.rng.pick(GF.Tiles.IDS) } };
   };
   def({ id: 'magic_wand', rarity: 'uncommon', name: 'Magic Wand', desc: 'Round start: a random cell gets a random tile',
@@ -3835,7 +4149,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   set('golden_book', money(3));
   set('grindstone', (run) => { const n = P.byId.grindstone.specialCount(run.board); return { text: '+$' + n, kind: 'money', active: n > 0 }; });
   set('gifter', (run) => {
-    const n = Math.max(0, Math.min(P.byId.gifter.gifts, run.perkSlots - run.perks.length + 1));
+    const n = Math.max(0, Math.min(P.byId.gifter.gifts, P.freeSlots(run) + 1));
     return { text: '+' + n, kind: 'count', sub: n === 1 ? 'PERK' : 'PERKS', active: n > 0 };
   });
   set('spell_book', (run) => { const n = P.byId.spell_book.tilePairs(run.board); return { text: '+' + fmt(50 * n), kind: 'add', active: n > 0 }; });
@@ -4153,11 +4467,18 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     // what a coal match group is guaranteed per coal (the fewest geodes); the geodes themselves roll in the coal step
     const coalValue = () => C.geodeValues(C.GEODE_MIN, C.base(run.round)).reduce((a, b) => a + b, 0) * coalMul;
     const survival = !!(GF.Boards && GF.Boards.has(run, 'survival'));
+    // v4.8 challenges: "Only" scoring (only: null, or the Set of destroy sources that score; a cleared gem whose clear
+    // cell by is not in it is worth 0, matched gems and unlocks included, coal geodes too) and Pacifist (noSpecials:
+    // matches create no specials)
+    const only = GF.Boards ? GF.Boards.onlySources(run) : null;
+    const scores = (by) => !only || (!!by && only.has(by));
+    const noSpecials = !!(GF.Boards && GF.Boards.noSpecials(run));
 
     const apply = (eff, slot, meta) => {
       const step = { t: 'perk', slot: slot, level: x.level };
       if (meta && meta.mirrored != null) step.mirrored = meta.mirrored;
       if (meta && meta.echo) step.echo = true;
+      if (meta && meta.approved) step.approved = true;
       if (eff.add) { points += eff.add; step.add = eff.add; }
       if (eff.mul != null && eff.mul !== 1) { points *= eff.mul; step.mul = eff.mul; }
       if (eff.money) { run.money += eff.money; step.money = eff.money; }
@@ -4183,7 +4504,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         step.descramble = n === 1 ? true : n;
       }
       if (eff.fireTiles && eff.fireTiles.length) { pending.edits.push({ fireTiles: eff.fireTiles, slot: slot }); step.fireTiles = eff.fireTiles.length; }
-      if (eff.destroySelf) { destroy.add(run.perks[slot].uid); step.destroy = true; }
+      // v4.8: a Permanent perk is never destroyed (the effect still shows nothing)
+      if (eff.destroySelf && !P.isPermanent(run.perks[slot])) { destroy.add(run.perks[slot].uid); step.destroy = true; }
       // v4.7 {fire: [{r, c, kind?, color?, mod?}]}: each cell is edited by its patch (when it has one; a 'transform'
       // step) at the next safe point, then fires/breaks as a seed of the next cascade level (source 'perk'; Hidden
       // Gem, Aura Farming, Glitter Bomb, Virus breaks)
@@ -4358,7 +4680,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         for (const [r, c] of seeds) cellCasc.set(B.key(r, c), levelCasc);
         const prismColors = {};
         if (seeds.length && prismPos && !clearAll) prismColors[B.key(prismPos.r, prismPos.c)] = prismColor;
-        const creates = B.planSpecials(groups, swapLevel && a ? prefer : [], board);
+        const creates = noSpecials ? [] : B.planSpecials(groups, swapLevel && a ? prefer : [], board);
         // v4.2 (Poker RAINBOW): a group whose match makes a Prism carries makesPrism in the 'match' event
         for (const cr of creates) {
           if (cr.kind !== 'prism') continue;
@@ -4380,7 +4702,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         }
         groups.forEach((g, gi) => {
           x.group = g;
-          x.groupPoints = g.coal ? g.cells.length * coalValue()
+          x.groupPoints = !scores(null) ? 0 : g.coal ? g.cells.length * coalValue()
             : g.cells.reduce((s, [r, c]) => s + gemValue(run, board.cells[r][c], g.casc, vopts('match', g.mul, null, g.wild)), 0);
           mstep.groups[gi].points = x.groupPoints;
           emit('match');
@@ -4445,8 +4767,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
             const mul = cellMul.has(k) ? cellMul.get(k) : g.mod === 'shiny' ? shinyMul : 1;
             // broken coal is worth nothing here: its value comes later as a flat coal step
             const by = st.by[k];
-            const v = g.kind === 'coal' ? 0 : gemValue(run, g, lvl, vopts(src, mul, by, cellWild.has(k)));
-            if (g.kind === 'coal') coals.push([r, c]);
+            const v = g.kind === 'coal' || !scores(by) ? 0 : gemValue(run, g, lvl, vopts(src, mul, by, cellWild.has(k)));
+            if (g.kind === 'coal') coals.push([r, c, by]);
             values.set(k, v);
             points = Math.min(points + v, Number.MAX_VALUE);
             summary.gemsCleared++;
@@ -4460,7 +4782,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
             const g = board.cells[r][c], k = B.key(r, c);
             const lvl = cellCasc.has(k) ? cellCasc.get(k) : levelCasc;
             const mul = cellMul.has(k) ? cellMul.get(k) : g.mod === 'shiny' ? shinyMul : 1;
-            const v = g.kind === 'coal' ? 0 : gemValue(run, g, lvl, vopts('match', mul, null, cellWild.has(k)));
+            const v = g.kind === 'coal' || !scores(null) ? 0 : gemValue(run, g, lvl, vopts('match', mul, null, cellWild.has(k)));
             points = Math.min(points + v, Number.MAX_VALUE);
             step.cells.push({ r: r, c: c, id: g.id, color: g.color, kind: g.kind, mod: g.mod || null, v: v, src: 'match', lvl: lvl, origin: originOf(k), unlock: true });
           }
@@ -4483,9 +4805,9 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
           // coal geodes: each broken coal (blast or coal match) bursts into 3-5 geodes, each scored as it lands:
           // 5x base, then +1x base per geode (no cascade, colour polish, mods; v4.3: Coal Polish multiplies each).
           // v = their sum, total = points after all of them.
-          coals.forEach(([r, c], i) => {
+          coals.forEach(([r, c, by], i) => {
             const n = C.GEODE_MIN + run.rng.int(C.GEODE_MAX - C.GEODE_MIN + 1);
-            const geodes = C.geodeValues(n, C.base(run.round)).map((v) => v * coalMul), v = geodes.reduce((a, b) => a + b, 0);
+            const geodes = C.geodeValues(n, C.base(run.round)).map((v) => (scores(by) ? v * coalMul : 0)), v = geodes.reduce((a, b) => a + b, 0);
             points = Math.min(points + v, Number.MAX_VALUE);
             tl.push({ t: 'coal', r: r, c: c, geodes: geodes, v: v, i: i, total: points });
           });
@@ -4589,6 +4911,9 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     summary.levels = levels;
     endPhase();
     summary.isLastMove = !infinite && run.movesLeft <= cost; // v4.7 Survival: no move limit, never a last move
+    // v4.8 Approved attachment: +100 points every player move (not free resolves), before the moveEnd multipliers;
+    // a perk step with approved: true (never doubled by Pristine, never echoed)
+    if (!summary.free) run.perks.forEach((inst, i) => { if (P.hasAtt(inst, 'approved')) apply({ add: P.APPROVED_POINTS }, i, { approved: true }); });
     emit('moveEnd');
     snapDisp();
     continueResolve(); // a moveEnd board edit: its matches still resolve (after the multipliers)
@@ -4720,7 +5045,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       // run.stats.tilesRemoved). events.tilesPlaced: [{r, c, tile, replaced, slot}]
       if (eff.placeTile) {
         const t = eff.placeTile, old = B.inB(t.r, t.c) ? run.board.tiles[t.r][t.c] : undefined;
-        if (old !== undefined && GF.Tiles.DEFS[t.id]) {
+        if (old !== undefined && GF.Tiles.DEFS[t.id] && !B.tileFixed(run.board, t.r, t.c)) { // v4.8: fixed tiles stay
           run.board.tiles[t.r][t.c] = t.id; run.board.tileState[t.r][t.c] = 0;
           if (old) GF.Run.tileRemoved(run, 1);
           (events.tilesPlaced = events.tilesPlaced || []).push({ r: t.r, c: t.c, tile: t.id, replaced: old || null, slot: slot });
@@ -4771,8 +5096,14 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         }
         if (n) step.strip = n;
       }
-      if (eff.destroySelf) { destroy.add(run.perks[slot].uid); step.destroy = true; }
+      if (eff.destroySelf && !GF.Perks.isPermanent(run.perks[slot])) { destroy.add(run.perks[slot].uid); step.destroy = true; }
       steps.push(step);
+    });
+    // v4.8 Debt attachment: -$3 per perk carrying it (a perk step with debt: true; Run.finishRound shows it apart)
+    run.perks.forEach((inst, i) => {
+      if (!GF.Perks.hasAtt(inst, 'debt')) return;
+      run.money -= GF.Perks.DEBT_COST;
+      steps.push({ t: 'perk', slot: i, money: -GF.Perks.DEBT_COST, debt: true });
     });
     if (destroy.size) run.perks = run.perks.filter((p) => !destroy.has(p.uid));
     return steps;
@@ -4846,6 +5177,12 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // v4.7: perks depending on moves left treat Survival as having infinite moves (Fast and Furious always on, Last
   // Hope never triggers)
   function infiniteMoves(run) { return !!run && !!GF.Boards && GF.Boards.has(run, 'survival'); }
+  // v4.8 Survival: gems left = on the board + in the pool; the HUD bar is full above SURVIVAL_BAR_FULL, then x / it
+  function gemsLeft(run) {
+    const pool = (run && run.boardState && run.boardState.refillPool) || 0;
+    return C.SIZE * C.SIZE - GF.Board.emptyCount(run.board) + Math.max(0, pool);
+  }
+  function gemBarFill(x) { return Math.max(0, Math.min(1, (+x || 0) / C.SURVIVAL_BAR_FULL)); }
   function earn(run, n) { if (n > 0) bump(run, 'moneyEarned', n); }
   // Aggregates one move's result: every cleared cell carries the gem's colour and kind (resolver clear steps).
   function recordMove(run, res, free) {
@@ -4892,7 +5229,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     run.shop = null;
     run.timer = null;
     GF.Boards.hook(run, 'roundStart');
-    for (const p of run.perks) if (p.id === 'time_machine') p.state.snaps = [];
+    for (const p of run.perks) if (p.id === 'time_machine' && !GF.Perks.isSpent(p)) p.state.snaps = [];
     for (const p of run.perks) if (p.id === 'last_hurrah') p.state.used = false;
     const flags = GF.Perks.flags(run.perks, run), cols = colors(run);
     GF.Board.carryOver(run.board, run.rng, cols, flags, true); // keep frozen matches (jewel placements, cards)
@@ -4987,7 +5324,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // Time Machine keeps the board before each of the last 5 moves of the round (on its instance).
   function snapshot(run) {
     for (const p of run.perks) {
-      if (p.id !== 'time_machine') continue;
+      if (p.id !== 'time_machine' || GF.Perks.isSpent(p)) continue; // v4.8: a SPENT Time Machine keeps no snapshots
       const snaps = p.state.snaps || (p.state.snaps = []);
       snaps.push({ cells: run.board.cells.map((row) => row.map(GF.Board.clone)), tileState: run.board.tileState.map((row) => row.slice()) });
       while (snaps.length > 5) snaps.shift();
@@ -5038,7 +5375,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // the board (never normally: gems fall in from the pool as soon as cells empty) drops in first (a fall step).
   function survivalEnd(run, res) {
     if (run.phase !== 'play' || !GF.Boards.has(run, 'survival')) return false;
-    const flags = GF.Perks.flags(run.perks, run), cols = colors(run);
+    // v4.8 fix: Baseball Bat's no-match swaps do not keep a Survival round alive (no move limit: they never ran out)
+    const flags = Object.assign({}, GF.Perks.flags(run.perks, run), { illegalSwap: false }), cols = colors(run);
     if (GF.Board.hasMoves(run.board, flags, cols)) return false;
     const st = run.boardState || (run.boardState = {});
     if (st.refillPool > 0 && GF.Board.emptyCount(run.board) > 0) {
@@ -5106,18 +5444,25 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (run.score < targetFor(run, run.round) && out()) lastHurrah(run, res);
     if (run.score >= targetFor(run, run.round)) run.phase = 'won';
     else if (out()) {
-      const tm = run.perks.findIndex((p) => p.id === 'time_machine' && p.state.snaps && p.state.snaps.length);
-      const ins = run.perks.findIndex((p) => p.id === 'insurance');
+      // v4.8: a Permanent Time Machine / Lifebuoy stays in its slot once used, SPENT (state.spent: never fires again)
+      const live = (p) => !GF.Perks.isSpent(p);
+      const tm = run.perks.findIndex((p) => p.id === 'time_machine' && live(p) && p.state.snaps && p.state.snaps.length);
+      const ins = run.perks.findIndex((p) => p.id === 'insurance' && live(p));
       if (tm >= 0) {
-        const inst = run.perks.splice(tm, 1)[0], snap = inst.state.snaps[0];
+        const inst = GF.Perks.isPermanent(run.perks[tm]) ? run.perks[tm] : run.perks.splice(tm, 1)[0], snap = inst.state.snaps[0];
+        if (GF.Perks.isPermanent(inst)) { inst.state.snaps = []; inst.state.spent = true; res.spent = (res.spent || []).concat([inst.uid]); }
         run.board.cells = snap.cells.map((row) => row.map(GF.Board.clone));
         run.board.tileState = snap.tileState.map((row) => row.slice());
         run.movesLeft += 5;
         res.timeMachine = true;
-        res.timeline.push({ t: 'perkGone', uids: [inst.uid] });
+        if (!GF.Perks.isPermanent(inst)) res.timeline.push({ t: 'perkGone', uids: [inst.uid] });
         res.timeline.push({ t: 'shuffle', cells: run.board.cells.map((row) => row.map(GF.Board.clone)) });
         GF.Resolver.boardReady(run);
-      } else if (ins >= 0) { run.perks.splice(ins, 1); run.phase = 'won'; res.insured = true; }
+      } else if (ins >= 0) {
+        const inst = run.perks[ins];
+        if (GF.Perks.isPermanent(inst)) { inst.state.spent = true; res.spent = (res.spent || []).concat([inst.uid]); } else run.perks.splice(ins, 1);
+        run.phase = 'won'; res.insured = true;
+      }
       else run.phase = 'over';
     }
     return res;
@@ -5352,12 +5697,20 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     run.pendingChoice = null; // v4.7: a line never picked (round won before any move) is not asked for any more
     const leftover = infiniteMoves(run) ? 0 : run.movesLeft; // v4.7 Survival: no move limit, no leftover moves
     const interestCap = GF.Vouchers.interestCap(run);
-    const interest = Math.min(interestCap, Math.floor(Math.max(0, run.money) / C.INTEREST_PER));
+    // v4.8 Bankrupt: no round-end payout (win reward, leftover moves / gems, interest); perks' round-end money stays
+    const bankrupt = GF.Boards.noPayout(run);
+    const interest = bankrupt ? 0 : Math.min(interestCap, Math.floor(Math.max(0, run.money) / C.INTEREST_PER));
     const steps = GF.Resolver.roundEnd(run);
     const perkIncome = steps.reduce((s, x) => s + (x.income || 0), 0);
-    const perkMoney = steps.reduce((s, x) => s + (x.money || 0), 0); // already paid by roundEnd (Landlord, Bank Account, Loan Shark)
-    const leftoverIncome = Math.floor(leftover / 2);
-    const income = Math.max(0, C.BASE_INCOME + leftoverIncome + perkIncome + interest);
+    // already paid by roundEnd (Landlord, Bank Account, Loan Shark); v4.8 Debt attachments apart (info.debt)
+    const perkMoney = steps.reduce((s, x) => s + (x.debt ? 0 : x.money || 0), 0);
+    const debt = steps.reduce((s, x) => s + (x.debt ? x.money || 0 : 0), 0);
+    const leftoverIncome = bankrupt ? 0 : Math.floor(leftover / 2);
+    // v4.8 Survival: $1 per SURVIVAL_GEMS_PER gems left (board + pool), at most SURVIVAL_GEMS_MAX (replaces leftover moves)
+    const gems = GF.Boards.has(run, 'survival') ? gemsLeft(run) : 0;
+    const gemsIncome = GF.Boards.has(run, 'survival') && !bankrupt ? Math.min(C.SURVIVAL_GEMS_MAX, Math.floor(gems / C.SURVIVAL_GEMS_PER)) : 0;
+    const base = bankrupt ? 0 : C.BASE_INCOME;
+    const income = Math.max(0, base + leftoverIncome + gemsIncome + perkIncome + interest);
     run.money += income;
     stats(run).roundsWon++;
     earn(run, income + perkMoney);
@@ -5365,7 +5718,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     const wasFinal = run.round === C.ROUNDS && !run.endless;
     run.round++;
     run.phase = wasFinal ? 'victory' : 'shop';
-    return { base: C.BASE_INCOME, leftover: leftover, leftoverIncome: leftoverIncome, perkIncome: perkIncome, perkMoney: perkMoney, interest: interest, interestCap: interestCap, income: income, total: income + perkMoney, steps: steps };
+    return { base: base, bankrupt: bankrupt, leftover: leftover, leftoverIncome: leftoverIncome, gemsLeft: gems, gemsIncome: gemsIncome, perkIncome: perkIncome, perkMoney: perkMoney, debt: debt, interest: interest, interestCap: interestCap, income: income, total: income + perkMoney + debt, steps: steps };
   }
   // v4.6: round 20 cleared: the VICTORY screen comes first, the round's payout waits (run.payoutDue) and is only
   // paid when the player goes ENDLESS (continueEndless). NEW RUN / MAIN MENU leave without it. Returns true when the
@@ -5428,6 +5781,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (!o.boardState || typeof o.boardState !== 'object') o.boardState = {};
     if (!o.abilities || typeof o.abilities !== 'object') o.abilities = {};
     migrateV47(o);
+    migrateV48(o);
     delete o.v;
     return o;
   }
@@ -5521,6 +5875,19 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (ab.shopSwap) { delete ab.shopSwap; ab.freeSwap = { left: GF.Boards.ABILITIES.freeSwap.max, max: GF.Boards.ABILITIES.freeSwap.max }; }
     delete ab.refill;
   }
+  // v4.8: attachments are kept (unknown ids dropped, at most 2, distinct); Haunted / Strange saves from before fixed
+  // tiles get every tile fixed. hell -> pink and black -> coal_mine are done by Boards.normalize. Idempotent.
+  function migrateV48(o) {
+    const clean = (it) => {
+      if (!it || !Array.isArray(it.att)) { if (it) delete it.att; return; }
+      const a = [];
+      it.att.forEach((id) => { if (GF.Perks.ATT[id] && a.indexOf(id) < 0 && a.length < GF.Perks.ATT_MAX) a.push(id); });
+      if (a.length) it.att = a; else delete it.att;
+    };
+    o.perks.forEach(clean);
+    if (o.shop && Array.isArray(o.shop.items)) o.shop.items.forEach((it) => { if (it && it.kind === 'perk') clean(it); });
+    if ((GF.Boards.has(o, 'haunted') || GF.Boards.has(o, 'strange')) && !o.board.fixed) GF.Board.fixAllTiles(o.board);
+  }
   function save(run) {
     try { localStorage.setItem(C.SAVE_KEY, serialize(run)); return true; } catch (e) { return false; }
   }
@@ -5531,7 +5898,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   function clearSave() { try { localStorage.removeItem(C.SAVE_KEY); } catch (e) { /* storage unavailable */ } }
   function hasSave() { try { return !!localStorage.getItem(C.SAVE_KEY); } catch (e) { return false; } }
 
-  GF.Run = { KINDS, newStats, tileRemoved, infiniteMoves, chooseLine, autoChoose, refreshChoice, fillStats, stats, bump, earn, recordMove, create, target, targetFor, colors, roundMoves, moneyFloor, startRound, swapKind, doMove, finishRound, claimVictory, continueEndless, seedLabel, freeResolve, rescues, stuckEnd, RESCUE_BANNER,
+  GF.Run = { KINDS, newStats, tileRemoved, infiniteMoves, gemsLeft, gemBarFill, chooseLine, autoChoose, refreshChoice, fillStats, stats, bump, earn, recordMove, create, target, targetFor, colors, roundMoves, moneyFloor, startRound, swapKind, doMove, finishRound, claimVictory, continueEndless, seedLabel, freeResolve, rescues, stuckEnd, RESCUE_BANNER,
     abilities, canUseAbility, useAbility, freeSwapOk, survivalEnd, blazeFill, blazeTick, blazeDrains, blazeDrain,
     timerReady, timerStart, timerSwap, timerEnd, timerBatch,
     serialize, deserialize, save, load, clearSave, hasSave };
@@ -5580,7 +5947,15 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   function all() {
     try {
       const o = JSON.parse(localStorage.getItem(KEY) || '{}');
-      return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+      if (!o || typeof o !== 'object' || Array.isArray(o)) return {};
+      // v4.8 renamed boards (hell -> pink, black -> coal_mine): the better record is kept under the new id
+      const RN = (GF.Boards && GF.Boards.RENAMED) || {};
+      for (const old in RN) {
+        if (!(old in o)) continue;
+        if (better(norm(o[old]), norm(o[RN[old]]))) o[RN[old]] = o[old];
+        delete o[old];
+      }
+      return o;
     } catch (e) { return {}; }
   }
   // a stored record in the current shape (v4.5 migration: no difficulty -> I)
@@ -5673,13 +6048,11 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     apply: (run) => { run.rng.shuffle(GF.Resolver.colorsOf(run).slice()).slice(0, 3).forEach((k) => { run.polish[k]++; }); return []; } });
   def({ id: 'judgement', name: 'Judgement', desc: 'Gain a random perk',
     apply: (run) => {
+      if (!GF.Perks.canGain(run)) return []; // v4.8 Unperkify
       const ex = new Set(GF.Perks.flags(run.perks, run).showman ? [] : run.perks.map((p) => p.id));
       const id = GF.Perks.roll(run.rng, ex);
       if (!id) return [];
-      const inst = GF.Perks.create(id);
-      run.perks.push(inst);
-      const d = GF.Perks.byId[id];
-      if (d.onBuy) d.onBuy(run, inst, run.rng);
+      GF.Perks.acquire(run, GF.Perks.create(id)); // v4.8: perkAcquired hook, then onBuy
       return [];
     } });
   // tile events ({r, c, tile, gem} / {r, c, tile, swap}); counters untouched
@@ -5726,7 +6099,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     const ex = exclude || new Set();
     const cols = run ? GF.Resolver.colorsOf(run) : C.COLORS.map((_, k) => k);
     const inf = run && GF.Run && GF.Run.infiniteMoves && GF.Run.infiniteMoves(run);
-    const plain = IDS.filter((id) => DEFS[id].color == null && !ex.has(id) && !(inf && id === 'hourglass'));
+    const noPerk = run && !GF.Perks.canGain(run); // v4.8 Unperkify: Judgement never rolls
+    const plain = IDS.filter((id) => DEFS[id].color == null && !ex.has(id) && !(inf && id === 'hourglass') && !(noPerk && id === 'judgement'));
     const codes = IDS.filter((id) => DEFS[id].color != null && cols.indexOf(DEFS[id].color) >= 0 && !ex.has(id));
     const n = plain.length + (codes.length ? 1 : 0);
     if (!n) return null;
@@ -5800,7 +6174,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (!d) return { ok: false, reason: 'slot' };
     if (run.phase !== 'play' && run.phase !== 'shop') return { ok: false, reason: 'phase' };
     if (d.playOnly && run.phase !== 'play') return { ok: false, reason: 'phase' };
-    if (d.id === 'judgement' && run.perks.length >= run.perkSlots) return { ok: false, reason: 'slots' };
+    if (d.id === 'judgement' && !GF.Perks.hasRoom(run)) return { ok: false, reason: 'slots' };
     if (d.id === 'hourglass' && GF.Run.infiniteMoves && GF.Run.infiniteMoves(run)) return { ok: false, reason: 'phase' };
     if (d.color != null && d.kind !== 'polish' && GF.Resolver.colorsOf(run).indexOf(d.color) < 0) return { ok: false, reason: 'color' };
     return { ok: true };
@@ -5821,7 +6195,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       case 'modable': return C.canMod(g); // normal/bomb/star/nova without a modifier
       case 'notPrism': return !!g && g.kind !== 'prism';
       case 'coal': return !!g && g.kind === 'coal';
-      case 'cell': return true;
+      // v4.8: a card placing a tile (a tile card, Brushstroke) cannot go on a fixed tile (Haunted / Strange)
+      case 'cell': return !(d.kind === 'tile' || d.id === 'brushstroke') || !GF.Board.tileFixed(run.board, t.r, t.c);
       case 'gem': return !!g;
       case 'recolor': return !!g && g.color != null && !C.COLORLESS[g.kind] && g.color !== d.color;
       default: return false;
@@ -5949,7 +6324,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   function def(d) { d.tier = d.tier || 1; d.price = d.price || [0, 10, 15, 20][d.tier]; DEFS[d.id] = d; }
   def({ id: 'overstock_1', name: 'Overstock I', desc: '+1 shop item slot' });
   def({ id: 'overstock_2', name: 'Overstock II', tier: 2, requires: 'overstock_1', desc: '+1 more shop item slot' });
-  def({ id: 'business_man', name: 'Business Man', desc: '+1 perk slot', effect: (run) => { run.perkSlots = Math.min(C.MAX_SLOTS, run.perkSlots + 1); } });
+  def({ id: 'business_man', name: 'Business Man', desc: '+1 perk slot', effect: (run) => { run.perkSlots = Math.min(C.MAX_SLOTS, run.perkSlots + 1); },
+    canOffer: (run) => !(GF.Perks && GF.Perks.canGain && !GF.Perks.canGain(run)) }); // v4.8 Unperkify: never offered
   def({ id: 'card_holder_1', name: 'Card Holder', desc: '+1 card slot', effect: (run) => { run.cardSlots++; } });
   def({ id: 'bonanza_1', name: 'Bonanza I', desc: '+2 moves each round', effect: (run) => { run.extraMoves += 2; } });
   def({ id: 'bonanza_2', name: 'Bonanza II', tier: 2, requires: 'bonanza_1', desc: '+3 more moves each round', effect: (run) => { run.extraMoves += 3; } });
@@ -6074,7 +6450,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   function canPlace(run, r, c) {
     const p = run.pendingPlace[0];
     if (!p || !GF.Board.inB(r, c)) return false;
-    if (p.kind === 'tile') return true;
+    if (p.kind === 'tile') return !GF.Board.tileFixed(run.board, r, c); // v4.8: fixed tiles (Haunted / Strange) stay
     if (GF.Board.isLocked(run.board.cells[r][c])) return false; // v4.0: jewels never replace or edit a locked gem
     if (C.MODS[p.id]) return C.modable(run.board.cells[r][c]); // legacy gold/shiny item (old saves are migrated)
     return true; // a jewel replaces any gem, or (v4.3, Survival) fills an empty cell
@@ -6118,9 +6494,9 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   const C = GF.C;
   const fl = (run) => GF.Perks.flags(run.perks, run);
   const hasV = (run, id) => GF.Vouchers.has(run, id);
-  // v4.0: board types (Green x0.5) and difficulty (IV+ x1.5, v4.1) scale every shop price, then round (min $1)
+  // v4.0: board types (Green x0.5) scale every shop price, then round (min $1). v4.8: difficulty no longer does.
   function scaled(run, kind, p) {
-    const q = GF.Boards.hook(run, 'price', p, kind) * GF.Difficulty.priceMul(run);
+    const q = GF.Boards.hook(run, 'price', p, kind);
     return q === p ? p : Math.max(1, Math.round(q));
   }
   function bf(run, p) {
@@ -6137,14 +6513,22 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (!C.UPGRADE_CARD[it.id]) return 3;
     return C.UPGRADE_CARD[it.id].price;
   }
-  // it.free: a Claw Machine prize, $0
-  function itemPrice(run, it) { return it.free ? 0 : bf(run, scaled(run, it.kind, Math.max(1, itemBase(run, it)))); }
+  // it.free: a Claw Machine prize, $0. v4.8: a perk carrying Debt costs $1.
+  function itemPrice(run, it) {
+    if (it.free) return 0;
+    if (it.kind === 'perk' && GF.Perks.hasAtt(it, 'debt')) return 1;
+    return bf(run, scaled(run, it.kind, Math.max(1, itemBase(run, it))));
+  }
   // Claw Machine (v3.11): when the shop is stocked or rerolled, 25% chance one random item slot holding a perk,
   // card, tile, gem or polish card (not Brilliance, not packs) becomes free: the item gets free: true.
   const clawable = (it) => !!it && (it.kind === 'perk' || it.kind === 'card' || it.kind === 'tile' || it.kind === 'gem' ||
     (it.kind === 'upgrade' && it.id !== 'brilliance'));
   function claw(run, items) {
-    if (!fl(run).claw || !run.rng.chance(GF.Perks.byId.claw_machine.chance)) return;
+    if (!fl(run).claw) return;
+    // v4.8: a Pristine Claw Machine doubles the chance
+    const own = run.perks.filter((p) => p.id === 'claw_machine');
+    const p = Math.max.apply(null, own.map((i) => GF.Perks.chance(i, GF.Perks.byId.claw_machine.chance)));
+    if (!run.rng.chance(p)) return;
     const idx = [];
     items.forEach((it, i) => { if (clawable(it)) idx.push(i); });
     if (idx.length) items[run.rng.pick(idx)].free = true;
@@ -6154,8 +6538,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   function rerollPrice(run) {
     if (fl(run).freeReroll && run.shop && !run.shop.freeUsed) return 0;
     const p = Math.max(0, run.shop.rerollCost - (hasV(run, 'reroll_1') ? 1 : 0) - (hasV(run, 'reroll_2') ? 2 : 0));
-    // v4.0: Green x4, difficulty IV+ x1.5 (a $0 reroll stays free)
-    const q = GF.Boards.hook(run, 'rerollPrice', p) * GF.Difficulty.priceMul(run);
+    // v4.0: Green x4 (a $0 reroll stays free)
+    const q = GF.Boards.hook(run, 'rerollPrice', p);
     return q === p ? p : Math.round(q);
   }
   function canAfford(run, price) { return run.money - price >= GF.Run.moneyFloor(run); }
@@ -6170,6 +6554,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (hasV(run, 'constructor')) w.tile *= 2;
     if (hasV(run, 'gemsmith')) w.upgrade *= 2;
     if (hasV(run, 'jewel_hunter')) w.gem = C.GEM_ITEM_WEIGHT;
+    if (!GF.Perks.canGain(run)) w.perk = 0; // v4.8 Unperkify: no perks in the shop
     return w;
   }
 
@@ -6184,6 +6569,9 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         exclude.forEach((k) => { if (k.startsWith('perk:')) ex.add(k.split(':')[1]); });
         const id = GF.Perks.roll(run.rng, ex);
         it = id ? { kind: 'perk', id: id } : { kind: 'card', id: GF.Cards.roll(run.rng, null, run) };
+        // v4.8 difficulty IV+: shop perks may carry attachments (rolled only there, so lower levels keep their rng)
+        if (id && GF.Difficulty.attachments(run)) { const att = GF.Perks.rollAttachments(run.rng); if (att.length) it.att = att; }
+        if (id) GF.Boards.hook(run, 'shopPerk', it); // v4.8 Rent Is Due / Rare Find: the forced attachment shows already
       } else if (kind === 'card') it = { kind: 'card', id: GF.Cards.roll(run.rng, null, run) };
       else if (kind === 'tile') it = { kind: 'tile', id: run.rng.pick(GF.Tiles.IDS) };
       else if (kind === 'gem') it = GF.Packs.rollJewel(run, true);
@@ -6214,13 +6602,12 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     const price = itemPrice(run, it);
     if (!canAfford(run, price)) return { ok: false, reason: 'money' };
     if (it.kind === 'perk') {
-      if (run.perks.length >= run.perkSlots) return { ok: false, reason: 'slots' };
+      // v4.8: an Invisible perk needs no free slot
+      if (!GF.Perks.hasRoom(run) && !GF.Perks.hasAtt(it, 'invisible')) return { ok: false, reason: 'slots' };
       run.money -= price;
       const inst = GF.Perks.create(it.id);
       inst.paid = price;
-      run.perks.push(inst);
-      const d = GF.Perks.byId[it.id];
-      if (d.onBuy) d.onBuy(run, inst, run.rng);
+      GF.Perks.acquire(run, inst, { att: GF.Perks.atts(it) });
     } else if (it.kind === 'gem') {
       const r = GF.Packs.grant(run, it); // Jewel Hunter gems: pending placement
       if (!r.ok) return r;
@@ -6286,6 +6673,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     const i = run.perks.findIndex((p) => p.uid === uid);
     if (i < 0) return { ok: false, reason: 'none' };
     const inst = run.perks[i], d = GF.Perks.byId[inst.id], value = GF.Perks.sellValue(inst);
+    if (!GF.Perks.canSell(inst)) return { ok: false, reason: 'permanent' }; // v4.8 Permanent
     if (inst.id === 'credit_card' && run.money + value < 0) return { ok: false, reason: 'debt' };
     run.perks.splice(i, 1);
     run.money += value;
@@ -6305,7 +6693,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     return true;
   }
   function removeTile(run, r, c) {
-    if (!GF.Board.inB(r, c) || !run.board.tiles[r][c]) return false;
+    if (!GF.Board.inB(r, c) || !run.board.tiles[r][c] || GF.Board.tileFixed(run.board, r, c)) return false;
     run.board.tiles[r][c] = null;
     run.board.tileState[r][c] = 0;
     GF.Run.tileRemoved(run, 1); // v4.7 Tile Master
@@ -6340,8 +6728,81 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   const GEMTINT = [['#ff4d6d', '#ffb3c1'], ['#3a86ff', '#b8d4ff'], ['#3ddc84', '#b5f5d0'], ['#ffd23f', '#fff1b8'],
     ['#a259ff', '#dcc2ff'], ['#eeeeee', '#ffffff'], ['#ff8c42', '#ffd2b0']];
   const NAMED = { gold: ['#ffd23f', '#fff1b8'], pink: ['#ff6bd6', '#ffc2f0'], cyan: ['#7fe7ff', '#d6f8ff'], green: ['#3ddc84', '#b5f5d0'], grey: ['#8a86a0', '#d0cde0'], brown: ['#c08040', '#ecc48c'],
-    darkred: ['#c0263d', '#ff8a8a'], violet: ['#9d8fc4', '#ddd5f5'], teal: ['#2ec4b6', '#b5f2ec'], magenta: ['#e040fb', '#f6b8ff'] };
+    darkred: ['#c0263d', '#ff8a8a'], white: ['#ffffff', '#e8e4f4'], violet: ['#9d8fc4', '#ddd5f5'], teal: ['#2ec4b6', '#b5f2ec'], magenta: ['#e040fb', '#f6b8ff'] };
   const GLYPHS = {
+    // v4.8 perk attachment badges (drawn white on the badge's coloured circle; Pristine uses star)
+    att_lock: [
+      '................',
+      '................',
+      '.....kkkkkk.....',
+      '....kmmmmmmk....',
+      '...kmkkkkkkmk...',
+      '...kmk....kmk...',
+      '...kmk....kmk...',
+      '..kkkkkkkkkkkk..',
+      '..kmmmmmmmmmmk..',
+      '..kmmmmkkmmmmk..',
+      '..kmmmmkkmmmmk..',
+      '..kmmmmmkmmmmk..',
+      '..kmmmmmmmmmmk..',
+      '..kkkkkkkkkkkk..',
+      '................',
+      '................',
+    ],
+    att_thumb: [
+      '................',
+      '.......kk.......',
+      '......kmmk......',
+      '......kmmk......',
+      '.....kmmmk......',
+      '....kmmmmkkkkk..',
+      '.kkkkmmmmmmmmmk.',
+      '.kmmkmmmmmkkkk..',
+      '.kmmkmmmmmmmmmk.',
+      '.kmmkmmmmmkkkk..',
+      '.kmmkmmmmmmmmmk.',
+      '.kmmkmmmmmkkkk..',
+      '.kmmkmmmmmmmmk..',
+      '.kkkkkkkkkkkk...',
+      '................',
+      '................',
+    ],
+    att_dollar: [
+      '................',
+      '.......kk.......',
+      '.....kkmmkk.....',
+      '....kmmmmmmk....',
+      '...kmmkmmkmmk...',
+      '...kmmkmmkkk....',
+      '....kmmmmmk.....',
+      '.....kmmmmmk....',
+      '....kkkmmkmmk...',
+      '...kmmkmmkmmk...',
+      '....kmmmmmmk....',
+      '.....kkmmkk.....',
+      '.......kk.......',
+      '................',
+      '................',
+      '................',
+    ],
+    att_eye: [
+      '................',
+      '.............kk.',
+      '............kmk.',
+      '.....kkkkkkkmk..',
+      '...kkmmmmmmkkk..',
+      '..kmmmmkkkmmmk..',
+      '.kmmmmkmmkmmmmk.',
+      'kmmmmmkmkkmmmmmk',
+      '.kmmmmkkmkmmmmk.',
+      '..kmmmkkkmmmmk..',
+      '..kkkmmmmmmkk...',
+      '..kmkkkkkkk.....',
+      '.kmk............',
+      '.kk.............',
+      '................',
+      '................',
+    ],
     unknown: [
       '................',
       '.....kkkkkk.....',
@@ -9211,7 +9672,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       '..kk........kk..',
       '................',
     ],
-    board_black: [
+    board_coal_mine: [ // v4.8: was board_black
       '................',
       '................',
       '......kkkkk.....',
@@ -9247,22 +9708,22 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       '................',
       '................',
     ],
-    board_hell: [
-      '..k....k.....k..',
-      '.kok..kok...kok.',
-      '.koyk.koyk.koyk.',
-      'kooyokooyokoyyok',
-      'koyyyokyyyokyyok',
-      '.kkkkkkkkkkkkkk.',
-      '.kwwwwwwwwwwwwk.',
-      'kwwwwwwwwwwwwwwk',
-      'kwkkkwwwwwkkkwwk',
-      'kwkrkwwwwwkrkwwk',
-      'kwkkkwwkwwkkkwwk',
-      '.kwwwwkkkwwwwwk.',
-      '..kwwwwwwwwwwk..',
-      '..kwkwkwkwkwwk..',
-      '...kkkkkkkkkk...',
+    board_pink: [ // v4.8: replaces board_hell (a sparkling heart: starts with a rare perk)
+      '.............k..',
+      '............kwk.',
+      '..kkk...kkk..k..',
+      '.kmmmk.kmmmk....',
+      'kmllmmkmmmmmk...',
+      'kmlmmmmmmmmmk...',
+      'kmmmmmmmmmmmk.k.',
+      '.kmmmmmmmmmk.kwk',
+      '..kmmmmmmmk...k.',
+      '...kmmmmmk......',
+      '....kmmmk.......',
+      '.....kmk........',
+      '......k.........',
+      '................',
+      '................',
       '................',
     ],
     board_haunted: [
@@ -9371,6 +9832,259 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       '..kmmk....w.....',
       '.kmmk....wlw....',
       '.kkk......w.....',
+      '................',
+    ],
+    // v4.8 challenges
+    board_one_move: [
+      '................',
+      '......kkkk......',
+      '.....kmmmk......',
+      '....kmlmmk......',
+      '...kmlkmmk......',
+      '...kkk.kmmk.....',
+      '.......kmmk.....',
+      '.......kmmk.....',
+      '.......kmmk.....',
+      '.......kmmk.....',
+      '.......kmmk.....',
+      '.......kmmk.....',
+      '....kkkkmmkkkk..',
+      '....kmmmmmmmmk..',
+      '....kkkkkkkkkk..',
+      '................',
+    ],
+    board_blazing: [
+      '.......k........',
+      '......kmk.......',
+      '......kmmk......',
+      '.....kmmmk..k...',
+      '.....kmmmmk.kk..',
+      '....kmmmmmmkmk..',
+      '..k.kmmyymmmmk..',
+      '.kk.kmmyymmmmk..',
+      '.kmkkmyyyymmmk..',
+      '.kmmmmyyyyymmk..',
+      '.kmmmyywwyymmk..',
+      '.kmmmyywwyyymk..',
+      '..kmmyywwwyymk..',
+      '...kmmyyyyymk...',
+      '....kkmmmmkk....',
+      '......kkkk......',
+    ],
+    board_unperkify: [
+      '.....kkkkkk.....',
+      '...kkrrrrrrkk...',
+      '..krrkkkkkkrrk..',
+      '.krrk......krrk.',
+      '.krkrr.kkk..krk.',
+      'krrkkrrkmmk.krrk',
+      'krk.kkrrmmmk.krk',
+      'krk.kmmrrmmk.krk',
+      'krk.kmmmrrmk.krk',
+      'krk.kmmmmrrk.krk',
+      'krrk.kmmmkrrkrrk',
+      '.krk..kkk..rrrk.',
+      '.krrk......krrk.',
+      '..krrkkkkkkrrk..',
+      '...kkrrrrrrkk...',
+      '.....kkkkkk.....',
+    ],
+    board_cardsharp: [
+      '..kkkkkkkkkk....',
+      '..kwwwwwwwwk....',
+      '..kwkwwwwwwkkkk.',
+      '..kwwwwwwwwkwwk.',
+      '..kwwwwkwwwkwwk.',
+      '..kwwwkkkwwkwwk.',
+      '..kwwkkkkkwkwwk.',
+      '..kwkkkkkkkkwwk.',
+      '..kwkkkkkkkkwwk.',
+      '..kwwkwkwkwkwwk.',
+      '..kwwwwkwwwkwwk.',
+      '..kwwwkkkwwkwwk.',
+      '..kwwwwwwkwkwwk.',
+      '..kkkkkkkkkkwwk.',
+      '.....kwwwwwwwwk.',
+      '.....kkkkkkkkkk.',
+    ],
+    board_explosives: [
+      '...........k.k..',
+      '..........kyk...',
+      '.........kk.ky..',
+      '........kk..k.k.',
+      '.......kk.......',
+      '.....kkkkk......',
+      '....kdddddk.....',
+      '..kkdddddddkk...',
+      '.kddwwdddddddk..',
+      '.kdwwdddddddddk.',
+      'kddwdddddddddddk',
+      'kdddddkkkddddddk',
+      'kdddddkmkddddddk',
+      '.kddddkmkdddddk.',
+      '..kkdddddddddk..',
+      '....kkkkkkkkk...',
+    ],
+    board_crystals: [
+      '.......kk.......',
+      '.......km.......',
+      '......kmmk......',
+      '......kmmk...k..',
+      'kkkkkkmllmkkkkwk',
+      'kmmmmmllllmmmk.k',
+      '.kmmmllwwllmk...',
+      '..kmmmllllmmk...',
+      '...kmmmllmmk....',
+      '...kmmmmmmmk....',
+      '..kmmmmkkmmmk...',
+      '..kmmmk..kmmk...',
+      '.kmmkk....kkmk..',
+      '.kmk........kk..',
+      '.kk.....k.......',
+      '.......kwk......',
+    ],
+    board_optics: [
+      '................',
+      '.......kk.......',
+      '......kllk......',
+      '......kllk....rr',
+      '.....kllmmk..rr.',
+      '.....klmmmk.oo..',
+      'wwww.klmmmkyy...',
+      '....kllmmmmkgg..',
+      '....klmmmmmk.bb.',
+      '...kllmmmmmmk.pp',
+      '...klmmmmmmmk...',
+      '..kllmmmmmmmmk..',
+      '..klmmmmmmmmmk..',
+      '.kkkkkkkkkkkkkk.',
+      '................',
+      '................',
+    ],
+    board_gamblers: [
+      '................',
+      '.kkkkkkkk.......',
+      '.kwwwwwwk.......',
+      '.kwkwwwwk.......',
+      '.kwwwwwwkkkkkkk.',
+      '.kwwwkwwkmmmmmk.',
+      '.kwwwwwwkmwmmmk.',
+      '.kwwwwwkkmmmmmk.',
+      '.kwwwwwkkmmwmmk.',
+      '.kkkkkkkkmmmmmk.',
+      '........kmmmwmk.',
+      '........kmmmmmk.',
+      '........kkkkkkk.',
+      '................',
+      '................',
+      '................',
+    ],
+    board_rent_due: [
+      '.......kk.......',
+      '......kmmk......',
+      '.....kmmmmk.....',
+      '....kmmmmmmk....',
+      '...kmmmmmmmmk...',
+      '..kmmmmmmmmmmk..',
+      '.kkkkkkkkkkkkkk.',
+      '..kllllkyklllk..',
+      '..klllkyyyklk...',
+      '..klllkykkklk...',
+      '..kllllkyyklk...',
+      '..klllkkkykllk..',
+      '..klllkyyykllk..',
+      '..kllllkykllk...',
+      '..kkkkkkkkkkkk..',
+      '................',
+    ],
+    board_area51_raid: [
+      '................',
+      '......kkkk......',
+      '.....kccllk.....',
+      '....kcwcclk.....',
+      '..kkkkkkkkkkkk..',
+      '.kmmmmmmmmmmmmk.',
+      'kmmkmmkmmkmmkmmk',
+      '.kmmmmmmmmmmmmk.',
+      '..kkkkkkkkkkkk..',
+      '....kyk..kyk....',
+      '...kyyk..kyyk...',
+      '..kyyyk..kyyyk..',
+      '.kyyyyk..kyyyyk.',
+      '................',
+      '..kkk..kkk..kkk.',
+      '..kgk..kgk..kgk.',
+    ],
+    board_rare_find: [
+      '............k...',
+      '...........kwk..',
+      '..kkkkkkk...k...',
+      '.kllllmmmk......',
+      'kllwllmmmmk.....',
+      'kkkkkkkkkkk.....',
+      '.kmmllmmmmk.....',
+      '..kmmlmmmk......',
+      '...kmmmmk.......',
+      '....kmmk.....k..',
+      '.....kk.....kwk.',
+      '.............k..',
+      '..k.............',
+      '.kwk............',
+      '..k.............',
+      '................',
+    ],
+    board_pacifist: [
+      '.....kkkkkk.....',
+      '...kkmmmmmmkk...',
+      '..kmmkkkkkkmmk..',
+      '.kmkk..km..kkmk.',
+      '.kmk...km...kmk.',
+      'kmk....km....kmk',
+      'kmk....km....kmk',
+      'kmk...kmmk...kmk',
+      'kmk..kmkkmk..kmk',
+      'kmk.kmk..kmk.kmk',
+      'kmkkmk....kmkkmk',
+      '.kmmk..km..kmmk.',
+      '.kmkk..km..kkmk.',
+      '..kmmkkkkkkmmk..',
+      '...kkmmmmmmkk...',
+      '.....kkkkkk.....',
+    ],
+    board_gravity_flip: [
+      '.......kk.......',
+      '......kmmk......',
+      '.....kmmmmk.....',
+      '....kmmmmmmk....',
+      '...kmmmmmmmmk...',
+      '..kkkkmmmmkkkk..',
+      '.....kmmmmk.....',
+      '.....kmmmmk.....',
+      '.....kkkkkk.....',
+      '................',
+      '....kkkkkkkk....',
+      '...kwlllllmmk...',
+      '...klllllmmmk...',
+      '....kllmmmmk....',
+      '.....kkmmkk.....',
+      '.......kk.......',
+    ],
+    board_bankrupt: [
+      '................',
+      '....kkkkkkkk....',
+      '...kyyyyyyyyk...',
+      '..kyywwyyyyyyk..',
+      '.kyywkyyyykkyyk.',
+      '.kyyykkyykkyyyk.',
+      '.kyyyykkkkyyyyk.',
+      '.kyyyyykkyyyyyk.',
+      '.kyyyykkkkyyyyk.',
+      '.kyyykkyykkyyyk.',
+      '.kyykkyyyykkyyk.',
+      '..kyyyyyyyyyyk..',
+      '...kyyyyyyyyk...',
+      '....kkkkkkkk....',
+      '................',
       '................',
     ],
   };
@@ -9932,8 +10646,13 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   const ABILITY = { break: P('ab_break', 0), scramble: P('ab_scramble', 6), freeSwap: P('ab_swap', 1) };
   // v4.0 board types (GF.Boards.DEFS[id].icon = 'board_' + id)
   const BOARD = {};
-  [['default', 5], ['red', 0], ['blue', 1], ['yellow', 3], ['orange', 6], ['purple', 4], ['black', 'grey'], ['green', 2], ['hell', 'darkred'], ['haunted', 'violet'], ['strange', 'teal'], ['survival', 'brown'], ['mono', 'grey'], ['random', 'pink'], ['magic', 'magenta']].forEach(([id, t]) => { BOARD[id] = P('board_' + id, t); });
-  const TABLES = { board: BOARD, ability: ABILITY, perk: PERK, tile: TILE, card: CARD, pack: PACK, voucher: VOUCHER, upgrade: UPGRADE, gem: GEM };
+  [['default', 5], ['red', 0], ['blue', 1], ['yellow', 3], ['orange', 6], ['purple', 4], ['coal_mine', 'grey'], ['green', 2], ['pink', 'pink'], ['haunted', 'violet'], ['strange', 'teal'], ['survival', 'brown'], ['mono', 'grey'], ['random', 'pink'], ['magic', 'magenta'],
+    // v4.8 challenges
+    ['one_move', 0], ['blazing', 6], ['unperkify', 'grey'], ['cardsharp', 'gold'], ['explosives', 6], ['crystals', 3], ['optics', 'cyan'],
+    ['gamblers', 0], ['rent_due', 'brown'], ['area51_raid', 'green'], ['rare_find', 'green'], ['pacifist', 'teal'], ['gravity_flip', 4], ['bankrupt', 'grey']].forEach(([id, t]) => { BOARD[id] = P('board_' + id, t); });
+  // v4.8 perk attachments (GF.Perks.ATT ids): white glyphs for the small coloured badge circles
+  const ATT = { permanent: P('att_lock', 'white'), approved: P('att_thumb', 'white'), pristine: P('star', 'white'), debt: P('att_dollar', 'white'), invisible: P('att_eye', 'white') };
+  const TABLES = { att: ATT, board: BOARD, ability: ABILITY, perk: PERK, tile: TILE, card: CARD, pack: PACK, voucher: VOUCHER, upgrade: UPGRADE, gem: GEM };
   const COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'white', 'orange'];
   COLORS.forEach((c, k) => { PERK[c + '_lover'] = P('heart', k); PERK[c + '_grinder'] = P('wheat', k); PERK[c + '_crusher'] = P('press', k); PERK[c + '_breaker'] = P('shatter', k); }); // grinder ids = Farmers
   COLORS.forEach((c, k) => { CARD['code_' + c] = P('code', k); }); // Code cards: one screen glyph tinted by colour
@@ -10729,6 +11448,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   function drawGem(sp, time) {
     // a gem refilled under a locked gem (clipTop: its segment's first row) shows only below the lock's lower edge
     if (sp.clipTop != null) { g.save(); g.beginPath(); g.rect(-cell, sp.clipTop * cell, (N + 2) * cell, (N + 1) * cell); g.clip(); drawGem0(sp, time); g.restore(); return; }
+    // v4.8 Gravity Flip: a gem refilled above a locked gem (clipBot: its segment's entry edge) shows only above it
+    if (sp.clipBot != null) { g.save(); g.beginPath(); g.rect(-cell, (sp.clipBot - 2 * N - 2) * cell, (N + 2) * cell, (2 * N + 2) * cell); g.clip(); drawGem0(sp, time); g.restore(); return; }
     drawGem0(sp, time);
   }
   function drawGem0(sp, time) {
@@ -11123,7 +11844,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       const subs = (bt.subs && bt.subs.length ? bt.subs : B.ORDER.filter((x) => x !== 'default' && x !== 'magic')).filter((x) => B.DEFS[x]);
       pal = tintPair(B.DEFS.magic.color);
       subPal = subs.map((x) => tintPair(B.DEFS[x].color, 1.15));
-    } else if (id !== 'random') pal = id === 'default' ? [CHK_A, CHK_B] : tintPair(B.DEFS[id].color, id === 'black' || id === 'mono' ? 0.8 : 1);
+    } else if (id !== 'random') pal = id === 'default' ? [CHK_A, CHK_B] : tintPair(B.DEFS[id].color, id === 'coal_mine' || id === 'mono' ? 0.8 : 1);
     for (let r = 0; r < N; r++) {
       const row = [];
       for (let c = 0; c < N; c++) {
@@ -11468,14 +12189,17 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       case 'create': case 'tile': case 'coal': case 'transform': add(s.r, s.c); break;
       // per touched column: from the highest row a gem leaves or a spawn enters (its segment top: row 0, or the
       // row under a locked gem) down to the deepest destination; a locked gem above a refilled segment is untouched
+      // v4.8 Gravity Flip (moves going up, spawns with up: true): mirrored, from the shallowest destination down to
+      // the lowest row a gem leaves or a spawn enters (the bottom row, or the row above a locked gem: bot - 1)
       case 'fall': {
         const maxRow = {}, minRow = {};
-        const see = (r, c, top) => {
-          if (maxRow[c] == null || r > maxRow[c]) maxRow[c] = r;
-          if (minRow[c] == null || top < minRow[c]) minRow[c] = top;
+        const see = (r1, r2, c) => {
+          const lo = Math.min(r1, r2), hi = Math.max(r1, r2);
+          if (maxRow[c] == null || hi > maxRow[c]) maxRow[c] = hi;
+          if (minRow[c] == null || lo < minRow[c]) minRow[c] = lo;
         };
-        for (const m of s.moves) see(m.to[0], m.to[1], m.from[0]);
-        for (const n of s.spawns) see(n.r, n.c, n.top || 0);
+        for (const m of s.moves) see(m.to[0], m.from[0], m.to[1]);
+        for (const n of s.spawns) see(n.r, n.up ? (n.bot != null ? n.bot - 1 : N - 1) : n.top || 0, n.c);
         for (const c in maxRow) for (let r = minRow[c]; r <= maxRow[c]; r++) add(r, +c);
         break;
       }
@@ -11775,7 +12499,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         for (const [m, sp] of moved) {
           if (!sp) continue;
           D[m.to[0]][m.to[1]] = sp;
-          ps.push(tween(sp, { y: m.to[0] }, 80 + 45 * (m.to[0] - m.from[0]), 'in'));
+          ps.push(tween(sp, { y: m.to[0] }, 80 + 45 * Math.abs(m.to[0] - m.from[0]), 'in'));
         }
         // optional (v4.3 Survival round start): n.delay (ms) holds a spawn above its segment first (column stagger),
         // s.bounce: each spawn hops up a little after landing
@@ -11783,13 +12507,16 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
           if (n.delay) await wait(n.delay);
           await tween(sp, { y: n.r }, 80 + 45 * n.drop, 'in');
           if (sp.clipTop != null) delete sp.clipTop;
-          if (s.bounce) { await tween(sp, { y: n.r - s.bounce }, 70); await tween(sp, { y: n.r }, 70, 'in'); }
+          if (sp.clipBot != null) delete sp.clipBot;
+          if (s.bounce) { await tween(sp, { y: n.r + (n.up ? s.bounce : -s.bounce) }, 70); await tween(sp, { y: n.r }, 70, 'in'); }
         };
         for (const n of s.spawns) {
-          const sp = sprite(n.gem, n.c, n.r - n.drop);
+          const sp = sprite(n.gem, n.c, n.up ? n.r + n.drop : n.r - n.drop);
           D[n.r][n.c] = sp;
           // under a locked gem: drawn only below its lower edge, so the new gem slides out from under the lock
+          // (Gravity Flip: above a locked gem, drawn only above its upper edge)
           if (n.top) sp.clipTop = n.top;
+          if (n.up && n.bot != null) sp.clipBot = n.bot;
           ps.push(drop(sp, n));
         }
         await Promise.all(ps);
@@ -12315,7 +13042,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   function boardIcon(id, cls) { return '<img class="' + (cls || 'icon') + '" alt="" src="' + GF.Icons.url('board', id) + '">'; }
   const diffBadge = (d, cls) => '<span class="diff-badge d' + d + (cls ? ' ' + cls : '') + '">' + GF.Difficulty.LEVELS[d].name + '</span>';
   // board colours too dark to read as text on the panels get a lighter text shade
-  const NAME_COL = { black: '#a3a3b5', hell: '#ff4a64', survival: '#d6904e' };
+  const NAME_COL = { coal_mine: '#a3a3b5', survival: '#d6904e', unperkify: '#a3a3b5' };
   const nameCol = (id) => NAME_COL[id] || (GF.Boards.DEFS[id] || GF.Boards.DEFS.default).color;
   function subsHtml(ids) { return ids.map((id) => '<span style="color:' + nameCol(id) + '">' + GF.Boards.DEFS[id].name + '</span>').join(' + '); }
   // v4.0 rescue-before-loss: a stuck board (no legal move) with a rescue left shows a bar over the board and
@@ -12365,25 +13092,24 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     else n = N * N - GF.Board.emptyCount(run.board);
     return { board: n, pool: poolOf(run) };
   }
+  // v4.8: GEMS LEFT: X (board + pool); the bar is full while X > C.SURVIVAL_BAR_FULL (64), then drains as X / 64
   function renderGemBar(run) {
     const inShop = !S.frozen && (run.phase === 'shop' || run.phase === 'victory');
-    const g = gemCounts(run), total = g.board + g.pool;
-    S.gemMax = Math.max(S.gemMax || 0, total, N * N);
+    const g = gemCounts(run), total = g.board + g.pool, fill = GF.Run.gemBarFill(total);
     const bar = $('moves-bar'), cells = $('moves-cells');
-    const sig = g.board + ':' + g.pool + ':' + S.gemMax + ':' + inShop;
+    const sig = total + ':' + inShop;
     if (bar.dataset.gems === sig && bar.classList.contains('gems')) return;
     bar.dataset.gems = sig;
     bar.classList.add('gems'); bar.classList.remove('warn', 'danger');
-    bar.classList.toggle('low', !inShop && g.pool === 0 && g.board < N * N / 2);
+    bar.classList.toggle('low', !inShop && fill < 0.5);
     if (cells.children.length !== GEM_CELLS || !cells.firstChild.classList.contains('gcell')) {
       cells.innerHTML = '';
       for (let i = 0; i < GEM_CELLS; i++) { const d = document.createElement('div'); d.className = 'mcell gcell'; cells.appendChild(d); }
     }
     cells.classList.remove('tight');
-    const nb = g.board > 0 ? Math.max(1, Math.round(g.board / S.gemMax * GEM_CELLS)) : 0;
-    const nt = total > 0 ? Math.max(nb + (g.pool > 0 ? 1 : 0), Math.round(total / S.gemMax * GEM_CELLS)) : 0;
-    Array.from(cells.children).forEach((d, i) => { d.classList.toggle('on', i < nb); d.classList.toggle('pool', i >= nb && i < nt); });
-    $('moves-text').innerHTML = 'GEMS: <b class="gb">' + g.board + '</b> + <b class="gp">' + g.pool + '</b>' + (inShop ? ' <i>· NEXT ROUND +' + C.SURVIVAL_ROUND_POOL + '</i>' : '');
+    const on = total > 0 ? Math.max(1, Math.round(fill * GEM_CELLS)) : 0;
+    Array.from(cells.children).forEach((d, i) => { d.classList.toggle('on', i < on); d.classList.remove('pool'); });
+    $('moves-text').innerHTML = 'GEMS LEFT: <b class="gb">' + total + '</b>' + (inShop ? ' <i>· NEXT ROUND +' + C.SURVIVAL_ROUND_POOL + '</i>' : '');
     S.lastLeft = null;
   }
   function renderMovesBar() {
@@ -12600,6 +13326,19 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   // v3.8 value box (GF.Perks.display, JokerDisplay-style): one compact box hanging under the card, coloured by kind
   function perkDisplay(run, i) { try { return GF.Perks.display(run, i); } catch (e) { return null; } }
   function perkBox(run, inst, i) { return boxHTML(inst, perkDisplay(run, i)); }
+  // v4.8 attachments (GF.Perks.ATT): small coloured circles with a white pixel icon at the card's top right (a second
+  // one beside the first), and one tooltip line each
+  function attBadge(id, cls) {
+    const a = GF.Perks.ATT[id];
+    return a ? '<i class="att att-' + id + (cls ? ' ' + cls : '') + '" style="background:' + a.color + '"><img alt="" src="' + GF.Icons.url('att', id) + '"></i>' : '';
+  }
+  function attBadges(obj) {
+    const att = GF.Perks.atts(obj);
+    return att.length ? '<span class="att-badges">' + att.map((id) => attBadge(id)).join('') + '</span>' : '';
+  }
+  function attLines(obj) {
+    return GF.Perks.atts(obj).map((id) => { const a = GF.Perks.ATT[id]; return '<p class="att-line">' + attBadge(id, 'inline') + '<b style="color:' + (id === 'invisible' ? 'var(--ink)' : a.color) + '">' + a.name.toUpperCase() + '</b> ' + a.desc + '</p>'; }).join('');
+  }
   function boxHTML(inst, v) {
     if (!v) return '';
     let text = v.text, active = v.active !== false, ready = v.ready;
@@ -12652,16 +13391,16 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     run.perks.forEach((inst, i) => {
       const el = document.createElement('div');
       const d = GF.Perks.byId[inst.id];
-      el.className = 'perk ' + d.rarity + (run.pendingChoice && run.pendingChoice.uid === inst.uid ? ' choose' : '');
+      el.className = 'perk ' + d.rarity + (run.pendingChoice && run.pendingChoice.uid === inst.uid ? ' choose' : '') + (GF.Perks.isSpent(inst) ? ' spent' : ''); // v4.8 SPENT: greyed
       el.dataset.i = String(i);
       el.dataset.uid = String(inst.uid);
-      el.innerHTML = '<div class="inner">' + iconImg('perk', inst.id) + '</div>' + perkBox(run, inst, i);
+      el.innerHTML = '<div class="inner">' + iconImg('perk', inst.id) + '</div>' + perkBox(run, inst, i) + attBadges(inst);
       floatPhase(el, 3, i);
       bindHover(el, d.name, d.rarity);
       bindPerkCard(el);
       row.appendChild(el);
     });
-    $('perk-count').textContent = run.perks.length + '/' + run.perkSlots;
+    $('perk-count').textContent = GF.Perks.slotsUsed(run) + '/' + run.perkSlots; // v4.8: Invisible perks take no slot
     fan(row);
   }
   function cardEl(cls, html) { const el = document.createElement('div'); el.className = cls; el.innerHTML = html; return el; }
@@ -12709,6 +13448,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       if (!it) { I.appendChild(soldSlot()); return; }
       const info = itemInfo(it), price = GF.Shop.itemPrice(run, it), ok = can(price);
       const el = slotEl(info.cls, info, price, !ok, i);
+      if (it.kind === 'perk' && GF.Perks.atts(it).length) el.querySelector('.frame').insertAdjacentHTML('beforeend', attBadges(it)); // v4.8
       // Claw Machine prize (it.free): a green FREE tag on the frame, a claw sparkle, FREE price
       if (it.free) {
         el.classList.add('free');
@@ -12721,7 +13461,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         const btns = [];
         if (ok) btns.push(full ? ['CARDS FULL', null, true] : [it.free ? 'TAKE FREE' : 'BUY $' + price, () => act(GF.Shop.buyItem(run, i))]);
         if (ok && tray && !animating() && GF.Shop.canBuyUse(run, i).ok) btns.push([it.free ? 'TAKE & USE' : 'BUY & USE $' + price, () => buyAndUse(i, it)]);
-        showTip(el.getBoundingClientRect(), info.icon + '<b>' + info.name + '</b><small>' + KIND_TAG[it.kind] + (it.free ? ' · <span class="free-txt">CLAW PRIZE: FREE</span>' : '') + '</small><p>' + info.desc + '</p>' + (ok ? '' : '<p><i>Not enough money</i></p>'), btns, info.rar);
+        showTip(el.getBoundingClientRect(), info.icon + '<b>' + info.name + '</b><small>' + KIND_TAG[it.kind] + (it.free ? ' · <span class="free-txt">CLAW PRIZE: FREE</span>' : '') + '</small><p>' + info.desc + '</p>' + (it.kind === 'perk' ? attLines(it) : '') + (ok ? '' : '<p><i>Not enough money</i></p>'), btns, info.rar);
         if (it.free) { const b = $('tip').querySelector('button'); if (b) b.classList.add('free-btn'); }
       };
       I.appendChild(el);
@@ -12812,7 +13552,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (r && r.ok) { GF.Audio.ching(); GF.Run.save(S.run); }
     else {
       GF.Audio.bad();
-      toast(r && r.reason === 'slots' ? 'NO FREE PERK SLOT' : r && r.reason === 'money' ? 'NOT ENOUGH MONEY' : r && r.reason === 'debt' ? 'PAY OFF DEBT FIRST' : r && r.reason === 'cards' ? 'CARD SLOTS FULL' : r && r.reason === 'pack' ? 'FINISH YOUR PACK FIRST' : 'CANNOT DO THAT');
+      toast(r && r.reason === 'slots' ? 'NO FREE PERK SLOT' : r && r.reason === 'money' ? 'NOT ENOUGH MONEY' : r && r.reason === 'debt' ? 'PAY OFF DEBT FIRST' : r && r.reason === 'permanent' ? 'PERMANENT: CANNOT SELL' : r && r.reason === 'cards' ? 'CARD SLOTS FULL' : r && r.reason === 'pack' ? 'FINISH YOUR PACK FIRST' : 'CANNOT DO THAT');
     }
     refresh();
   }
@@ -12867,9 +13607,11 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       // Printer (held 2 rounds, a non-Printer perk on its left): selling prints a fresh copy of that perk
       const left = S.run.perks[i - 1];
       const prints = inst.id === 'printer' && st && st.ready && left && left.id !== 'printer';
-      if (S.run.phase === 'shop') btns.push([(prints ? 'SELL & PRINT ' : 'SELL ') + money(GF.Perks.sellValue(inst, S.run.perks)), () => (prints ? sellAndPrint(inst, left) : sellPerkUI(inst))]);
+      // v4.8 Permanent: no selling (a disabled button says why)
+      if (S.run.phase === 'shop' && !GF.Perks.canSell(inst)) btns.push(['PERMANENT', null, true]);
+      else if (S.run.phase === 'shop') btns.push([(prints ? 'SELL & PRINT ' : 'SELL ') + money(GF.Perks.sellValue(inst, S.run.perks)), () => (prints ? sellAndPrint(inst, left) : sellPerkUI(inst))]);
     }
-    showTip(el.getBoundingClientRect(), iconImg('perk', inst.id) + '<b class="' + d.rarity + '">' + d.name + '</b><small>' + d.rarity.toUpperCase() + '</small><p>' + perkDesc(d, inst, st) + '</p>' + statusLine(inst, st), btns, d.rarity);
+    showTip(el.getBoundingClientRect(), iconImg('perk', inst.id) + '<b class="' + d.rarity + '">' + d.name + '</b><small>' + d.rarity.toUpperCase() + '</small><p>' + perkDesc(d, inst, st) + '</p>' + statusLine(inst, st) + attLines(inst), btns, d.rarity);
   }
   // Sell a perk; Gifter's gifts ("GIFT!") fly out of the sold card's spot into their slots, one after the other
   function sellPerkUI(inst) {
@@ -13326,7 +14068,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     const fill = (events.survivalFill || []).filter((sp) => target[sp.r][sp.c]);
     if (!fill.length) return null;
     const pre = target.map((row) => row.slice());
-    const spawns = fill.map((sp) => { pre[sp.r][sp.c] = null; const n = { r: sp.r, c: sp.c, drop: sp.drop, gem: GF.Board.clone(target[sp.r][sp.c]), delay: 140 + sp.c * 45 }; if (sp.top) n.top = sp.top; return n; });
+    const spawns = fill.map((sp) => { pre[sp.r][sp.c] = null; const n = { r: sp.r, c: sp.c, drop: sp.drop, gem: GF.Board.clone(target[sp.r][sp.c]), delay: 140 + sp.c * 45 }; if (sp.top) n.top = sp.top; if (sp.up) n.up = true; if (sp.bot != null) n.bot = sp.bot; return n; });
     GF.Anim.syncCells(pre);
     S.locked = true;
     return GF.Anim.run([{ t: 'fall', moves: [], spawns: spawns, bounce: 0.12 }], hooks).then(() => {
@@ -13957,9 +14699,13 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     info.steps.forEach((st) => hooks.perkFire(st));
     if (info.steps.some((st) => st.strip)) grindBoard(run);
     refresh();
-    const rows = [['Win reward', info.base]];
-    if (!GF.Run.infiniteMoves(run)) rows.push(['Moves left (' + info.leftover + ', $1 per 2)', info.leftoverIncome]); // v4.7 Survival: no move limit
+    // v4.8 Bankrupt: one "no payout" row instead of win reward / moves / gems / interest
+    const rows = info.bankrupt ? [['Bankrupt: no payout', 0]] : [['Win reward', info.base]];
+    if (!info.bankrupt && !GF.Run.infiniteMoves(run)) rows.push(['Moves left (' + info.leftover + ', $1 per 2)', info.leftoverIncome]); // v4.7 Survival: no move limit
+    // v4.8 Survival: gems left pay instead of moves
+    if (!info.bankrupt && GF.Boards.has(run, 'survival')) rows.push(['Gems left ($1 per ' + C.SURVIVAL_GEMS_PER + ', max $' + C.SURVIVAL_GEMS_MAX + ')', info.gemsIncome || 0]);
     if (info.perkIncome || info.perkMoney) rows.push(['Perks', info.perkIncome + info.perkMoney]);
+    if (info.debt) rows.push(['Debt', info.debt]); // v4.8 Debt attachments
     if (info.interest > 0) rows.push(['Interest ($1 per $5, max $' + info.interestCap + ')', info.interest]);
     const html = '<div class="payout">' + rows.map(([l, v]) => '<div class="row"><span>' + l + '</span><i></i><b>' + (v < 0 ? '-$' + (-v) : '$' + v) + '</b></div>').join('') + '</div>';
     await modal('ROUND CLEAR!', html, [['OBTAIN ' + money(info.total), true]]);
@@ -14042,7 +14788,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     $('vic-title').innerHTML = title.split('').map((ch, i) => '<span style="--i:' + i + '" aria-hidden="true">' + ch + '</span>').join('');
     $('vic-rounds-n').textContent = C.ROUNDS;
     const def = GF.Boards.DEFS[run.boardType.id] || GF.Boards.DEFS.default;
-    $('vic-board').innerHTML = boardIcon(def.id) + '<span style="color:' + nameCol(def.id) + '">' + GF.Boards.label(run) + '</span>' + diffBadge(run.difficulty || 1);
+    $('vic-board').innerHTML = boardIcon(def.id) + boardLabelHtml(run) + diffBadge(run.difficulty || 1); // v4.8: challenges tagged
     const target = GF.Run.targetFor(run, C.ROUNDS);
     const tiles = [
       ['FINAL SCORE', run.score, 'gold', 'ROUND ' + C.ROUNDS + ' / ' + fmt(target)],
@@ -14180,7 +14926,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     const why = res && res.noMovesLoss ? 'NO LEGAL MOVES LEFT' : 'OUT OF MOVES';
     $('go-sub').textContent = why + ' ON ROUND ' + run.round + (run.endless ? ' (ENDLESS)' : '');
     const def = GF.Boards.DEFS[(run.boardType && run.boardType.id) || 'default'] || GF.Boards.DEFS.default;
-    $('go-board').innerHTML = boardIcon(def.id) + '<span style="color:' + nameCol(def.id) + '">' + GF.Boards.label(run) + '</span>' + diffBadge(GF.Difficulty.clamp(run.difficulty || 1));
+    $('go-board').innerHTML = boardIcon(def.id) + boardLabelHtml(run) + diffBadge(GF.Difficulty.clamp(run.difficulty || 1)); // v4.8: challenges tagged
     const target = GF.Run.targetFor(run, run.round), pct = Math.max(0, Math.min(1, run.score / Math.max(1, target)));
     $('go-score-v').textContent = fmt(0); $('go-target-v').textContent = fmt(target);
     $('go-pct').textContent = Math.floor(pct * 100) + '%';
@@ -14339,7 +15085,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     ];
     const bt = run.boardType || { id: 'default' }, dl = GF.Difficulty.clamp(run.difficulty || 1), bdef = GF.Boards.DEFS[bt.id] || GF.Boards.DEFS.default;
     const subs = bdef.id === 'magic' ? GF.Boards.DISPLAY.filter((id) => GF.Boards.ids(run).indexOf(id) >= 0) : [];
-    $('about-run').innerHTML = '<div class="ar-top">' + boardIcon(bdef.id) + '<span class="ar-name"><b style="color:' + nameCol(bdef.id) + '">' + bdef.name + '</b>' + (subs.length ? ': ' + subsHtml(subs) : '') + '</span>' + diffBadge(dl) + '</div>'
+    $('about-run').innerHTML = '<div class="ar-top">' + boardIcon(bdef.id) + '<span class="ar-name">' + (GF.Boards.isChallenge(bdef.id) ? '<span class="chal-tag">CHALLENGE</span> ' : '') + '<b style="color:' + nameCol(bdef.id) + '">' + bdef.name + '</b>' + (subs.length ? ': ' + subsHtml(subs) : '') + '</span>' + diffBadge(dl) + '</div>'
       + '<p class="ar-rules">' + (subs.length ? subs : [bdef.id]).map((id) => GF.Boards.DEFS[id].desc.replace(/\.?$/, '.')).join(' ') + '</p>'
       + '<p class="ar-rules">DIFFICULTY ' + GF.Difficulty.LEVELS[dl].name + ': ' + GF.Difficulty.rules(dl).map((x) => x.text + '.').join(' ') + '</p>'
       + '<p class="ar-seed">SEED <b id="about-seed"></b></p>';
@@ -14432,43 +15178,79 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   }
 
   // ---------- v4.0 PLAY -> SELECT BOARD ----------
-  // A snap-scrolling strip of the 15 board cards (click, < > arrows, arrow keys / Home / End, mouse wheel, drag);
-  // the card resting in the middle is the selected one (enlarged, framed). Magic adds a 1-3 sub-board picker;
-  // difficulty I-VI (v4.1) shows its cumulative rules. The last choice is remembered (prefs).
-  const SEL = { board: 'default', subs: [], diff: 1, built: false, drag: null, settle: 0, wheelAt: 0 };
-  const SUB_IDS = () => GF.Boards.DISPLAY.filter((id) => id !== 'default' && id !== 'magic');
+  // v4.8: a snap-scrolling strip of the main boards plus one CHALLENGE card (click, < > arrows, arrow keys / Home /
+  // End, mouse wheel, drag); the card resting in the middle is the selected one (enlarged, framed). Magic shows a 1-3
+  // sub-board picker (colour boards, then the challenges), CHALLENGE a pick-one challenge list: both are a side column
+  // laid over the strip's right end on desktop (so the strip keeps its full width and the selected card stays at the
+  // screen's centre), under the strip on mobile. Difficulty I-VI (v4.1) shows its cumulative rules. The last choices
+  // are remembered (prefs: board, subs, chal, diff6).
+  const CHAL = 'challenge';
+  const SEL = { board: 'default', subs: [], chal: null, diff: 1, built: false, drag: null, settle: 0, wheelAt: 0 };
+  const STRIP_IDS = () => GF.Boards.MAIN.concat([CHAL]);
+  const SUB_MAIN = () => GF.Boards.MAIN.filter((id) => id !== 'default' && id !== 'magic');
+  const SUB_IDS = () => SUB_MAIN().concat(GF.Boards.CHALLENGES);
+  // the board a NEW RUN plays for a strip card (CHALLENGE: the challenge picked in its list)
+  const runId = (id) => (id === CHAL ? SEL.chal : id);
   function loadSel() {
-    const b = prefGet('board'); if (b && GF.Boards.DEFS[b]) SEL.board = b;
-    SEL.subs = String(prefGet('subs') || '').split(',').filter((id) => SUB_IDS().indexOf(id) >= 0).slice(0, 3);
+    const R = GF.Boards.rename;
+    SEL.chal = GF.Boards.CHALLENGES[0];
+    const c = R(prefGet('chal') || ''); if (GF.Boards.isChallenge(c)) SEL.chal = c;
+    // a stored challenge id (saved before v4.8) selects the CHALLENGE card with it picked
+    const b = R(prefGet('board') || '');
+    if (b === CHAL) SEL.board = CHAL;
+    else if (GF.Boards.isChallenge(b)) { SEL.board = CHAL; SEL.chal = b; }
+    else if (GF.Boards.MAIN.indexOf(b) >= 0) SEL.board = b;
+    const subs = String(prefGet('subs') || '').split(',').map(R);
+    SEL.subs = SUB_IDS().filter((id) => subs.indexOf(id) >= 0).slice(0, 3);
     // v4.1: 'diff6' holds a level 1-6; v4.0's 'diff' (1-5) is one level lower in the new numbering
     SEL.diff = +prefGet('diff6') ? GF.Difficulty.clamp(+prefGet('diff6')) : +prefGet('diff') ? GF.Difficulty.clamp(+prefGet('diff') + 1) : 1;
   }
-  function saveSel() { prefSet('board', SEL.board); prefSet('subs', SEL.subs.join(',')); prefSet('diff6', String(SEL.diff)); }
+  function saveSel() { prefSet('board', SEL.board); prefSet('subs', SEL.subs.join(',')); prefSet('chal', SEL.chal || ''); prefSet('diff6', String(SEL.diff)); }
+  // a glossary-style row of a side list: icon, name, short desc (+ a record badge in the challenge list)
+  function bsRow(id, cls, rec) {
+    const d = GF.Boards.DEFS[id], b = document.createElement('button');
+    b.className = 'bs-row ' + cls; b.dataset.id = id; b.style.setProperty('--bc', d.color); b.style.setProperty('--bn', nameCol(id)); b.title = d.name + ': ' + d.desc;
+    b.innerHTML = boardIcon(id, 'bs-row-ico') + '<span class="bs-row-t"><b>' + d.name + '</b><small>' + d.desc + '</small></span>' + (rec ? '<span class="bs-row-rec"></span>' : '');
+    return b;
+  }
   function buildSelect() {
     if (SEL.built) return;
     SEL.built = true;
     const strip = $('bs-strip');
     strip.innerHTML = '<div class="bs-pad"></div>';
-    GF.Boards.DISPLAY.forEach((id) => {
-      const d = GF.Boards.DEFS[id], el = document.createElement('div');
-      el.className = 'bs-card' + (id === 'random' ? ' rainbow-b' : ''); el.dataset.id = id;
-      el.setAttribute('role', 'option'); el.style.setProperty('--bc', d.color); el.style.setProperty('--bn', nameCol(id));
+    STRIP_IDS().forEach((id) => {
+      const chal = id === CHAL, d = chal ? null : GF.Boards.DEFS[id], el = document.createElement('div');
+      el.className = 'bs-card' + (id === 'random' ? ' rainbow-b' : '') + (chal ? ' bs-chal-card' : ''); el.dataset.id = id;
+      el.setAttribute('role', 'option');
+      if (!chal) { el.style.setProperty('--bc', d.color); el.style.setProperty('--bn', nameCol(id)); }
       // v4.1: an 8x8 miniature of the board's checker (GF.Render.checker) instead of the icon; no "1/15" index
-      el.innerHTML = '<div class="bs-chk"><canvas width="8" height="8" aria-hidden="true"></canvas></div>'
-        + '<b' + (id === 'random' ? ' class="rainbow"' : '') + '>' + d.name + '</b><p>' + d.desc + '</p>'
+      // v4.8 CHALLENGE: hazard-striped, a CHALLENGE ribbon, the picked challenge's checker, name, desc and record
+      el.innerHTML = (chal ? '<span class="bs-chal-tag">CHALLENGE</span>' : '') + '<div class="bs-chk"><canvas width="8" height="8" aria-hidden="true"></canvas></div>'
+        + '<b' + (id === 'random' ? ' class="rainbow"' : '') + '>' + (chal ? '' : d.name) + '</b><p>' + (chal ? '' : d.desc) + '</p>'
         + '<div class="bs-rec"><div>BEST RUN: <i class="bs-rec-run">—</i></div><div>BEST MOVE: <i class="bs-rec-move">—</i></div></div>';
       el.addEventListener('click', () => { if (SEL.dragged) return; GF.Audio.unlock(); if (SEL.board !== id) GF.Audio.tick(2); selectBoard(id, true); });
       strip.appendChild(el);
     });
     strip.insertAdjacentHTML('beforeend', '<div class="bs-pad"></div>');
+    // Magic picker: the colour boards, then a CHALLENGES subheading and every challenge
     const list = $('bs-sub-list');
-    SUB_IDS().forEach((id) => {
-      const d = GF.Boards.DEFS[id], b = document.createElement('button');
-      b.className = 'bs-sub'; b.dataset.id = id; b.style.setProperty('--bc', d.color); b.title = d.desc;
-      b.innerHTML = boardIcon(id, 'bs-sub-ico') + '<span>' + d.name + '</span>';
-      b.onclick = () => toggleSub(id);
-      list.appendChild(b);
+    list.insertAdjacentHTML('beforeend', '<div class="bs-list-head">BOARDS</div>');
+    SUB_MAIN().forEach((id) => { const b = bsRow(id, 'bs-sub'); b.onclick = () => toggleSub(id); list.appendChild(b); });
+    list.insertAdjacentHTML('beforeend', '<div class="bs-list-head">CHALLENGES</div>');
+    GF.Boards.CHALLENGES.forEach((id) => { const b = bsRow(id, 'bs-sub'); b.onclick = () => toggleSub(id); list.appendChild(b); });
+    // CHALLENGE list: pick exactly one (click, or up / down while the list or the strip has focus)
+    const cl = $('bs-chal-list');
+    GF.Boards.CHALLENGES.forEach((id) => {
+      const b = bsRow(id, 'bs-ch', true);
+      b.setAttribute('role', 'option'); b.tabIndex = -1;
+      b.onclick = () => { GF.Audio.unlock(); pickChallenge(id, false); };
+      cl.appendChild(b);
     });
+    cl.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); stepChallenge(e.key === 'ArrowDown' ? 1 : -1); }
+      else if (e.key === 'Enter') { e.preventDefault(); startSelected(); }
+    });
+    $('bs-chal-count').textContent = GF.Boards.CHALLENGES.length;
     const row = $('bs-diff-row');
     for (let lv = 1; lv <= GF.Difficulty.MAX; lv++) {
       const b = document.createElement('button');
@@ -14515,9 +15297,10 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       selectBoard(centreCard(), true);
     });
     strip.addEventListener('keydown', (e) => {
-      const i = GF.Boards.DISPLAY.indexOf(SEL.board), n = GF.Boards.DISPLAY.length;
+      const o = STRIP_IDS(), i = o.indexOf(SEL.board), n = o.length;
       const to = { ArrowLeft: i - 1, ArrowRight: i + 1, Home: 0, End: n - 1 }[e.key];
-      if (to != null) { e.preventDefault(); if (to >= 0 && to < n && to !== i) { GF.Audio.tick(2); selectBoard(GF.Boards.DISPLAY[to], true); } }
+      if (to != null) { e.preventDefault(); if (to >= 0 && to < n && to !== i) { GF.Audio.tick(2); selectBoard(o[to], true); } }
+      else if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && SEL.board === CHAL) { e.preventDefault(); stepChallenge(e.key === 'ArrowDown' ? 1 : -1); }
       else if (e.key === 'Enter') { e.preventDefault(); startSelected(); }
     });
     // after any scroll settles, the card in the middle becomes the selection
@@ -14528,19 +15311,26 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     $('btn-back').onclick = () => { GF.Audio.tick(0); toTitle(); };
     $('btn-new').onclick = () => { GF.Audio.unlock(); startSelected(); };
   }
-  // v4.2 per-board records under each card (GF.Records; "—" when the board has none yet)
+  // v4.2 per-board records under each card (GF.Records; "—" when the board has none yet); v4.8: the CHALLENGE card
+  // shows the picked challenge's, the challenge list a small badge per challenge
   function renderRecords() {
     const all = GF.Records.all();
-    GF.Boards.DISPLAY.forEach((id) => {
+    STRIP_IDS().forEach((id) => {
       const c = bsCard(id);
       if (!c) return;
       // v4.5: "BEST RUN: [VI] ROUND 32" (difficulty badge; old records count as I), "BEST MOVE: 32.0M"
-      const d = GF.Records.describe(all[id]), ok = !!d;
+      const d = GF.Records.describe(all[runId(id)]), ok = !!d;
       c.querySelector('.bs-rec-run').innerHTML = ok ? diffBadge(d.diff, 'rec') + '<span class="rec-r"></span>' : '—';
       if (ok) c.querySelector('.bs-rec-run .rec-r').textContent = d.run;
       c.querySelector('.bs-rec').classList.toggle('won', ok && d.won);
       c.querySelector('.bs-rec-move').textContent = ok ? fmt(d.move) : '—';
       c.querySelector('.bs-rec').classList.toggle('none', !ok);
+    });
+    $('bs-chal-list').querySelectorAll('.bs-ch').forEach((b) => {
+      const d = GF.Records.describe(all[b.dataset.id]), r = b.querySelector('.bs-row-rec');
+      r.innerHTML = d ? diffBadge(d.diff, 'rec') + '<i>' + (d.won ? 'WON' : 'R' + d.run.replace(/\D+/g, '')) + '</i>' : '';
+      r.classList.toggle('won', !!(d && d.won));
+      b.title = GF.Boards.DEFS[b.dataset.id].name + ': ' + GF.Boards.DEFS[b.dataset.id].desc + (d ? '\nBEST RUN: ' + GF.Difficulty.LEVELS[d.diff].name + ' ' + d.run : '');
     });
   }
   // records the live run on its board (a new round reached, the run ended or left; GF.Records keeps the best)
@@ -14552,9 +15342,10 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       GF.Records.update(S.run);
     } catch (e) { /* records are best-effort */ }
   }
-  function bsCard(id) { return $('bs-strip').querySelector('.bs-card[data-id="' + id + '"]'); }
+  // the strip card of a board id (a challenge's is the CHALLENGE card)
+  function bsCard(id) { return $('bs-strip').querySelector('.bs-card[data-id="' + (GF.Boards.isChallenge(id) ? CHAL : id) + '"]'); }
   // the board type a card stands for (Magic: with the sub-boards picked so far, as the run will have them)
-  const cardType = (id) => ({ id: id, subs: id === 'magic' ? SEL.subs.slice() : [] });
+  const cardType = (id) => ({ id: runId(id), subs: id === 'magic' ? SEL.subs.slice() : [] });
   // (Re)draws a card's checker at its displayed size in device pixels (sizes change with the mobile layout)
   function drawCardChecker(id) {
     const c = bsCard(id), cv = c && c.querySelector('.bs-chk canvas');
@@ -14563,7 +15354,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (cv.width !== px) { cv.width = px; cv.height = px; }
     GF.Render.drawChecker(cv.getContext('2d'), px, GF.Render.checker(cardType(id)), true);
   }
-  function drawCardCheckers() { GF.Boards.DISPLAY.forEach(drawCardChecker); }
+  function drawCardCheckers() { STRIP_IDS().forEach(drawCardChecker); }
   function centreCard() {
     const strip = $('bs-strip'), mid = strip.getBoundingClientRect().left + strip.clientWidth / 2;
     let best = SEL.board, bd = Infinity;
@@ -14577,14 +15368,14 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     strip.scrollTo({ left: left, behavior: smooth ? 'smooth' : 'auto' });
   }
   function stepBoard(n) {
-    const o = GF.Boards.DISPLAY, i = Math.max(0, Math.min(o.length - 1, o.indexOf(SEL.board) + n));
+    const o = STRIP_IDS(), i = Math.max(0, Math.min(o.length - 1, o.indexOf(SEL.board) + n));
     if (o[i] !== SEL.board) GF.Audio.tick(2);
     selectBoard(o[i], true);
   }
   function selectBoard(id, scroll) {
     SEL.board = id;
     $('bs-strip').querySelectorAll('.bs-card').forEach((c) => { const on = c.dataset.id === id; c.classList.toggle('on', on); c.setAttribute('aria-selected', on ? 'true' : 'false'); });
-    const o = GF.Boards.DISPLAY, i = o.indexOf(id);
+    const o = STRIP_IDS(), i = o.indexOf(id);
     $('bs-prev').disabled = i <= 0; $('bs-next').disabled = i >= o.length - 1;
     renderSubs();
     saveSel();
@@ -14600,17 +15391,45 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     SEL.subs = SUB_IDS().filter((x) => SEL.subs.indexOf(x) >= 0); // board order
     renderSubs(); saveSel(); drawCardChecker('magic');
   }
-  // v4.7: the picker is a column inside the strip's row, just before the > arrow (desktop); on mobile it sits under
-  // the strip (full width, wrapping)
+  // v4.8 CHALLENGE: picks one challenge (the card's checker, name, desc and record follow)
+  function pickChallenge(id, keyboard) {
+    if (!GF.Boards.isChallenge(id)) return;
+    if (id !== SEL.chal) GF.Audio.tick(3);
+    SEL.chal = id;
+    renderChallenge(true);
+    saveSel();
+    if (keyboard) { const b = $('bs-chal-list').querySelector('.bs-ch[data-id="' + id + '"]'); if (b) b.scrollIntoView({ block: 'nearest' }); }
+  }
+  function stepChallenge(n) {
+    const o = GF.Boards.CHALLENGES, i = Math.max(0, Math.min(o.length - 1, o.indexOf(SEL.chal) + n));
+    pickChallenge(o[i], true);
+  }
+  function renderChallenge(redraw) {
+    const id = SEL.chal, d = GF.Boards.DEFS[id], c = bsCard(CHAL);
+    if (c && d) {
+      c.style.setProperty('--bc', d.color); c.style.setProperty('--bn', nameCol(id));
+      c.querySelector('b').textContent = d.name; c.querySelector('p').textContent = d.desc;
+      c.setAttribute('aria-label', 'Challenge: ' + d.name);
+    }
+    $('bs-chal-list').querySelectorAll('.bs-ch').forEach((b) => { const on = b.dataset.id === id; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+    if (redraw) { renderRecords(); drawCardChecker(CHAL); }
+  }
+  // v4.7: the side column sits inside the strip's row, laid over its right end before the > arrow (desktop: the strip
+  // keeps the full width, so its centre card stays centred); on mobile it sits under the strip (full width)
   function placeSubs() {
-    const subs = $('bs-subs'), wrap = document.querySelector('.bs-wrap'), mobile = document.body.classList.contains('mobile');
-    if (mobile) { if (subs.parentNode !== wrap.parentNode || subs.previousElementSibling !== wrap) wrap.after(subs); }
-    else if (subs.parentNode !== wrap) wrap.insertBefore(subs, $('bs-next'));
-    wrap.classList.toggle('magic', !mobile && SEL.board === 'magic');
+    const wrap = document.querySelector('.bs-wrap'), mobile = document.body.classList.contains('mobile');
+    ['bs-chals', 'bs-subs'].forEach((pid) => {
+      const p = $(pid);
+      if (mobile) { if (p.parentNode !== wrap.parentNode || p.previousElementSibling !== wrap) wrap.after(p); }
+      else if (p.parentNode !== wrap) wrap.insertBefore(p, $('bs-next'));
+    });
+    wrap.classList.toggle('side', !mobile && (SEL.board === 'magic' || SEL.board === CHAL));
   }
   function renderSubs() {
-    const magic = SEL.board === 'magic';
+    const magic = SEL.board === 'magic', chal = SEL.board === CHAL;
+    const wasHidden = $('bs-chals').classList.contains('hidden');
     $('bs-subs').classList.toggle('hidden', !magic);
+    $('bs-chals').classList.toggle('hidden', !chal);
     placeSubs();
     $('bs-sub-list').querySelectorAll('.bs-sub').forEach((b) => {
       const on = SEL.subs.indexOf(b.dataset.id) >= 0;
@@ -14619,6 +15438,12 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     });
     $('bs-sub-count').textContent = SEL.subs.length + '/3';
     $('bs-sub-count').classList.toggle('none', !SEL.subs.length);
+    renderChallenge(false);
+    // the picked challenge scrolls into view when the list opens (its own scroll box only)
+    if (chal && wasHidden) {
+      const l = $('bs-chal-list'), b = l.querySelector('.bs-ch.on');
+      if (b) l.scrollTop = Math.max(0, b.offsetTop - l.offsetTop - (l.clientHeight - b.offsetHeight) / 2);
+    }
     const need = magic && !SEL.subs.length;
     $('btn-new').disabled = need;
     $('btn-new').title = need ? 'Pick at least 1 board for Magic' : '';
@@ -14631,13 +15456,22 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   function renderDiffDesc(lv) {
     $('bs-diff-desc').innerHTML = GF.Difficulty.rules(lv).map((x) => '<div class="bs-rule' + (x.lv === lv ? ' new' : '') + '">' + diffBadge(x.lv) + '<span>' + x.text + '</span></div>').join('');
   }
+  // v4.8: a run's board as HTML: a CHALLENGE tag before a challenge's name, Magic's subs each in their colour
+  function boardLabelHtml(run) {
+    const bt = (run && run.boardType) || { id: 'default' }, def = GF.Boards.DEFS[bt.id] || GF.Boards.DEFS.default;
+    if (def.id === 'magic') {
+      const subs = GF.Boards.DISPLAY.filter((id) => GF.Boards.ids(run).indexOf(id) >= 0);
+      return '<span class="bl-name"><span style="color:' + nameCol('magic') + '">' + def.name + '</span>' + (subs.length ? ': ' + subsHtml(subs) : '') + '</span>';
+    }
+    return '<span class="bl-name">' + (GF.Boards.isChallenge(def.id) ? '<span class="chal-tag">CHALLENGE</span> ' : '') + '<span style="color:' + nameCol(def.id) + '">' + def.name + '</span></span>';
+  }
   function updateContinue() {
     let r = null;
     try { r = GF.Run.hasSave() ? GF.Run.load() : null; } catch (e) { r = null; }
     $('btn-continue').classList.toggle('hidden', !r);
     if (!r) return;
-    const d = GF.Difficulty.clamp(r.difficulty || 1), def = GF.Boards.DEFS[(r.boardType && r.boardType.id) || 'default'] || GF.Boards.DEFS.default;
-    $('continue-info').innerHTML = '<span style="color:' + nameCol(def.id) + '">' + GF.Boards.label(r) + '</span> ' + diffBadge(d) + ' <span class="ci-round">ROUND ' + r.round + '</span>';
+    const d = GF.Difficulty.clamp(r.difficulty || 1);
+    $('continue-info').innerHTML = boardLabelHtml(r) + ' ' + diffBadge(d) + ' <span class="ci-round">ROUND ' + r.round + '</span>';
   }
   function openSelect() {
     loadSel(); buildSelect();
@@ -14652,7 +15486,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
   }
   function startSelected() {
     if (SEL.board === 'magic' && !SEL.subs.length) { GF.Audio.bad(); toast('PICK 1-3 BOARDS FOR MAGIC'); return; }
-    newRun(false, { board: SEL.board, subs: SEL.board === 'magic' ? SEL.subs.slice() : [], difficulty: SEL.diff }, 'card');
+    newRun(false, { board: runId(SEL.board), subs: SEL.board === 'magic' ? SEL.subs.slice() : [], difficulty: SEL.diff }, 'card');
   }
   // ---------- v4.1 NEW RUN intro ----------
   // 'card' (NEW RUN on SELECT BOARD), about 2.3 s, fixed (not scaled by the speed setting):
@@ -14694,14 +15528,17 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     if (p < F) { const q = p / F; return -dist * (1 - q * q); }
     return -Math.min(0.16, 0.03 * dist + 0.05) * Math.sin(Math.PI * (p - F) / (1 - F));
   }
-  function liftGems() { const D = GF.Anim.display.cells; for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (D[r][c]) D[r][c].oy = -(r + 1.25); }
+  // v4.8 Gravity Flip (board.flip): the gems rise in from below the board instead (mirrored offsets, top row first)
+  const introUp = () => !!(S.run && GF.Board.flipped(S.run.board));
+  const introDist = (r) => (introUp() ? N - r + 0.25 : r + 1.25);
+  function liftGems() { const D = GF.Anim.display.cells, up = introUp(); for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (D[r][c]) D[r][c].oy = (up ? 1 : -1) * introDist(r); }
   function dropGems(it) {
-    const D = GF.Anim.display.cells, items = [];
+    const D = GF.Anim.display.cells, items = [], up = introUp();
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
       const sp = D[r][c];
       if (!sp) continue;
-      const dist = r + 1.25;
-      items.push({ sp: sp, r: r, c: c, dist: dist, delay: (c * 30 + (N - 1 - r) * 20) * islow(), dur: (150 + 80 * Math.sqrt(dist)) * islow() });
+      const dist = introDist(r);
+      items.push({ sp: sp, r: r, c: c, dist: dist, up: up, delay: (c * 30 + (up ? r : N - 1 - r) * 20) * islow(), dur: (150 + 80 * Math.sqrt(dist)) * islow() });
     }
     const end = items.reduce((m, x) => Math.max(m, x.delay + x.dur), 0), t0 = performance.now();
     const step = (now) => {
@@ -14709,8 +15546,8 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       const e = now - t0;
       for (const x of items) {
         const p = Math.max(0, Math.min(1, (e - x.delay) / x.dur));
-        x.sp.oy = fallOffset(p, x.dist);
-        if (p >= 1 && !x.landed) { x.landed = true; if (x.r === N - 1 && x.c % 2 === 0) GF.Audio.tick(x.c / 2); }
+        x.sp.oy = (x.up ? -1 : 1) * fallOffset(p, x.dist);
+        if (p >= 1 && !x.landed) { x.landed = true; if (x.r === (x.up ? 0 : N - 1) && x.c % 2 === 0) GF.Audio.tick(x.c / 2); }
       }
       if (e < end) it.raf = requestAnimationFrame(step);
     };
@@ -14894,14 +15731,18 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
         tag: d.type === 'gem' ? 'GEM' : d.type === 'mod' ? 'MODIFIER' : 'STATE', desc: d.desc, extra: vals.join('<br>') };
     });
   }
-  // v4.0 BOARDS tab: the 15 boards, then the 6 difficulty levels (cumulative; v4.1)
+  // v4.0 BOARDS tab: v4.8 the main boards, the challenges, then the 6 difficulty levels (cumulative; v4.1)
   const DIFF_COL = ['', '#e8e8e8', '#3ddc84', '#7fe7ff', '#ffd23f', '#ff8c42', '#ff4d6d'];
   function boardGlossary() {
-    const out = [{ head: 'BOARDS' }];
-    GF.Boards.DISPLAY.forEach((id) => {
+    const out = [];
+    const add = (id, tag) => {
       const d = GF.Boards.DEFS[id], ab = GF.Boards.ABILITY_ORDER.filter((a) => GF.Boards.ABILITIES[a].board === id);
-      out.push({ kind: 'board', icon: boardIcon(id), name: d.name, rar: nameCol(id), tag: 'BOARD' + (ab.length ? ' · ABILITY: ' + GF.Boards.ABILITIES[ab[0]].name : ''), desc: d.desc });
-    });
+      out.push({ kind: 'board', icon: boardIcon(id), name: d.name, rar: nameCol(id), tag: tag + (ab.length ? ' · ABILITY: ' + GF.Boards.ABILITIES[ab[0]].name : ''), desc: d.desc });
+    };
+    out.push({ head: 'MAIN BOARDS (' + GF.Boards.MAIN.length + ')' });
+    GF.Boards.MAIN.forEach((id) => add(id, 'BOARD'));
+    out.push({ head: 'CHALLENGES (' + GF.Boards.CHALLENGES.length + ') · PICK ONE ON THE CHALLENGE CARD, OR MIX THEM IN MAGIC' });
+    GF.Boards.CHALLENGES.forEach((id) => add(id, 'CHALLENGE'));
     out.push({ head: 'DIFFICULTY (EACH LEVEL INCLUDES THE ONES BELOW)' });
     for (let lv = 1; lv <= GF.Difficulty.MAX; lv++) {
       const L = GF.Difficulty.LEVELS[lv];
@@ -15151,7 +15992,7 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
     scoreStat.addEventListener('click', scoreTip);
     bindBoard();
     bindIntroSkip();
-    window.addEventListener('resize', () => { endIntro('skip'); layout(); if (!$('screen-select').classList.contains('hidden')) { placeSubs(); drawCardCheckers(); } });
+    window.addEventListener('resize', () => { endIntro('skip'); layout(); if (!$('screen-select').classList.contains('hidden')) { placeSubs(); drawCardCheckers(); scrollToCard(SEL.board, false); } });
     layout();
     toTitle();
     requestAnimationFrame(loop);
@@ -15228,11 +16069,9 @@ body.mobile #line-bar { font-size: 7px; gap: 4px; padding: 2px 4px; } body.mobil
       const r = idle(); if (!r) return false;
       const d = GF.Perks.byId[id];
       if (!d) { say('NO PERK ' + id); return false; }
-      if (r.perks.length >= r.perkSlots) r.perkSlots = Math.min(C.MAX_SLOTS, r.perkSlots + 1);
-      if (r.perks.length >= r.perkSlots) { say('PERK SLOTS FULL'); return false; }
-      const inst = GF.Perks.create(id);
-      r.perks.push(inst);
-      if (d.onBuy) d.onBuy(r, inst, r.rng);
+      if (!GF.Perks.hasRoom(r)) r.perkSlots = Math.min(C.MAX_SLOTS, r.perkSlots + 1);
+      if (!GF.Perks.hasRoom(r)) { say('PERK SLOTS FULL'); return false; }
+      GF.Perks.acquire(r, GF.Perks.create(id)); // v4.8: perkAcquired hook, then onBuy
       return done(r);
     },
     // removed without a refund; its onSell undo runs (Monochrome's colour, Loan Shark's $15, Blazing Speed's meter)
