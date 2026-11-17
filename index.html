@@ -12,7 +12,7 @@
   --bg: #120b1f; --panel: #1e1433; --panel2: #2a1d47; --ink: #f5efff; --muted: #a99cc7;
   --accent: #ffd23f; --good: #3ddc84; --bad: #ff4d6d;
   --common: #9ad1ff; --uncommon: #3ddc84; --rare: #ff6bd6;
-  --enh: #a259ff; --upg: #ffd23f; /* card borders: Enhance cards purple, Upgrade (polish) cards yellow */
+  --enh: #ff4d6d; --upg: #ffd23f; /* card borders: Enhance cards red (v4.9, was purple), Upgrade (polish) cards yellow, Tile cards blue (--tilec) */
   --vch: #ff8fc7; /* v3.10: UPGRADES (vouchers) are rose pink everywhere: shop slot, About, Glossary, hover label, tooltip */
   --tilec: #3a86ff; /* tray: tile consumables blue */
   color-scheme: dark; /* single deliberate dark arcade look */
@@ -66,7 +66,7 @@ canvas#board { display: block; image-rendering: pixelated; border: 3px solid var
 .card { width: 88px; min-height: 112px; background: var(--panel2); border: 3px solid var(--common); padding: 6px; font-size: 7px; line-height: 1.5; cursor: pointer; box-shadow: 3px 3px 0 #000; display: flex; flex-direction: column; gap: 4px; }
 .card.uncommon { border-color: var(--uncommon); }
 .card.rare { border-color: var(--rare); }
-.card.tile { border-color: var(--accent); } .card.upgrade { border-color: var(--upg); }
+.card.tile { border-color: var(--tilec); } .card.upgrade { border-color: var(--upg); }
 .card .cn { font-size: 8px; color: var(--accent); line-height: 1.3; }
 .card .cd { flex: 1; }
 .card .cp { font-size: 10px; color: var(--good); }
@@ -144,7 +144,9 @@ body.mobile #screen-game { grid-template-columns: 1fr; grid-template-areas: "hud
 body.mobile #left-col { display: contents; }
 body.mobile #hud { grid-area: hud; flex-direction: row; flex-wrap: wrap; gap: 8px 14px; padding: 8px; width: 100%; }
 body.mobile .stat .v { font-size: 11px; }
-body.mobile #bar { width: 80px; }
+body.mobile #hud .stat { flex: 1 1 0; min-width: 0; } /* v4.9: ROUND / TARGET / SCORE / MONEY evenly across the width */
+body.mobile #hud .stat .v { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.mobile #bar { width: 100%; }
 body.mobile #top-row { width: 100%; contain: none; }
 body.mobile .hud-btns { flex-direction: row; flex-wrap: wrap; width: 100%; gap: 6px; }
 body.mobile .hb-row { gap: 6px; }
@@ -225,7 +227,7 @@ body.mobile #cascade-panel div { margin: 0; font-size: 12px; }
 .slot.off { opacity: .45; }
 .slot.sold { opacity: .25; cursor: default; animation: none; }
 .slot.uncommon .frame { border-color: var(--uncommon); } .slot.rare .frame { border-color: var(--rare); }
-.slot.tile .frame { border-color: var(--accent); }
+.slot.tile .frame { border-color: var(--tilec); } .slot.gem .frame { border-color: var(--accent); }
 .slot.enh .frame, .choice.enh .frame { border-color: var(--enh); } .slot.upgrade .frame, .choice.upgrade .frame { border-color: var(--upg); } .slot.voucher .frame { border-color: var(--vch); }
 .pack { width: 56px; cursor: pointer; text-align: center; animation: float 3.2s ease-in-out infinite; }
 .pack .frame { position: relative; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; background: var(--panel2); border: 3px solid; box-shadow: 3px 3px 0 #000; padding: 4px; }
@@ -251,7 +253,7 @@ button.wide { width: 100%; margin-top: 8px; }
 .choice.sold { opacity: .25; cursor: default; }
 .choice.off { opacity: .45; }
 .choice.uncommon .frame { border-color: var(--uncommon); } .choice.rare .frame { border-color: var(--rare); }
-.choice.tile .frame { border-color: var(--accent); }
+.choice.tile .frame { border-color: var(--tilec); } .choice.gem .frame { border-color: var(--accent); }
 #hover-label { position: absolute; z-index: 39; pointer-events: none; background: #0d0818; border: 2px solid var(--ink); padding: 4px 6px; font-size: 8px; color: var(--accent); white-space: nowrap; }
 .perk.uncommon { border-color: var(--uncommon); }
 .perk.rare { border-color: var(--rare); }
@@ -432,6 +434,7 @@ body.mobile #gl-tabs .tab-n, body.mobile #gl-sub .tab-n { margin-left: 2px; }
 .att.att-invisible { border-color: #cfc8e8; }
 .att.inline { width: 14px; height: 14px; vertical-align: -3px; margin-right: 4px; box-shadow: none; }
 .att.inline img { width: 9px; height: 9px; }
+.att.big { width: 36px; height: 36px; border-width: 3px; box-shadow: 3px 3px 0 #000; } .att.big img { width: 22px; height: 22px; } /* v4.9 glossary ATTACHMENTS */
 #tip .att-line { font-size: 8px; line-height: 1.5; margin-top: 4px; }
 #tip .att-line b { display: inline; margin: 0 2px 0 0; }
 .claw-spark { position: absolute; left: 3px; top: 3px; width: 4px; height: 4px; background: #fff; box-shadow: 4px 0 0 #fff, -4px 0 0 #fff, 0 4px 0 #fff, 0 -4px 0 #fff; animation: clawSpark 1.4s steps(4) infinite; pointer-events: none; }
@@ -465,7 +468,8 @@ body.mobile #gl-tabs .tab-n, body.mobile #gl-sub .tab-n { margin-left: 2px; }
 .big-btn { font-size: 14px; padding: 12px 28px; color: #000; background: var(--accent); border-color: #000; box-shadow: 4px 4px 0 #000, inset -3px -3px 0 rgba(0,0,0,.25), inset 3px 3px 0 rgba(255,255,255,.4); text-shadow: none; }
 .big-btn:hover:not(:disabled) { background: #ffe27a; }
 #btn-play { min-width: 200px; animation: playPulse 1.6s steps(2) infinite; }
-@keyframes playPulse { 50% { box-shadow: 4px 4px 0 #000, inset -3px -3px 0 rgba(0,0,0,.25), inset 3px 3px 0 rgba(255,255,255,.4), 0 0 0 3px var(--bad); } }
+/* v4.9: the red ring is listed first so it paints above the drop shadow, which then follows the ringed outline (spread 3px) */
+@keyframes playPulse { 50% { box-shadow: 0 0 0 3px var(--bad), 4px 4px 0 3px #000, inset -3px -3px 0 rgba(0,0,0,.25), inset 3px 3px 0 rgba(255,255,255,.4); } }
 #screen-title > #btn-glossary { min-width: 200px; }
 .diff-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; padding: 3px 4px 2px; font-size: 8px; line-height: 1; color: #000; background: var(--dc, var(--good)); border: 2px solid #000; box-shadow: 2px 2px 0 #000; text-shadow: none; letter-spacing: 1px; }
 .diff-badge.d1 { --dc: #e8e8e8; } .diff-badge.d2 { --dc: #3ddc84; } .diff-badge.d3 { --dc: #7fe7ff; } .diff-badge.d4 { --dc: #ffd23f; } .diff-badge.d5 { --dc: #ff8c42; } .diff-badge.d6 { --dc: #ff4d6d; }
@@ -481,7 +485,7 @@ body.mobile #gl-tabs .tab-n, body.mobile #gl-sub .tab-n { margin-left: 2px; }
 .bs-arrow { position: absolute; z-index: 3; top: 50%; transform: translateY(-50%); width: 40px; height: 56px; padding: 0; font-size: 16px; color: var(--accent); border-color: var(--accent); }
 .bs-arrow:active:not(:disabled) { transform: translate(2px, calc(-50% + 2px)); }
 #bs-prev { left: 8px; } #bs-next { right: 8px; }
-#bs-strip { --cw: 156px; flex: 1; min-width: 0; display: flex; gap: 30px; align-items: center; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; padding: 26px 0 60px; scrollbar-width: none; outline: none; cursor: grab; overscroll-behavior-x: contain; }
+#bs-strip { --cw: 156px; flex: 1; min-width: 0; display: flex; gap: 30px; align-items: center; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; padding: 56px 0 72px; margin: -30px 0 -12px; /* v4.9: room for the selected card's glow (scale 1.1 + 32px glow), layout unchanged */ scrollbar-width: none; outline: none; cursor: grab; overscroll-behavior-x: contain; }
 #bs-strip::-webkit-scrollbar { display: none; }
 #bs-strip.dragging { scroll-snap-type: none; cursor: grabbing; }
 #bs-strip:focus-visible .bs-card.on { outline-style: dashed; }
@@ -513,7 +517,7 @@ body.mobile #gl-tabs .tab-n, body.mobile #gl-sub .tab-n { margin-left: 2px; }
 .bs-dbtn.on { filter: none; outline: 3px solid var(--ink); outline-offset: 2px; transform: translateY(-2px); }
 #bs-diff-desc { margin-top: 10px; min-height: 116px; /* v4.2: room for all 6 rule lines, so hovering a level never shifts the page */  display: flex; flex-direction: column; gap: 5px; }
 .bs-rule { display: flex; align-items: center; gap: 8px; font-size: 7px; line-height: 1.6; color: var(--muted); }
-.bs-rule .diff-badge { flex: none; font-size: 6px; min-width: 22px; box-shadow: none; }
+.bs-rule .diff-badge { flex: none; font-size: 6px; min-width: 28px; box-shadow: none; } /* v4.9: 28px so I..VI line their texts up */
 .bs-rule.new { color: var(--ink); }
 .bs-foot { width: min(640px, calc(100% - 32px)); display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .bs-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: stretch; }
@@ -522,7 +526,7 @@ body.mobile #gl-tabs .tab-n, body.mobile #gl-sub .tab-n { margin-left: 2px; }
 #btn-continue small { display: flex; align-items: center; gap: 6px; font-size: 7px; color: var(--ink); flex-wrap: wrap; justify-content: center; max-width: 260px; line-height: 1.5; }
 #btn-continue .diff-badge { font-size: 6px; min-width: 18px; padding: 2px 3px 1px; box-shadow: none; }
 .ci-round { color: var(--muted); }
-body.mobile #bs-strip { --cw: 128px; --gap: 22px; gap: 22px; padding: 22px 0 48px; }
+body.mobile #bs-strip { --cw: 128px; --gap: 22px; gap: 22px; padding: 50px 0 60px; margin: -20px 0 -12px; }
 body.mobile .bs-card { height: 190px; padding: 12px 7px 8px; }
 body.mobile .bs-card .bs-chk { width: 62px; height: 62px; } body.mobile .bs-card .bs-chk canvas { width: 56px; height: 56px; }
 body.mobile .bs-card b { font-size: 10px; } body.mobile .bs-card p { font-size: 6px; } body.mobile .bs-rec { font-size: 6px; gap: 4px; }
@@ -537,7 +541,18 @@ body.mobile .bs-dbtn { min-width: 40px; }
 #about-run .ar-top { display: flex; align-items: center; gap: 8px; font-size: 9px; line-height: 1.5; }
 #about-run .ar-top .icon { width: 32px; height: 32px; margin: 0; flex: none; }
 #about-run .ar-name { flex: 1; min-width: 0; } #about-run .ar-name b { font-weight: normal; }
-#about-run .ar-rules { margin: 6px 0 0; font-size: 7px; line-height: 1.6; color: var(--muted); }
+/* v4.9 About header: board line, then the difficulty list as on SELECT BOARD (.bs-rule), then the seed */
+#about-run .ar-top { align-items: flex-start; }
+#about-run .ar-desc { margin: 4px 0 0; font-size: 7px; line-height: 1.6; color: var(--muted); }
+#about-run .ar-diff { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; padding-top: 8px; border-top: 2px dashed #4a3b70; }
+#about-run .ar-label { display: flex; align-items: center; gap: 6px; font-size: 7px; color: var(--muted); margin-bottom: 2px; }
+#about-run .ar-label .diff-badge { font-size: 7px; }
+#about-run .ar-seed { padding-top: 8px; border-top: 2px dashed #4a3b70; margin-top: 8px !important; }
+#about-modal { gap: 10px; }
+.about-nav { flex: none; width: 40px; height: 56px; padding: 0; font-size: 16px; color: var(--accent); border-color: var(--accent); }
+body.mobile #about-modal { gap: 4px; padding: 8px 4px; }
+body.mobile .about-nav { width: 28px; height: 48px; font-size: 12px; }
+body.mobile #about-modal .box { width: calc(100vw - 72px); padding: 12px; }
 /* Glossary BOARDS tab */
 .gl-head { grid-column: 1 / -1; margin: 6px 0 0; font-size: 8px; color: var(--muted); border-bottom: 2px dotted #4a3b70; padding-bottom: 6px; }
 .gl-head:first-child { margin-top: 0; }
@@ -985,21 +1000,25 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     <div class="set-row menu"><button id="set-newrun">NEW RUN</button><button id="set-menu">MAIN MENU</button></div>
     <div class="panel-btns"><button class="panel-close">CLOSE</button></div>
   </div></div>
-  <div id="about-modal" class="panel-modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-title"><div class="box">
+  <div id="about-modal" class="panel-modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <button id="about-prev" class="about-nav" aria-label="Previous tab">&lt;</button>
+    <div class="box">
     <h2 id="about-title">ABOUT THIS RUN</h2>
     <div id="about-run"></div>
-    <div id="about-tabs" class="tabs" role="tablist"><button role="tab" data-tab="stats">STATS</button><button role="tab" data-tab="upgrades">UPGRADES</button></div>
-    <div id="about-pane-stats" class="pane" role="tabpanel">
+    <div id="about-tabs" class="tabs" role="tablist"><button role="tab" data-tab="gems">GEMS</button><button role="tab" data-tab="stats">STATS</button><button role="tab" data-tab="upgrades">UPGRADES</button></div>
+    <div id="about-pane-gems" class="pane" role="tabpanel">
       <h3>GEMS BROKEN BY COLOR</h3><div id="about-colors" class="chart"></div>
       <h3>SPECIAL GEMS BROKEN</h3><div id="about-kinds" class="chart"></div>
-      <div id="about-stats" class="payout"></div>
     </div>
+    <div id="about-pane-stats" class="pane hidden" role="tabpanel"><div id="about-stats" class="payout"></div></div>
     <div id="about-pane-upgrades" class="pane hidden" role="tabpanel"><div id="about-upgrades"></div></div>
     <div class="panel-btns"><button class="panel-close">CLOSE</button></div>
-  </div></div>
+    </div>
+    <button id="about-next" class="about-nav" aria-label="Next tab">&gt;</button>
+  </div>
   <div id="glossary-modal" class="panel-modal full hidden" role="dialog" aria-modal="true" aria-labelledby="glossary-title"><div class="box">
     <h2 id="glossary-title">GLOSSARY</h2>
-    <div id="gl-tabs" class="tabs" role="tablist"><button role="tab" data-tab="perks">PERKS</button><button role="tab" data-tab="upgrades">UPGRADES</button><button role="tab" data-tab="enhance">ENHANCE</button><button role="tab" data-tab="polish">POLISH</button><button role="tab" data-tab="tiles">TILES</button><button role="tab" data-tab="gems">GEMS</button><button role="tab" data-tab="boards">BOARDS</button></div>
+    <div id="gl-tabs" class="tabs" role="tablist"><button role="tab" data-tab="perks">PERKS</button><button role="tab" data-tab="upgrades">UPGRADES</button><button role="tab" data-tab="enhance">ENHANCE</button><button role="tab" data-tab="polish">POLISH</button><button role="tab" data-tab="tiles">TILES</button><button role="tab" data-tab="gems">GEMS</button><button role="tab" data-tab="boards">BOARDS</button><button role="tab" data-tab="attachments">ATTACHMENTS</button></div>
     <div id="gl-sub" class="tabs sub" role="tablist"><button role="tab" data-tab="all">ALL</button><button role="tab" data-tab="common">COMMON</button><button role="tab" data-tab="uncommon">UNCOMMON</button><button role="tab" data-tab="rare">RARE</button></div>
     <div id="gl-grid" role="tabpanel"></div>
     <div class="panel-btns"><button class="panel-close">CLOSE</button></div>
@@ -1150,7 +1169,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   C.blazeChunks = (m) => C.BLAZE_CHUNKS[Math.max(0, Math.min(C.BLAZE_CHUNKS.length - 1, Math.floor(m || 1) - 1))];
   // v4.6: the drain is a third of v4.4's (0.06 -> 0.02 x m per second)
   C.BLAZE_RESET_CHUNK = 0.5; C.BLAZE_DRAIN = 0.02; C.BLAZE_DROP_FILL = 0.7;
-  C.PROTECTOR_MUL = 1.05; // v4.6 Protector: x1.05 per gem of the most common colour (was x1.01)
+  C.PROTECTOR_MUL = 1.1; // v4.9 Protector: x1.1 per gem of the most common colour (v4.6: x1.05, was x1.01)
   // v4.3 Survival: gems added to the refill pool at each round start, and on a full clear (v4.7: 128 at every round
   // start, round 1 included, after the initial board)
   C.SURVIVAL_ROUND_POOL = 128; C.SURVIVAL_FULL_CLEAR = 64;
@@ -1262,7 +1281,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   //   onlyBy: [destroy sources]              "Only" scoring: a cleared gem scores only when its destroy source (the
   //                                          clear cell's by: bomb / star / supernova / prism) is listed; several Only
   //                                          boards: the union (Boards.onlySources)
-  //   noPerks (Unperkify), noSpecials (Pacifist), noPayout (Bankrupt), forceAtt (Rent Is Due: debt, Rare Find: pristine)
+  //   noPerks (Unperkify), noSpecials (Pacifist), noPayout (Bankrupt, v4.9: leftover moves / gems only), forceAtt (Rent Is Due: debt, Rare Find: pristine)
   // Per-board run data lives in run.boardState (saved with the run); ability charges in run.abilities
   // ({id: {left, max}}, see ABILITIES; Run.useAbility spends them).
   const DEFS = {};
@@ -1283,6 +1302,8 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   // x0.2 (14) / x0.1 (14); 1 Move Only 6 -> x0.6 (8); Blazing Speed 21 (60% wins) -> x4 (15); Gambler's Choice 21 (98%
   // wins) -> x5 (16); Pacifist (spec x0.5: 17) -> x0.65 (15). At x1 and kept: Gravity Flip 15, Area 51 15, Cardsharp 15,
   // Rare Find 16, Unperkify 13, Rent Is Due 10, Bankrupt 9; Coal Mine x1.5: 14.
+  // v4.9 (40 runs, difficulty I, x1 kept): Bankrupt pays win reward + interest again: median 9 -> 10; 1 Move Only
+  // + Power Surge: 8 (the bot places no tiles); Default 14.
   const TARGET_MUL = { haunted: 6, strange: 3, coal_mine: 1.5, survival: 2, random: 1.5, pacifist: 0.65,
     explosives: 0.15, crystals: 0.2, optics: 0.1, one_move: 0.6, blazing: 4, gamblers: 5 };
   const MONO_MUL = 2, MONO_MUL_GROWTH = 1.25, MONO_COLORS = 5; // v4.3: 5 colours (was 4)
@@ -1435,8 +1456,9 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   def({ id: 'magic', name: 'MAGIC', color: '#e040fb', desc: 'Play 1-3 boards at once' });
 
   // ---------- v4.8 challenges (spec "Challenges (20)"; listed after the six above, in this order) ----------
-  def({ id: 'one_move', name: '1 MOVE ONLY', color: '#ff5470', challenge: true, desc: '1 move per round. Last Hurrah + Aura Farming',
-    start: [['last_hurrah', PI], ['aura_farming', PI]],
+  def({ id: 'one_move', name: '1 MOVE ONLY', color: '#ff5470', challenge: true, desc: '1 move. Last Hurrah, Aura Farming, Power Surge',
+    // v4.9: + Power Surge (blueprint), Permanent + Invisible
+    start: [['last_hurrah', PI], ['aura_farming', PI], ['blueprint', PI]],
     hooks: { onCreate: startHook('one_move'), baseMoves: () => 1, targetMul: flatMul('one_move') } });
   def({ id: 'blazing', name: 'BLAZING SPEED', color: '#ff7b1c', challenge: true, desc: 'Starts with Blazing Speed',
     start: [['blazing_speed', PI]], hooks: { onCreate: startHook('blazing'), targetMul: flatMul('blazing') } });
@@ -1469,7 +1491,8 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   // Gravity Flip: board.flip (Board.gravity / refill / refillUpTo / checkerboard / descramble mirror; the display too)
   def({ id: 'gravity_flip', name: 'GRAVITY FLIP', color: '#a259ff', challenge: true, desc: 'Gems fall upward',
     hooks: { onCreate: (run) => { run.board.flip = true; }, targetMul: flatMul('gravity_flip') } });
-  def({ id: 'bankrupt', name: 'BANKRUPT', color: '#8a86a0', challenge: true, desc: 'No round-end payout', noPayout: true,
+  // v4.9: only the leftover moves (Survival: leftover gems) pay nothing; win reward, interest and perks pay as usual
+  def({ id: 'bankrupt', name: 'BANKRUPT', color: '#8a86a0', challenge: true, desc: 'No money for leftover moves', noPayout: true,
     hooks: { targetMul: flatMul('bankrupt') } });
 
   // v4.2 display order (SELECT BOARD strip, glossary, Magic picker, labels): Default, the 6 colours in rainbow order,
@@ -2776,9 +2799,11 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
 
   // ---------- Uncommon ----------
   def({ id: 'jewel_collector', rarity: 'uncommon', name: 'Jewel Collector',
-    desc: 'Stores the points of its color\'s matches. Adds the total every move. New color each round',
+    desc: 'Stores the points of its color\'s matches. Adds the total every move. Resets each round, new color',
     on: {
-      roundStart: (x, inst) => { inst.state.color = x.rng.pick(x.colors); return null; },
+      // v4.9: the stored points reset after each round (roundEnd; round start too, for saves made in the shop before)
+      roundStart: (x, inst) => { inst.state.color = x.rng.pick(x.colors); inst.state.acc = 0; return null; },
+      roundEnd: (x, inst) => { inst.state.acc = 0; return null; },
       match: (x, inst) => {
         if (inst.state.color == null) inst.state.color = x.group.color;
         if (x.group.color !== inst.state.color) return null;
@@ -2986,7 +3011,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     on: { roundStart: () => ({ scoreFrac: 0.25 }) },
     force: (x) => (x.event === 'roundStart' ? { scoreFrac: 0.25 } : null) });
   def({ id: 'insurance', rarity: 'uncommon', name: 'Lifebuoy', desc: 'Win the first round you would lose. Then it is gone', passive: true });
-  def({ id: 'baseball_bat', rarity: 'rare', name: 'Baseball Bat', desc: 'Swaps don\'t need to make a match', passive: true });
+  def({ id: 'baseball_bat', rarity: 'rare', name: 'Baseball Bat', desc: 'Swaps don\'t need to make a match. A swap making none costs no move', passive: true });
   def({ id: 'pyromaniac', rarity: 'uncommon', name: 'Pyromaniac', desc: 'Exploding Bombs have a 50% chance to leave a new Bomb', chanceScaled: true,
     on: { special: (x, i) => (x.special.kind === 'bomb' && x.rng.chance(P.chance(i, 0.5)) ? { spawnSpecial: { kind: 'bomb' } } : null) },
     force: (x) => (x.special ? { spawnSpecial: { kind: 'bomb' } } : null) });
@@ -3222,14 +3247,16 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   // move that completes the hand; several hands in one move stack. A swap match that makes a Prism counts as RAINBOW
   // (P.RAINBOW, -1): a wildcard taking whatever colour makes the best hand. A Prism swap counts as the colour of the
   // gem it was swapped with (x.swapPrism, set by the resolver).
+  // v4.9 rewards: +add points, x mul points, +$money, kinds: one random plain gem becomes each (Board.transformRandom).
+  // The ranking (HAND_RANK, best first: what a RAINBOW wildcard aims for) follows the reward size.
   const HANDS = {
-    flush: { name: 'Flush', mul: 5, money: 20, kind: 'supernova' },
-    four: { name: 'Four of a kind', mul: 4, money: 10, kind: 'prism' },
-    full_house: { name: 'Full house', mul: 3, kind: 'star' },
-    three: { name: 'Three of a kind', mul: 2, kind: 'bomb' },
-    spectrum: { name: 'Spectrum', kind: 'prism' },
-    two_pair: { name: 'Two pair', mul: 1.5 },
-    pair: { name: 'Pair', baseX: 5 },
+    flush: { name: 'Flush', add: 2500, mul: 5, money: 25, kinds: ['supernova', 'prism'] },
+    four: { name: 'Four of a kind', add: 1000, mul: 4, money: 10, kinds: ['prism'] },
+    full_house: { name: 'Full house', add: 850, mul: 3, kinds: ['star', 'bomb'] },
+    three: { name: 'Three of a kind', add: 600, mul: 2, kinds: ['star'] },
+    two_pair: { name: 'Two pair', add: 400, mul: 1.5, kinds: ['bomb'] },
+    spectrum: { name: 'Spectrum', add: 250, kinds: ['prism'] },
+    pair: { name: 'Pair', add: 100 },
   };
   const RAINBOW = -1;
   const HAND_RANK = Object.keys(HANDS); // best first
@@ -3262,7 +3289,19 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     i.state.last = h;
     if (h) (i.state.pend || (i.state.pend = [])).push(h);
   }
-  def({ id: 'poker', rarity: 'rare', name: 'Poker', desc: 'Every 5 colors your swaps match make a hand (a match making a Prism is a RAINBOW wild; a Prism swap counts its gem\'s color): Flush x5 +$20 +Nova, Four x4 +$10 +Prism, Full house x3 +Star, Three x2 +Bomb, Spectrum +Prism, Two pair x1.5, Pair +5x base',
+  // v4.9: a multi-line description (one line per hand; the UI turns \n into line breaks)
+  const KIND_NAME = { supernova: 'Nova', prism: 'Prism', star: 'Star', bomb: 'Bomb' };
+  const handLine = (id, label) => {
+    const R = HANDS[id], out = ['+' + R.add + ' points'];
+    if (R.mul) out.push('x' + R.mul + ' points');
+    if (R.money) out.push('+$' + R.money);
+    (R.kinds || []).forEach((k) => out.push('+1 ' + KIND_NAME[k]));
+    return (label || R.name) + ': ' + out.join(', ');
+  };
+  const POKER_DESC = ['Every 5 colors your swaps match makes a hand. Rewards based on hand type.', handLine('pair'),
+    handLine('spectrum', 'Spectrum (5 unique colors)'), handLine('two_pair'), handLine('three'), handLine('full_house'),
+    handLine('four'), handLine('flush')].join('\n');
+  def({ id: 'poker', rarity: 'rare', name: 'Poker', desc: POKER_DESC,
     on: {
       roundStart: (x, i) => { i.state.hand = []; i.state.pend = null; return null; },
       moveStart: (x, i) => { i.state.pend = null; return null; },
@@ -3286,10 +3325,10 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
         const tf = [];
         for (const h of pend) {
           const R = HANDS[h];
+          if (R.add) add += R.add;
           if (R.mul) m *= R.mul;
           if (R.money) money += R.money;
-          if (R.baseX) add += R.baseX * C.base(x.run.round);
-          if (R.kind) tf.push({ kind: R.kind, count: 1 });
+          for (const k of R.kinds || []) { const t = tf.find((e) => e.kind === k); if (t) t.count++; else tf.push({ kind: k, count: 1 }); }
         }
         if (add) eff.add = add;
         if (m !== 1) eff.mul = m;
@@ -3301,7 +3340,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     status: (i) => ({ hand: (i.state.hand || []).slice(), last: i.state.last || null,
       text: (i.state.hand || []).length + '/5' + (i.state.last ? ' · last: ' + HANDS[i.state.last].name : '') }) });
   const protector = (x) => ({ mul: Math.pow(C.PROTECTOR_MUL, maxCount(Bd().colorCounts(x.board), x.colors)) });
-  def({ id: 'protector', rarity: 'rare', name: 'Protector', desc: 'x1.05 per gem of the most common color',
+  def({ id: 'protector', rarity: 'rare', name: 'Protector', desc: 'x1.1 per gem of the most common color',
     on: { moveEnd: protector }, force: protector });
   def({ id: 'printer', rarity: 'rare', name: 'Printer', noCopy: true,
     desc: 'After 2 rounds, sell it to copy the perk on its left',
@@ -3729,15 +3768,16 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     display: (run, inst) => ({ text: 'x3', kind: 'mult', icon: inst.state.area ? 'zone' : 'zone-off', active: !!inst.state.area }) });
 
   // ---------- Virus (uncommon) ----------
-  // state.cells: [{r, c, age, gen}] (gen 0 = the origin, at most VIRUS_GEN), state.acc: the stored total.
+  // state.cells: [{r, c, age, gen}] (gen 0 = the origin, at most VIRUS_GEN). v4.9: no stored points any more (the
+  // old state.acc of a save is ignored and cleared at round start); broken gems score their normal points.
   // Round start: the infection restarts on one random cell. After each player move (afterCascade, not free resolves),
   // every infected cell acts: its tile is removed (run.stats.tilesRemoved), a special kind / modifier is stripped (the
   // gem becomes plain; colourless gems take a random colour), a plain gem breaks (eff.fire: a seed of the continue-
-  // resolve, normal points); locked gems are left alone. Each affected gem stores +50. Then every cell ages by 1 and
+  // resolve, normal points); locked gems are left alone. Then every cell ages by 1 and
   // (gen < VIRUS_GEN) spreads to one random uninfected neighbour of its 8; cells reaching VIRUS_LIFE moves are removed.
   // Timeline: {t: 'virus', slot, cells: the infection after the move, strip: [[r, c]], breakCells: [[r, c]], tiles:
-  // [[r, c]]} after the perk step. moveEnd adds the stored total.
-  const VIRUS_LIFE = 3, VIRUS_GEN = 2, VIRUS_STORE = 50;
+  // [[r, c]]} after the perk step.
+  const VIRUS_LIFE = 3, VIRUS_GEN = 2;
   const N8 = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
   const virusCopy = (cells) => (cells || []).map((v) => ({ r: v.r, c: v.c, age: v.age, gen: v.gen }));
   function virusAct(x, i) {
@@ -3755,8 +3795,6 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
       if (g.kind !== 'normal' || g.mod) strip.push({ r: v.r, c: v.c, kind: 'normal', mod: null, color: g.color != null ? g.color : x.rng.pick(x.colors) });
       else breaks.push({ r: v.r, c: v.c });
     }
-    const n = strip.length + breaks.length;
-    i.state.acc = (i.state.acc || 0) + VIRUS_STORE * n;
     const taken = new Set(cells.map((v) => v.r * N + v.c)), born = [];
     for (const v of cells) {
       v.age = (v.age || 0) + 1;
@@ -3769,22 +3807,18 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     }
     i.state.cells = cells.filter((v) => v.age < VIRUS_LIFE).concat(born);
     const eff = { step: { t: 'virus', cells: virusCopy(i.state.cells), strip: strip.map((p) => [p.r, p.c]), breakCells: breaks.map((p) => [p.r, p.c]), tiles: tiles } };
-    if (n) eff.store = VIRUS_STORE * n;
     if (strip.length) eff.setGems = strip;
     if (breaks.length) eff.fire = breaks;
     return eff;
   }
-  const virusAdd = (x, i) => (i.state.acc ? { add: i.state.acc } : null);
   def({ id: 'virus', rarity: 'uncommon', name: 'Virus', life: VIRUS_LIFE, maxGen: VIRUS_GEN,
-    desc: 'An infected cell strips or breaks gems (+50 stored each) and spreads. Adds the total every move',
+    desc: 'An infected cell strips or breaks gems and spreads',
     on: {
-      roundStart: (x, i) => { i.state.cells = [{ r: x.rng.int(N), c: x.rng.int(N), age: 0, gen: 0 }]; return null; },
+      roundStart: (x, i) => { i.state.cells = [{ r: x.rng.int(N), c: x.rng.int(N), age: 0, gen: 0 }]; delete i.state.acc; return null; },
       afterCascade: (x, i) => (free(x) ? null : virusAct(x, i)),
-      moveEnd: virusAdd,
     },
-    force: virusAdd, echo: (x, i, eff) => (eff && eff.add ? eff : null),
-    status: (i) => { const cells = virusCopy(i.state.cells); return { infected: cells, acc: i.state.acc || 0, text: cells.length + ' infected · ' + fmt(i.state.acc || 0) + ' stored' }; },
-    display: (run, inst) => ({ text: '+' + fmt(inst.state.acc || 0), kind: 'add', active: !!inst.state.acc, sub: String((inst.state.cells || []).length) }) });
+    status: (i) => { const cells = virusCopy(i.state.cells); return { infected: cells, text: cells.length + ' infected' }; },
+    display: (run, inst) => { const n = (inst.state.cells || []).length; return { text: String(n), kind: 'count', active: n > 0, sub: 'INFECTED' }; } });
 
   // ======================= Tiles =======================
 
@@ -3828,16 +3862,16 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   const FIRE_KINDS = ['bomb', 'star', 'supernova', 'prism'];
 
   // ---------- Spawnpoint (uncommon) ----------
-  const SPAWN_N = 16;
+  const SPAWN_N = 8; // v4.9: 8 (was 16)
   const spawnpoint = (x, n, taken) => {
     const cells = x.rng.shuffle(cellsWhere(x.board, plainCell, taken)).slice(0, n);
     return cells.length ? { setGems: cells.map(([r, c]) => Object.assign({ r: r, c: c }, MOD_OR_KIND(x.rng.pick(SPAWN_KINDS)))) } : null;
   };
   def({ id: 'spawnpoint', rarity: 'uncommon', name: 'Spawnpoint', count: SPAWN_N,
-    desc: 'Round start: 16 random gems become random specials',
+    desc: 'Round start: ' + SPAWN_N + ' random gems become random specials',
     on: { roundStart: (x) => spawnpoint(x, SPAWN_N) },
     force: (x) => spawnpoint(x, 1), echo: (x, i, eff) => spawnpoint(x, SPAWN_N, takenOf(eff, 'setGems')),
-    display: () => ({ text: '+16', kind: 'count', sub: 'SPECIALS' }) });
+    display: () => ({ text: '+' + SPAWN_N, kind: 'count', sub: 'SPECIALS' }) });
 
   // ---------- Hidden Gem / Aura Farming / Glitter Bomb (uncommon): after each player move, gems become specials
   // and fire (eff.fire: set, then seeds of the continue-resolve) ----------
@@ -5284,7 +5318,8 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   // v4.0 Survival (flags.freeNoMatchSwap): a legal-shaped swap of two free gems that makes no match is free: the
   // gems stay swapped, no move is spent (res.freeSwap, a timeline holding just the swap step).
   // What doMove(run, a, b) would do with this pair: 'move' (a swap making a match), 'free' (Survival's free
-  // no-match swap; with Purple the cells may be far apart), 'illegal' (Baseball Bat's no-match swap, costs a move)
+  // no-match swap; with Purple the cells may be far apart), 'illegal' (Baseball Bat's no-match swap; v4.9: free, no
+  // move spent, played like the free swap)
   // or null (refused). The UI uses it for Purple's far clicks. v4.2 Survival: a gem + an empty cell (either order) is
   // an empty-cell move: 'move' when the gem's landing makes a match, else 'free' (Board.canSwap / emptyMove).
   function swapKind(run, a, b) {
@@ -5302,11 +5337,12 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     // v4.2 Survival: a gem moved into an empty cell (either click order): free without a match, else a move
     if (kind && flags.emptySwap && B.emptyPair(run.board, a, b)) {
       if (!run.board.cells[a.r][a.c]) { const t = a; a = b; b = t; }
-      if (kind === 'free') return freeEmptyMove(run, a, b);
+      if (kind === 'free' || kind === 'illegal') return freeEmptyMove(run, a, b); // v4.9 Bat: free too
       snapshot(run);
       return afterMove(run, GF.Resolver.move(run, a, b, { empty: true }), 1);
     }
-    if (kind === 'free') return freeSwap(run, a, b);
+    // v4.9 Baseball Bat: a swap making no match costs no move (the gems just swap; Wrong Turn does not redirect it)
+    if (kind === 'free' || kind === 'illegal') return freeSwap(run, a, b);
     if (!kind) return null;
     let to = b, redirect = null;
     if (flags.wrongTurn && run.rng.chance(0.5)) {
@@ -5697,9 +5733,9 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     run.pendingChoice = null; // v4.7: a line never picked (round won before any move) is not asked for any more
     const leftover = infiniteMoves(run) ? 0 : run.movesLeft; // v4.7 Survival: no move limit, no leftover moves
     const interestCap = GF.Vouchers.interestCap(run);
-    // v4.8 Bankrupt: no round-end payout (win reward, leftover moves / gems, interest); perks' round-end money stays
+    // v4.9 Bankrupt: no money for leftover moves (Survival: leftover gems); win reward, interest and perks pay
     const bankrupt = GF.Boards.noPayout(run);
-    const interest = bankrupt ? 0 : Math.min(interestCap, Math.floor(Math.max(0, run.money) / C.INTEREST_PER));
+    const interest = Math.min(interestCap, Math.floor(Math.max(0, run.money) / C.INTEREST_PER));
     const steps = GF.Resolver.roundEnd(run);
     const perkIncome = steps.reduce((s, x) => s + (x.income || 0), 0);
     // already paid by roundEnd (Landlord, Bank Account, Loan Shark); v4.8 Debt attachments apart (info.debt)
@@ -5709,7 +5745,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     // v4.8 Survival: $1 per SURVIVAL_GEMS_PER gems left (board + pool), at most SURVIVAL_GEMS_MAX (replaces leftover moves)
     const gems = GF.Boards.has(run, 'survival') ? gemsLeft(run) : 0;
     const gemsIncome = GF.Boards.has(run, 'survival') && !bankrupt ? Math.min(C.SURVIVAL_GEMS_MAX, Math.floor(gems / C.SURVIVAL_GEMS_PER)) : 0;
-    const base = bankrupt ? 0 : C.BASE_INCOME;
+    const base = C.BASE_INCOME;
     const income = Math.max(0, base + leftoverIncome + gemsIncome + perkIncome + interest);
     run.money += income;
     stats(run).roundsWon++;
@@ -5782,8 +5818,15 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     if (!o.abilities || typeof o.abilities !== 'object') o.abilities = {};
     migrateV47(o);
     migrateV48(o);
+    migrateV49(o);
     delete o.v;
     return o;
+  }
+  // v4.9: Bonanza III is gone: an owned one is dropped with its +5 moves (no refund); an offered one is cleared
+  function migrateV49(o) {
+    const i = o.vouchers.indexOf('bonanza_3');
+    if (i >= 0) { o.vouchers.splice(i, 1); o.extraMoves = Math.max(0, (o.extraMoves || 0) - 5); }
+    if (o.voucherOffer && !GF.Vouchers.DEFS[o.voucherOffer]) o.voucherOffer = null;
   }
   // v3.5: the Clock tile became the Mystery tile; Clockmaker and Overtime are gone.
   // v3.6: gem kinds gold/shiny became modifiers ({kind: 'normal', mod}); every gem has a mod field. Removed perks
@@ -6324,22 +6367,29 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   function def(d) { d.tier = d.tier || 1; d.price = d.price || [0, 10, 15, 20][d.tier]; DEFS[d.id] = d; }
   def({ id: 'overstock_1', name: 'Overstock I', desc: '+1 shop item slot' });
   def({ id: 'overstock_2', name: 'Overstock II', tier: 2, requires: 'overstock_1', desc: '+1 more shop item slot' });
-  def({ id: 'business_man', name: 'Business Man', desc: '+1 perk slot', effect: (run) => { run.perkSlots = Math.min(C.MAX_SLOTS, run.perkSlots + 1); },
-    canOffer: (run) => !(GF.Perks && GF.Perks.canGain && !GF.Perks.canGain(run)) }); // v4.8 Unperkify: never offered
+  const perkSlot = (run) => { run.perkSlots = Math.min(C.MAX_SLOTS, run.perkSlots + 1); };
+  const perksOk = (run) => !(GF.Perks && GF.Perks.canGain && !GF.Perks.canGain(run)); // v4.8 Unperkify: never offered
+  const paletteOk = (run) => GF.Resolver.colorsOf(run).length > 3;
+  const palette = (run) => { const cols = GF.Resolver.colorsOf(run); if (cols.length > 3) run.removedColors.push(run.rng.pick(cols)); };
+  def({ id: 'business_man', name: 'Business Man', desc: '+1 perk slot', effect: perkSlot, canOffer: perksOk });
+  // v4.9 tier IIs of Business Man, Card Holder, Pack Rat, Palette Knife (family: id without its _2)
+  def({ id: 'business_man_2', name: 'Business\'s Rising', tier: 2, requires: 'business_man', desc: '+1 more perk slot', effect: perkSlot, canOffer: perksOk });
   def({ id: 'card_holder_1', name: 'Card Holder', desc: '+1 card slot', effect: (run) => { run.cardSlots++; } });
+  def({ id: 'card_holder_2', name: 'Hand Maker', tier: 2, requires: 'card_holder_1', desc: '+1 more card slot', effect: (run) => { run.cardSlots++; } });
   def({ id: 'bonanza_1', name: 'Bonanza I', desc: '+2 moves each round', effect: (run) => { run.extraMoves += 2; } });
   def({ id: 'bonanza_2', name: 'Bonanza II', tier: 2, requires: 'bonanza_1', desc: '+3 more moves each round', effect: (run) => { run.extraMoves += 3; } });
-  def({ id: 'bonanza_3', name: 'Bonanza III', tier: 3, requires: 'bonanza_2', desc: '+5 more moves each round', effect: (run) => { run.extraMoves += 5; } });
+  // v4.9: Bonanza III removed (saves: Run.migrateV49 drops it with its +5 moves)
   def({ id: 'pack_rat', name: 'Pack Rat', desc: 'The shop offers 3 packs' });
+  def({ id: 'pack_rat_2', name: 'Pack Grabber', tier: 2, requires: 'pack_rat', desc: 'The shop offers 1 more pack' });
   def({ id: 'reroll_1', name: 'Reroll Surplus I', desc: 'Rerolls cost $1 less' });
   def({ id: 'reroll_2', name: 'Reroll Surplus II', tier: 2, requires: 'reroll_1', desc: 'Rerolls cost another $2 less' });
   def({ id: 'black_friday_1', name: 'Black Friday I', desc: 'Shop items and packs cost 25% less' });
   def({ id: 'black_friday_2', name: 'Black Friday II', tier: 2, requires: 'black_friday_1', desc: 'Shop items and packs cost 50% less' });
   def({ id: 'chain_reaction_1', name: 'Chain Reaction I', desc: 'Gems cleared at cascade level 3+ score x1.5' });
   def({ id: 'chain_reaction_2', name: 'Chain Reaction II', tier: 2, requires: 'chain_reaction_1', desc: 'Gems cleared at cascade level 3+ score x2' });
-  def({ id: 'palette_knife', name: 'Palette Knife', desc: 'Remove 1 random color for good',
-    canOffer: (run) => GF.Resolver.colorsOf(run).length > 3,
-    effect: (run) => { const cols = GF.Resolver.colorsOf(run); if (cols.length > 3) run.removedColors.push(run.rng.pick(cols)); } });
+  def({ id: 'palette_knife', name: 'Palette Knife', desc: 'Remove 1 random color for good', canOffer: paletteOk, effect: palette });
+  def({ id: 'palette_knife_2', name: 'Blank Canvas', tier: 2, requires: 'palette_knife', desc: 'Remove 1 more random color for good (min 3)',
+    canOffer: paletteOk, effect: palette });
   def({ id: 'stock_rising_1', name: 'Stock Rising I', desc: 'Max interest +$5' });
   def({ id: 'stock_rising_2', name: 'Stock Rising II', tier: 2, requires: 'stock_rising_1', desc: 'Max interest +$10 more' });
   def({ id: 'mercy', name: 'Mercy', desc: 'Round targets 25% lower. -5 moves each round' });
@@ -6349,6 +6399,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   def({ id: 'constructor', name: 'Constructor', desc: 'Tiles appear twice as often' });
   const IDS = Object.keys(DEFS);
   // v3.6: old voucher ids -> their replacements (save migration)
+  // (card_holder_2 is Hand Maker since v4.9; this map only runs on saves before SAVE_VER 2, Run.migrateV36)
   const RENAMED = { stamina_1: 'bonanza_1', stamina_2: 'bonanza_2', card_holder_2: 'business_man', chain_reaction_v: 'chain_reaction_1' };
 
   function has(run, id) { return !!run.vouchers && run.vouchers.indexOf(id) >= 0; }
@@ -6365,11 +6416,13 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     return C.INTEREST_MAX + (has(run, 'stock_rising_1') ? 5 : 0) + (has(run, 'stock_rising_2') ? 10 : 0);
   }
   // cascade level 3+ multiplier (Chain Reaction II replaces I)
+  // v4.9: packs in a shop (2, Pack Rat 3, Pack Grabber 4)
+  function packCount(run) { return 2 + (has(run, 'pack_rat') ? 1 : 0) + (has(run, 'pack_rat_2') ? 1 : 0); }
   function chainMul(run) { return has(run, 'chain_reaction_2') ? 2 : has(run, 'chain_reaction_1') ? 1.5 : 1; }
   function roll(run) { const pool = available(run); return pool.length ? run.rng.pick(pool) : null; }
   function apply(run, id) { if (has(run, id)) return; run.vouchers.push(id); if (DEFS[id].effect) DEFS[id].effect(run); }
 
-  GF.Vouchers = { DEFS, IDS, RENAMED, has, available, roll, apply, interestCap, chainMul };
+  GF.Vouchers = { DEFS, IDS, RENAMED, has, available, roll, apply, interestCap, chainMul, packCount };
 })(typeof window !== 'undefined' ? (window.GF = window.GF || {}) : (globalThis.GF = globalThis.GF || {}));
 
 // ---- packs.js
@@ -6584,7 +6637,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     const ex = new Set(), items = [], packs = [];
     for (let i = 0, n = itemSlots(run); i < n; i++) items.push(rollItem(run, ex));
     claw(run, items);
-    const np = hasV(run, 'pack_rat') ? 3 : 2;
+    const np = GF.Vouchers.packCount(run); // v4.9: Pack Grabber +1
     for (let i = 0; i < np; i++) packs.push(GF.Packs.roll(run));
     return { items: items, packs: packs };
   }
@@ -10628,8 +10681,10 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   // Tier II vouchers share the tier I glyph in gold (Bonanza III: pink).
   const VOUCHER = {
     overstock_1: P('box_plus', 'green'), overstock_2: P('box_plus', 'gold'), business_man: P('briefcase', 6),
-    bonanza_1: P('bonanza', 'green'), bonanza_2: P('bonanza', 'gold'), bonanza_3: P('bonanza', 'pink'),
+    bonanza_1: P('bonanza', 'green'), bonanza_2: P('bonanza', 'gold'),
     card_holder_1: P('card_slot', 'cyan'), pack_rat: P('rat', 'grey'),
+    // v4.9 tier IIs: their tier I glyph in gold, like every other tier II
+    business_man_2: P('briefcase', 'gold'), card_holder_2: P('card_slot', 'gold'), pack_rat_2: P('rat', 'gold'), palette_knife_2: P('palette', 'gold'),
     reroll_1: P('reroll', 'green'), reroll_2: P('reroll', 'gold'), black_friday_1: P('tag', 'grey'), black_friday_2: P('tag', 'gold'),
     chain_reaction_1: P('chain', 'cyan'), chain_reaction_2: P('chain', 'gold'), palette_knife: P('palette', 6), mercy: P('dove', 'green'),
     jewel_hunter: P('magnifier_gem', 'pink'), enchanter: P('wizard_hat', 4), gemsmith: P('smith_hammer', 'cyan'), constructor: P('hardhat', 'gold'),
@@ -13040,6 +13095,8 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   }
   // v4.1: the HUD no longer shows the board (ABOUT THIS RUN names the board and difficulty)
   function boardIcon(id, cls) { return '<img class="' + (cls || 'icon') + '" alt="" src="' + GF.Icons.url('board', id) + '">'; }
+  // v4.9: the cumulative rule list of level lv, one line per level with its coloured badge (SELECT BOARD, ABOUT)
+  const diffRulesHtml = (lv) => GF.Difficulty.rules(lv).map((x) => '<div class="bs-rule' + (x.lv === lv ? ' new' : '') + '">' + diffBadge(x.lv) + '<span>' + x.text + '</span></div>').join('');
   const diffBadge = (d, cls) => '<span class="diff-badge d' + d + (cls ? ' ' + cls : '') + '">' + GF.Difficulty.LEVELS[d].name + '</span>';
   // board colours too dark to read as text on the panels get a lighter text shade
   const NAME_COL = { coal_mine: '#a3a3b5', survival: '#d6904e', unperkify: '#a3a3b5' };
@@ -13310,8 +13367,10 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   }
   function saveIfShop() { if (S.run.phase === 'shop') GF.Run.save(S.run); }
   function nextRoundMoves(run) { return GF.Run.roundMoves(run); }
+  // v4.9: descriptions may hold several lines (Poker: one per hand); \n becomes a line break wherever one is shown
+  const descHTML = (s) => String(s == null ? '' : s).replace(/\n/g, '<br>');
   function perkDesc(d, inst, st) {
-    let s = d.desc;
+    let s = descHTML(d.desc);
     if (!st && inst.state.color != null && ['jewel_collector', 'money_tree', 'monochrome'].indexOf(d.id) >= 0) {
       s += ' <b style="color:' + GF.Render.colorHex(inst.state.color) + '">[' + C.COLORS[inst.state.color].toUpperCase() + ']</b>';
     }
@@ -13412,10 +13471,10 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     return (it.mod ? it.mod.toUpperCase() + ' ' : '') + (it.color != null ? C.COLORS[it.color].toUpperCase() + ' ' : '') + (it.id === 'normal' ? 'GEM' : it.id.toUpperCase());
   }
   function itemInfo(it) {
-    if (it.kind === 'perk') { const d = GF.Perks.byId[it.id]; return { icon: iconImg('perk', it.id), name: d.name, desc: d.desc, cls: d.rarity, rar: d.rarity }; }
-    if (it.kind === 'card') { const d = GF.Cards.DEFS[it.id]; return { icon: iconImg('card', it.id), name: d.name, desc: d.desc, cls: 'enh' }; }
-    if (it.kind === 'tile') { const d = GF.Tiles.DEFS[it.id]; return { icon: iconImg('tile', it.id), name: d.name, desc: d.desc, cls: 'tile' }; }
-    if (it.kind === 'gem') return { icon: GF.Render.gemIconHTML(it.color, it.id, null, it.mod), name: jewelName(it), desc: GEM_INFO[it.id] + (it.mod ? '. ' + MOD_INFO[it.mod] : ''), cls: 'tile' };
+    if (it.kind === 'perk') { const d = GF.Perks.byId[it.id]; return { icon: iconImg('perk', it.id), name: d.name, desc: descHTML(d.desc), cls: d.rarity, rar: d.rarity }; }
+    if (it.kind === 'card') { const d = GF.Cards.DEFS[it.id]; return { icon: iconImg('card', it.id), name: d.name, desc: descHTML(d.desc), cls: 'enh', rar: 'enh' }; }
+    if (it.kind === 'tile') { const d = GF.Tiles.DEFS[it.id]; return { icon: iconImg('tile', it.id), name: d.name, desc: descHTML(d.desc), cls: 'tile', rar: 'tilec' }; }
+    if (it.kind === 'gem') return { icon: GF.Render.gemIconHTML(it.color, it.id, null, it.mod), name: jewelName(it), desc: GEM_INFO[it.id] + (it.mod ? '. ' + MOD_INFO[it.mod] : ''), cls: 'gem' }; // v4.9: gems keep the yellow frame (tiles are blue)
     // v4.4: colour polish ("Red Polish"), special polish cards and Brilliance (names / descriptions from Cards.def)
     const d = GF.Cards.def(GF.Cards.entryOf(it)) || { name: String(it.id), desc: '' };
     const name = d.name.toUpperCase();
@@ -14699,11 +14758,11 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     info.steps.forEach((st) => hooks.perkFire(st));
     if (info.steps.some((st) => st.strip)) grindBoard(run);
     refresh();
-    // v4.8 Bankrupt: one "no payout" row instead of win reward / moves / gems / interest
-    const rows = info.bankrupt ? [['Bankrupt: no payout', 0]] : [['Win reward', info.base]];
-    if (!info.bankrupt && !GF.Run.infiniteMoves(run)) rows.push(['Moves left (' + info.leftover + ', $1 per 2)', info.leftoverIncome]); // v4.7 Survival: no move limit
+    // v4.9 Bankrupt: the leftover moves / gems row says it pays nothing
+    const rows = [['Win reward', info.base]];
+    if (!GF.Run.infiniteMoves(run)) rows.push(info.bankrupt ? ['Moves left (' + info.leftover + ', Bankrupt: no pay)', 0] : ['Moves left (' + info.leftover + ', $1 per 2)', info.leftoverIncome]); // v4.7 Survival: no move limit
     // v4.8 Survival: gems left pay instead of moves
-    if (!info.bankrupt && GF.Boards.has(run, 'survival')) rows.push(['Gems left ($1 per ' + C.SURVIVAL_GEMS_PER + ', max $' + C.SURVIVAL_GEMS_MAX + ')', info.gemsIncome || 0]);
+    if (GF.Boards.has(run, 'survival')) rows.push(info.bankrupt ? ['Gems left (Bankrupt: no pay)', 0] : ['Gems left ($1 per ' + C.SURVIVAL_GEMS_PER + ', max $' + C.SURVIVAL_GEMS_MAX + ')', info.gemsIncome || 0]);
     if (info.perkIncome || info.perkMoney) rows.push(['Perks', info.perkIncome + info.perkMoney]);
     if (info.debt) rows.push(['Debt', info.debt]); // v4.8 Debt attachments
     if (info.interest > 0) rows.push(['Interest ($1 per $5, max $' + info.interestCap + ')', info.interest]);
@@ -15085,19 +15144,31 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     ];
     const bt = run.boardType || { id: 'default' }, dl = GF.Difficulty.clamp(run.difficulty || 1), bdef = GF.Boards.DEFS[bt.id] || GF.Boards.DEFS.default;
     const subs = bdef.id === 'magic' ? GF.Boards.DISPLAY.filter((id) => GF.Boards.ids(run).indexOf(id) >= 0) : [];
-    $('about-run').innerHTML = '<div class="ar-top">' + boardIcon(bdef.id) + '<span class="ar-name">' + (GF.Boards.isChallenge(bdef.id) ? '<span class="chal-tag">CHALLENGE</span> ' : '') + '<b style="color:' + nameCol(bdef.id) + '">' + bdef.name + '</b>' + (subs.length ? ': ' + subsHtml(subs) : '') + '</span>' + diffBadge(dl) + '</div>'
-      + '<p class="ar-rules">' + (subs.length ? subs : [bdef.id]).map((id) => GF.Boards.DEFS[id].desc.replace(/\.?$/, '.')).join(' ') + '</p>'
-      + '<p class="ar-rules">DIFFICULTY ' + GF.Difficulty.LEVELS[dl].name + ': ' + GF.Difficulty.rules(dl).map((x) => x.text + '.').join(' ') + '</p>'
+    // v4.9 header: board line (challenge tag, name, its rule), then the difficulty as on SELECT BOARD (one line per
+    // level, coloured badge), then the seed
+    const boardRules = subs.length ? subs.map((id) => '<span style="color:' + nameCol(id) + '">' + GF.Boards.DEFS[id].name + '</span> ' + GF.Boards.DEFS[id].desc) : [bdef.desc];
+    $('about-run').innerHTML = '<div class="ar-top">' + boardIcon(bdef.id) + '<div class="ar-name">' + (GF.Boards.isChallenge(bdef.id) ? '<span class="chal-tag">CHALLENGE</span> ' : '')
+      + '<b style="color:' + nameCol(bdef.id) + '">' + bdef.name + '</b>' + (subs.length ? ': ' + subsHtml(subs) : '') + boardRules.map((t) => '<p class="ar-desc">' + t + '</p>').join('') + '</div></div>'
+      + '<div class="ar-diff"><div class="ar-label">DIFFICULTY ' + diffBadge(dl) + '</div>' + diffRulesHtml(dl) + '</div>'
       + '<p class="ar-seed">SEED <b id="about-seed"></b></p>';
     $('about-seed').textContent = GF.Run.seedLabel(run);
     $('about-stats').innerHTML = rows.map(([l, v]) => '<div class="row"><span>' + l + '</span><i></i><b>' + v + '</b></div>').join('');
     if (!aboutTab) aboutTab = tabRow($('about-tabs'), (t) => {
-      $('about-pane-stats').classList.toggle('hidden', t !== 'stats');
-      $('about-pane-upgrades').classList.toggle('hidden', t !== 'upgrades');
+      S.aboutTab = t;
+      ABOUT_TABS.forEach((n) => $('about-pane-' + n).classList.toggle('hidden', t !== n));
       if (t === 'upgrades') renderAboutUpgrades();
     });
     openPanel('about-modal');
-    aboutTab('stats');
+    aboutTab('gems');
+  }
+  // v4.9 GEMS / STATS / UPGRADES; the < > buttons beside the panel (and the arrow keys) step through them, wrapping
+  const ABOUT_TABS = ['gems', 'stats', 'upgrades'];
+  function aboutStep(d) {
+    if (!aboutTab || $('about-modal').classList.contains('hidden')) return false;
+    const i = ABOUT_TABS.indexOf(S.aboutTab), n = ABOUT_TABS.length;
+    hideTip(); GF.Audio.tick(1);
+    aboutTab(ABOUT_TABS[((i < 0 ? 0 : i) + d + n) % n]);
+    return true;
   }
   // ---------- vouchers bought this run: one stack per family (tiers overlap), draggable just for fun ----------
   const ROMAN = ['', 'I', 'II', 'III', 'IV'];
@@ -15454,7 +15525,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     renderDiffDesc(lv); saveSel();
   }
   function renderDiffDesc(lv) {
-    $('bs-diff-desc').innerHTML = GF.Difficulty.rules(lv).map((x) => '<div class="bs-rule' + (x.lv === lv ? ' new' : '') + '">' + diffBadge(x.lv) + '<span>' + x.text + '</span></div>').join('');
+    $('bs-diff-desc').innerHTML = diffRulesHtml(lv);
   }
   // v4.8: a run's board as HTML: a CHALLENGE tag before a challenge's name, Magic's subs each in their colour
   function boardLabelHtml(run) {
@@ -15689,9 +15760,10 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     if (o.kind) el.dataset.kind = o.kind;
     const price = o.price != null ? ' · <i>$' + o.price + '</i>' : '';
     const extra = o.extra ? '<p class="gl-val">' + o.extra + '</p>' : '';
-    el.innerHTML = '<div class="gl-icon">' + o.icon + '</div><div class="gl-txt"><b>' + o.name + '</b><span class="gl-meta">' + o.tag + price + '</span><p>' + o.desc + '</p>' + extra + '</div>';
+    const desc = descHTML(o.desc); // v4.9: multi-line descriptions
+    el.innerHTML = '<div class="gl-icon">' + o.icon + '</div><div class="gl-txt"><b>' + o.name + '</b><span class="gl-meta">' + o.tag + price + '</span><p>' + desc + '</p>' + extra + '</div>';
     bindHover(el, o.name, o.rar);
-    el.onclick = () => showTip(el.getBoundingClientRect(), (o.tipIcon || o.icon) + '<b style="color:' + rarityColor(o.rar, 'var(--accent)') + '">' + o.name + '</b><small>' + o.tag + (o.price != null ? ' · $' + o.price : '') + '</small><p>' + o.desc + '</p>' + extra, [], o.rar);
+    el.onclick = () => showTip(el.getBoundingClientRect(), (o.tipIcon || o.icon) + '<b style="color:' + rarityColor(o.rar, 'var(--accent)') + '">' + o.name + '</b><small>' + o.tag + (o.price != null ? ' · $' + o.price : '') + '</small><p>' + desc + '</p>' + extra, [], o.rar);
     return el;
   }
   function glossaryItems(tab, sub) {
@@ -15711,6 +15783,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     }
     if (tab === 'boards') return boardGlossary();
     if (tab === 'gems') return gemGlossary();
+    if (tab === 'attachments') return attGlossary();
     return null; // upgrades: grouped, see renderGlossary
   }
   // v4.3 GEMS tab (C.GEM_INFO): every gem kind, the two modifiers and the locked state, each turning as a live 3D gem
@@ -15731,6 +15804,23 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
         tag: d.type === 'gem' ? 'GEM' : d.type === 'mod' ? 'MODIFIER' : 'STATE', desc: d.desc, extra: vals.join('<br>') };
     });
   }
+  // v4.9 ATTACHMENTS tab (GF.Perks.ATT): the badge in its coloured circle, its effect and where it turns up: shop
+  // perks from difficulty IV, every perk on a forceAtt challenge (Rent Is Due, Rare Find), challenges' start perks
+  function attWhere(id) {
+    const out = ['Shop perks from difficulty ' + GF.Difficulty.LEVELS[4].name + ' (' + Math.round(GF.Perks.ATT_ONE * 100) + '% one, ' + Math.round(GF.Perks.ATT_TWO * 100) + '% two)'];
+    const name = (bid) => GF.Boards.DEFS[bid].name;
+    const forced = GF.Boards.DISPLAY.filter((bid) => GF.Boards.DEFS[bid].forceAtt === id);
+    if (forced.length) out.push('Every perk in ' + forced.map(name).join(', '));
+    const start = GF.Boards.DISPLAY.filter((bid) => (GF.Boards.DEFS[bid].start || []).some((e) => (e[1] || []).indexOf(id) >= 0));
+    if (start.length) out.push('Start perks in ' + start.map(name).join(', '));
+    return out;
+  }
+  function attGlossary() {
+    return GF.Perks.ATT_IDS.map((id) => {
+      const a = GF.Perks.ATT[id];
+      return { kind: 'att', icon: attBadge(id, 'big'), name: a.name, rar: id === 'invisible' ? '#cfc8e8' : a.color, tag: 'ATTACHMENT', desc: a.desc + '.', extra: attWhere(id).join('<br>') };
+    });
+  }
   // v4.0 BOARDS tab: v4.8 the main boards, the challenges, then the 6 difficulty levels (cumulative; v4.1)
   const DIFF_COL = ['', '#e8e8e8', '#3ddc84', '#7fe7ff', '#ffd23f', '#ff8c42', '#ff4d6d'];
   function boardGlossary() {
@@ -15744,11 +15834,11 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     out.push({ head: 'CHALLENGES (' + GF.Boards.CHALLENGES.length + ') · PICK ONE ON THE CHALLENGE CARD, OR MIX THEM IN MAGIC' });
     GF.Boards.CHALLENGES.forEach((id) => add(id, 'CHALLENGE'));
     out.push({ head: 'DIFFICULTY (EACH LEVEL INCLUDES THE ONES BELOW)' });
+    // v4.9: each level shows only its own rule (the tag says what it builds on)
     for (let lv = 1; lv <= GF.Difficulty.MAX; lv++) {
       const L = GF.Difficulty.LEVELS[lv];
       out.push({ kind: 'diff', icon: diffBadge(lv, 'big'), name: 'DIFFICULTY ' + L.name, rar: DIFF_COL[lv], tag: lv === 1 ? 'BASE LEVEL' : 'ADDS TO I' + (lv > 2 ? '-' + GF.Difficulty.LEVELS[lv - 1].name : ''),
-        desc: GF.Difficulty.rules(lv).map((x) => GF.Difficulty.LEVELS[x.lv].name + ': ' + x.text + '.').join(' ')
-          + (lv === 2 ? ' Before losing to no moves, Last Hurrah, Time Machine and Lifebuoy still get a go.' : '') });
+        desc: L.adds + '.' + (lv === 2 ? ' Before losing to no moves, Last Hurrah, Time Machine and Lifebuoy still get a go.' : '') });
     }
     return out;
   }
@@ -15782,7 +15872,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     const perks = (r) => GF.Perks.DEFS.filter((d) => r === 'all' || d.rarity === r).length;
     return {
       tabs: { perks: perks('all'), upgrades: GF.Vouchers.IDS.length, enhance: GF.Cards.IDS.length, polish: glossaryItems('polish').length,
-        tiles: GF.Tiles.IDS.length, gems: C.GEM_INFO_ORDER.length, boards: GF.Boards.DISPLAY.length },
+        tiles: GF.Tiles.IDS.length, gems: C.GEM_INFO_ORDER.length, boards: GF.Boards.DISPLAY.length, attachments: GF.Perks.ATT_IDS.length },
       subs: { all: perks('all'), common: perks('common'), uncommon: perks('uncommon'), rare: perks('rare') },
     };
   }
@@ -15935,6 +16025,12 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     $('set-volume').addEventListener('change', () => { GF.Audio.unlock(); GF.Audio.tick(2); updateToggles(); });
     $('btn-settings').onclick = openSettings;
     $('btn-about').onclick = openAbout;
+    $('about-prev').onclick = () => aboutStep(-1);
+    $('about-next').onclick = () => aboutStep(1);
+    document.addEventListener('keydown', (e) => {
+      if ((e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || $('about-modal').classList.contains('hidden')) return;
+      if (aboutStep(e.key === 'ArrowLeft' ? -1 : 1)) e.preventDefault();
+    });
     $('btn-glossary').onclick = () => { GF.Audio.unlock(); openGlossary(); };
     $('set-menu').onclick = confirmMainMenu;
     $('set-newrun').onclick = confirmNewRun;
