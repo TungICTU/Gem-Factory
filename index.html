@@ -1281,6 +1281,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   //   onlyBy: [destroy sources]              "Only" scoring: a cleared gem scores only when its destroy source (the
   //                                          clear cell's by: bomb / star / supernova / prism) is listed; several Only
   //                                          boards: the union (Boards.onlySources)
+  //   noGemPoints (Cardsharp, v4.10)         cleared gems score 0 (matches, blasts, coal geodes): only perk points count
   //   noPerks (Unperkify), noSpecials (Pacifist), noPayout (Bankrupt, v4.9: leftover moves / gems only), forceAtt (Rent Is Due: debt, Rare Find: pristine)
   // Per-board run data lives in run.boardState (saved with the run); ability charges in run.abilities
   // ({id: {left, max}}, see ABILITIES; Run.useAbility spends them).
@@ -1304,8 +1305,10 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   // Rare Find 16, Unperkify 13, Rent Is Due 10, Bankrupt 9; Coal Mine x1.5: 14.
   // v4.9 (40 runs, difficulty I, x1 kept): Bankrupt pays win reward + interest again: median 9 -> 10; 1 Move Only
   // + Power Surge: 8 (the bot places no tiles); Default 14.
+  // v4.10 Cardsharp (gems score 0, only perk points; 40 runs, difficulty I): x1 6, x0.15 12, x0.12 12 (80 runs: 12),
+  // x0.1 13, x0.07 13-14, x0.03 16 -> x0.12.
   const TARGET_MUL = { haunted: 6, strange: 3, coal_mine: 1.5, survival: 2, random: 1.5, pacifist: 0.65,
-    explosives: 0.15, crystals: 0.2, optics: 0.1, one_move: 0.6, blazing: 4, gamblers: 5 };
+    explosives: 0.15, crystals: 0.2, optics: 0.1, one_move: 0.6, blazing: 4, gamblers: 5, cardsharp: 0.12 };
   const MONO_MUL = 2, MONO_MUL_GROWTH = 1.25, MONO_COLORS = 5; // v4.3: 5 colours (was 4)
   const flatMul = (id) => (run, v) => v * (TARGET_MUL[id] != null ? TARGET_MUL[id] : 1);
 
@@ -1466,8 +1469,8 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   // nothing: Perks.canGain). A challenge's own start perks (Magic) are still granted.
   def({ id: 'unperkify', name: 'UNPERKIFY', color: '#6c6c80', challenge: true, desc: 'No perks. 0 perk slots', noPerks: true,
     hooks: { onCreate: (run) => { run.perkSlots = 0; }, targetMul: flatMul('unperkify') } });
-  def({ id: 'cardsharp', name: 'CARDSHARP', color: '#e8c547', challenge: true, desc: 'Starts with a permanent Poker',
-    start: [['poker', PERM]], hooks: { onCreate: startHook('cardsharp'), targetMul: flatMul('cardsharp') } });
+  def({ id: 'cardsharp', name: 'CARDSHARP', color: '#e8c547', challenge: true, desc: 'Gems score 0. Starts with Poker',
+    start: [['poker', PERM]], noGemPoints: true, hooks: { onCreate: startHook('cardsharp'), targetMul: flatMul('cardsharp') } });
   def({ id: 'explosives', name: 'EXPLOSIVES ONLY', color: '#ff6a3d', challenge: true, desc: 'Only Bomb blasts score. Permanent Bomb Maker',
     start: [['bomb_maker', PERM]], onlyBy: ['bomb'], hooks: { onCreate: startHook('explosives'), targetMul: flatMul('explosives') } });
   def({ id: 'crystals', name: 'CRYSTALS ONLY', color: '#9ad1ff', challenge: true, desc: 'Only Stars & Novas score. Permanent Star Maker',
@@ -1545,7 +1548,9 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   function noSpecials(run) { return any(run, 'noSpecials'); }
   function noPayout(run) { return any(run, 'noPayout'); }
   // "Only" scoring: null (every gem scores) or the Set of allowed destroy sources (union over the Only boards)
+  // v4.10 noGemPoints (Cardsharp): no destroy source scores (the empty Set), whatever Only boards join it in Magic
   function onlySources(run) {
+    if (any(run, 'noGemPoints')) return new Set();
     let out = null;
     for (const id of ids(run)) if (DEFS[id].onlyBy) { out = out || new Set(); DEFS[id].onlyBy.forEach((k) => out.add(k)); }
     return out;
@@ -3455,7 +3460,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     status: (i) => ({ acc: i.state.total || 0, text: 'Pot: ' + C.fmt(i.state.total || 0) }) });
   // Engine: Run.afterMove (before Time Machine and Lifebuoy); state.used resets in Run.startRound.
   def({ id: 'last_hurrah', rarity: 'uncommon', name: 'Last Hurrah', passive: true,
-    desc: 'Out of moves below the target: every special gem on the board fires. Once per round',
+    desc: 'Out of moves below the target: specials fire until none are left. Once per round',
     status: (i) => ({ used: !!i.state.used, text: i.state.used ? 'Used this round' : 'Ready' }) });
   def({ id: 'claw_machine', rarity: 'uncommon', name: 'Claw Machine', passive: true, chance: 0.25, chanceScaled: true,
     desc: 'Each shop stock or reroll: 25% chance one item is free' });
@@ -4661,7 +4666,7 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     // opts.seedSource: the seeds' clear source (default 'hurrah'; Red's BREAK: 'break', which also breaks coal and
     // locked gems)
     const seedSrc = opts.seedSource || 'hurrah';
-    const hurrahSeeds = (opts.seeds || []).filter(([r, c]) => B.inB(r, c) && board.cells[r][c]);
+    let hurrahSeeds = (opts.seeds || []).filter(([r, c]) => B.inB(r, c) && board.cells[r][c]);
     const runLevels = (first, ghostFirst) => {
       for (let i = 0; i < 60; i++) {
         const level = levels + 1;
@@ -4926,6 +4931,30 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
 
     if (hurrahSeeds.length && seedSrc === 'hurrah') tl.push({ t: 'banner', text: 'LAST HURRAH!', kind: 'lastHurrah' });
     runLevels(true, !a && !opts.batch);
+    // v4.10 Last Hurrah waves (opts.repeatKinds: {kind: 1} of the specials that fire, opts.repeatCap: most waves in
+    // all, default 50): once the board rests (perk edits and their matches resolved too), every special of those
+    // kinds still on the board fires as a new first level (source seedSrc, no banner), until none is left. A gem is
+    // seeded at most twice (by id: a locked special's first wave only breaks its lock), so nothing can loop.
+    // summary.hurrahWaves: waves fired (the first included). Everything stays one timeline and one 'end' step.
+    if (opts.repeatKinds && hurrahSeeds.length) {
+      const fired = new Map();
+      const note = (list) => list.forEach(([r, c]) => { const g = board.cells[r][c]; if (g && g.id != null) fired.set(g.id, (fired.get(g.id) || 0) + 1); });
+      note(hurrahSeeds);
+      summary.hurrahWaves = 1;
+      const cap = opts.repeatCap || 50;
+      for (let wave = 1; wave < cap; wave++) {
+        continueResolve();
+        const more = [];
+        board.cells.forEach((row, r) => row.forEach((g, c) => {
+          if (g && opts.repeatKinds[g.kind] && (g.id == null || (fired.get(g.id) || 0) < 2)) more.push([r, c]);
+        }));
+        if (!more.length) break;
+        note(more);
+        hurrahSeeds = more;
+        summary.hurrahWaves++;
+        runLevels(true, true);
+      }
+    }
     summary.illegal = summary.maxLevel === 0;
     endPhase();
     if (!opts.noTiles) {
@@ -5368,9 +5397,13 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
   }
   // Last Hurrah (v3.11): out of moves below the target, once per round (own perk, state.used), when special gems
   // (bomb, star, prism, supernova) are on the board: they all fire as one free resolve (Resolver.move opts.seeds;
+  // v4.10: opts.repeatKinds: once the board rests, specials the cascades made fire too, wave after wave, until no
+  // bomb / star / prism / supernova is left (cap 50 waves; res.lastHurrah.waves). Wild and coal are not fired
+  // (nothing to fire); gold / shiny are modifiers: a special carrying one fires as its kind, a plain gem does not.
+  // A prism fires on the most common colour, as before. The target is checked after the last wave (outcome).
   // its timeline starts with a {t: 'banner', text: 'LAST HURRAH!', kind: 'lastHurrah'} step). Its timeline is
   // appended to res.timeline and its result is res.lastHurrah ({points, summary, ...}); points join the round score.
-  const HURRAH_KINDS = { bomb: 1, star: 1, prism: 1, supernova: 1 };
+  const HURRAH_KINDS = { bomb: 1, star: 1, prism: 1, supernova: 1 }, HURRAH_CAP = 50;
   function lastHurrah(run, res) {
     const inst = run.perks.find((p) => p.id === 'last_hurrah' && !p.state.used);
     if (!inst) return false;
@@ -5378,13 +5411,13 @@ body.mobile .bs-chal-card b { font-size: 8px; } body.mobile .bs-chal-card .bs-ch
     run.board.cells.forEach((row, r) => row.forEach((g, c) => { if (g && HURRAH_KINDS[g.kind]) seeds.push([r, c]); }));
     if (!seeds.length) return false;
     inst.state.used = true;
-    const hr = GF.Resolver.move(run, null, null, { seeds: seeds, noTiles: true });
+    const hr = GF.Resolver.move(run, null, null, { seeds: seeds, noTiles: true, repeatKinds: HURRAH_KINDS, repeatCap: HURRAH_CAP });
     run.score = Math.min(run.score + hr.points, Number.MAX_VALUE);
     recordMove(run, hr, true);
     run.stats.bestMove = Math.max(run.stats.bestMove, hr.points);
     run.stats.bestMoveRound = Math.max(run.stats.bestMoveRound || 0, hr.points);
     hr.timeline.forEach((s) => res.timeline.push(s));
-    res.lastHurrah = { points: hr.points, summary: hr.summary, moneyDelta: hr.moneyDelta, uid: inst.uid };
+    res.lastHurrah = { points: hr.points, summary: hr.summary, moneyDelta: hr.moneyDelta, uid: inst.uid, waves: hr.summary.hurrahWaves || 1 };
     return true;
   }
   // v4.2 Survival: an empty-cell move making no match: the gem slides in and everything falls (swap + fall steps)
